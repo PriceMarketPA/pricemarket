@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Price Market</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <nav class="nav">
+    <div class="brand">
+      <img src="pm-logo.png" alt="Price Market PM logo">
+      <span>Price Market</span>
+    </div>
+    <button class="btn dark open-waitlist">Join Waitlist</button>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <div class="badge">Launching in Central PA • Built to grow nationwide</div>
+      <h1>Save Local.<br><span>Buy Local.</span><br>Hire Local.</h1>
+      <p>Price Market is a modern local marketplace for deals, businesses, and job opportunities.</p>
+      <div class="actions">
+        <button class="btn blue open-waitlist">Join the Waitlist</button>
+        <a class="btn white" href="mailto:pat@pricemarketpa.com?subject=Advertise With Price Market">Advertise With Us</a>
+      </div>
+    </div>
+
+    <div class="mockup">
+      <div class="mockup-title">
+        <img src="pm-logo.png" alt="PM logo">
+        <strong>Price Market</strong>
+      </div>
+      <div class="deal featured">Local offers near you</div>
+      <div class="deal">Discover local favorites</div>
+      <div class="deal">Find local jobs</div>
+    </div>
+  </section>
+
+  <section class="pillars">
+    <h2>One platform for the local economy.</h2>
+    <div class="grid">
+      <div class="card"><div class="icon">🏷️</div><h3>Save Local</h3><p>Deals, coupons, promotions, and weekly savings from businesses in your community.</p></div>
+      <div class="card"><div class="icon">🛍️</div><h3>Buy Local</h3><p>Discover restaurants, shops, services, and small businesses near you.</p></div>
+      <div class="card"><div class="icon">💼</div><h3>Hire Local</h3><p>A local job board for companies hiring in your area.</p></div>
+    </div>
+  </section>
+
+  <section class="business">
+    <div>
+      <p class="small-title">For business owners</p>
+      <h2>Become a founding business.</h2>
+      <p>Promote your business, feature deals, and share hiring opportunities before launch.</p>
+    </div>
+    <a class="btn white" href="mailto:pat@pricemarketpa.com?subject=Founding Business Interest">Get Early Access</a>
+  </section>
+
+  <section class="waitlist-strip">
+    <h2>Get early access to Price Market.</h2>
+    <p>Join the waitlist and be first to know when we launch in Central PA.</p>
+    <button class="btn blue open-waitlist">Join Waitlist</button>
+  </section>
+</div>
+
+<div class="modal-backdrop" id="waitlistModal" aria-hidden="true">
+  <div class="modal">
+    <button class="close" id="closeModal" aria-label="Close waitlist form">×</button>
+    <img class="modal-logo" src="pm-logo.png" alt="Price Market PM logo">
+    <h2>Join the Price Market Waitlist</h2>
+    <p>Be first to know when local deals, businesses, and jobs go live.</p>
+
+    <form action="https://formsubmit.co/pat@pricemarketpa.com" method="POST">
+      <input type="hidden" name="_subject" value="New Price Market Waitlist Signup">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="_next" value="https://pricemarketpa.com/?joined=true">
+
+      <label>First Name<input type="text" name="First Name" placeholder="First name" required></label>
+      <label>Last Name<input type="text" name="Last Name" placeholder="Last name"></label>
+      <label>Email Address<input type="email" name="Email" placeholder="you@example.com" required></label>
+      <label>ZIP Code<input type="text" name="ZIP Code" placeholder="17055"></label>
+      <label>I am a...
+        <select name="User Type" required>
+          <option value="">Select one</option>
+          <option>Shopper</option>
+          <option>Local Business Owner</option>
+          <option>Looking for Work</option>
+          <option>Community Organization</option>
+          <option>Other</option>
+        </select>
+      </label>
+      <button class="btn blue submit" type="submit">Join Waitlist</button>
+    </form>
+    <small>We respect your privacy and will never share your information.</small>
+  </div>
+</div>
+
+<div class="toast" id="successToast">Thanks — you're on the waitlist!</div>
+
+<footer>
+  <span>© 2026 Price Market</span>
+  <span>PriceMarketPA.com</span>
+</footer>
+
+<script>
+const modal = document.getElementById('waitlistModal');
+const openButtons = document.querySelectorAll('.open-waitlist');
+const closeButton = document.getElementById('closeModal');
+const toast = document.getElementById('successToast');
+
+openButtons.forEach(button => button.addEventListener('click', () => {
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden', 'false');
+}));
+
+closeButton.addEventListener('click', () => {
+  modal.classList.remove('show');
+  modal.setAttribute('aria-hidden', 'true');
+});
+
+modal.addEventListener('click', event => {
+  if (event.target === modal) {
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+});
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') {
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+});
+
+const params = new URLSearchParams(window.location.search);
+if (params.get('joined') === 'true') {
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 5000);
+  window.history.replaceState({}, document.title, window.location.pathname);
+}
+</script>
+</body>
+</html>
