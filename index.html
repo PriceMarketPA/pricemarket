@@ -123,16 +123,36 @@
       <label>Contact Name<input type="text" name="contactName" placeholder="Your name" required></label>
       <label>Email Address<input type="email" name="email" placeholder="you@example.com" required></label>
       <label>Phone Number<input type="tel" name="phone" placeholder="717-555-1234"></label>
-      <label>Business Category<input type="text" name="businessCategory" placeholder="Restaurant, salon, contractor, retail, etc."></label>
+
+      <label>Business Category
+        <select name="businessCategory" required>
+          <option value="">Select one</option>
+          <option>Restaurant / Food</option>
+          <option>Retail / Shopping</option>
+          <option>Health / Fitness</option>
+          <option>Beauty / Salon</option>
+          <option>Home Services / Trades</option>
+          <option>Professional Services</option>
+          <option>Nonprofit / Community</option>
+          <option>Other</option>
+        </select>
+      </label>
+
       <label>I am interested in...
         <select name="interest" required>
           <option value="">Select one</option>
-          <option>Promoting deals</option>
-          <option>Business listing</option>
-          <option>Hiring / job posts</option>
-          <option>All of the above</option>
+          <option>Business Listing</option>
+          <option>Deals & Coupons</option>
+          <option>Hiring / Job Posts</option>
+          <option>Advertising</option>
+          <option>All of the Above</option>
         </select>
       </label>
+
+      <label>Notes
+        <textarea name="notes" placeholder="Tell us about your business or what you would like help promoting."></textarea>
+      </label>
+
       <button class="btn blue submit" type="submit">Join as a Founding Business</button>
     </form>
     <small>We respect your privacy and will never share your information.</small>
@@ -204,10 +224,6 @@ document.querySelectorAll('.lead-form').forEach(form => {
     const formData = new FormData(form);
     const payload = Object.fromEntries(formData.entries());
     payload.leadType = form.dataset.leadType;
-
-    if (payload.businessCategory && !payload.interest.includes(payload.businessCategory)) {
-      payload.interest = payload.businessCategory + ' | ' + payload.interest;
-    }
 
     try {
       await fetch(LEADS_API_URL, {
