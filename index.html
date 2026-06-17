@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Price Market</title>
+<title>Price Market | Central PA Marketplace</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -18,32 +18,52 @@
 
   <section class="hero">
     <div class="hero-copy">
-      <div class="badge">Launching in Central PA • Built to grow nationwide</div>
+      <div class="badge">Built for Central PA • Launching soon</div>
       <h1>Save Local.<br><span>Buy Local.</span><br>Hire Local.</h1>
-      <p>Price Market is a modern local marketplace for deals, businesses, and job opportunities.</p>
+      <p>Price Market is a community marketplace helping Central PA residents discover local deals, support local businesses, and find opportunities close to home.</p>
       <div class="actions">
         <button class="btn blue open-waitlist">Join the Waitlist</button>
         <button class="btn white open-business">Become a Founding Business</button>
       </div>
+      <p class="trust-line">For shoppers, local businesses, job seekers, and community organizations across Central Pennsylvania.</p>
     </div>
 
-    <div class="mockup">
-      <div class="mockup-title">
-        <img src="pm-logo.png" alt="PM logo">
-        <strong>Price Market</strong>
+    <div class="hero-community">
+      <div class="photo-placeholder large">
+        <span>Central PA</span>
+        <strong>Local businesses. Local jobs. Local savings.</strong>
       </div>
-      <div class="deal featured">Local offers near you</div>
-      <div class="deal">Discover local favorites</div>
-      <div class="deal">Find local jobs</div>
+      <div class="community-stats">
+        <div><strong>Residents</strong><span>Join the early access list</span></div>
+        <div><strong>Businesses</strong><span>Become founding partners</span></div>
+      </div>
     </div>
   </section>
 
+  <section class="mission">
+    <p class="small-title">Why we are building this</p>
+    <h2>Central PA deserves one place to discover, support, and hire local.</h2>
+    <p>Local businesses are the backbone of our communities. Price Market is being built to help residents find deals, discover trusted local businesses, and connect with job opportunities right here at home.</p>
+  </section>
+
   <section class="pillars">
-    <h2>One platform for the local economy.</h2>
+    <h2>Built around the local economy.</h2>
     <div class="grid">
-      <div class="card"><div class="icon">🏷️</div><h3>Save Local</h3><p>Deals, coupons, promotions, and weekly savings from businesses in your community.</p></div>
-      <div class="card"><div class="icon">🛍️</div><h3>Buy Local</h3><p>Discover restaurants, shops, services, and small businesses near you.</p></div>
-      <div class="card"><div class="icon">💼</div><h3>Hire Local</h3><p>A local job board for companies hiring in your area.</p></div>
+      <div class="card image-card">
+        <div class="card-photo save-photo"><span>Save</span></div>
+        <h3>Save Local</h3>
+        <p>Deals, coupons, promotions, and weekly savings from businesses in your community.</p>
+      </div>
+      <div class="card image-card">
+        <div class="card-photo buy-photo"><span>Buy</span></div>
+        <h3>Buy Local</h3>
+        <p>Discover restaurants, shops, services, and small businesses throughout Central PA.</p>
+      </div>
+      <div class="card image-card">
+        <div class="card-photo hire-photo"><span>Hire</span></div>
+        <h3>Hire Local</h3>
+        <p>Find local jobs and opportunities with companies hiring near you.</p>
+      </div>
     </div>
   </section>
 
@@ -70,18 +90,13 @@
     <h2>Join the Price Market Waitlist</h2>
     <p>Be first to know when local deals, businesses, and jobs go live.</p>
 
-    <form action="https://formsubmit.co/pat@pricemarketpa.com" method="POST">
-      <input type="hidden" name="_subject" value="New Price Market Waitlist Signup">
-      <input type="hidden" name="_captcha" value="false">
-      <input type="hidden" name="_template" value="table">
-      <input type="hidden" name="_next" value="https://pricemarketpa.com/?joined=true">
-
-      <label>First Name<input type="text" name="First Name" placeholder="First name" required></label>
-      <label>Last Name<input type="text" name="Last Name" placeholder="Last name"></label>
-      <label>Email Address<input type="email" name="Email" placeholder="you@example.com" required></label>
-      <label>ZIP Code<input type="text" name="ZIP Code" placeholder="17055"></label>
+    <form class="lead-form" data-lead-type="Waitlist">
+      <label>First Name<input type="text" name="firstName" placeholder="First name" required></label>
+      <label>Last Name<input type="text" name="lastName" placeholder="Last name"></label>
+      <label>Email Address<input type="email" name="email" placeholder="you@example.com" required></label>
+      <label>ZIP Code<input type="text" name="zipCode" placeholder="17055"></label>
       <label>I am a...
-        <select name="User Type" required>
+        <select name="interest" required>
           <option value="">Select one</option>
           <option>Shopper</option>
           <option>Local Business Owner</option>
@@ -96,49 +111,129 @@
   </div>
 </div>
 
-<div class="toast" id="successToast">Thanks — you're on the waitlist!</div>
+<div class="modal-backdrop" id="businessModal" aria-hidden="true">
+  <div class="modal">
+    <button class="close" id="closeBusinessModal" aria-label="Close business form">×</button>
+    <img class="modal-logo" src="pm-logo.png" alt="Price Market PM logo">
+    <h2>Become a Founding Business</h2>
+    <p>Get early access to promote your business, feature deals, and share local hiring opportunities before launch.</p>
+
+    <form class="lead-form" data-lead-type="Business">
+      <label>Business Name<input type="text" name="businessName" placeholder="Business name" required></label>
+      <label>Contact Name<input type="text" name="contactName" placeholder="Your name" required></label>
+      <label>Email Address<input type="email" name="email" placeholder="you@example.com" required></label>
+      <label>Phone Number<input type="tel" name="phone" placeholder="717-555-1234"></label>
+      <label>Business Category<input type="text" name="businessCategory" placeholder="Restaurant, salon, contractor, retail, etc."></label>
+      <label>I am interested in...
+        <select name="interest" required>
+          <option value="">Select one</option>
+          <option>Promoting deals</option>
+          <option>Business listing</option>
+          <option>Hiring / job posts</option>
+          <option>All of the above</option>
+        </select>
+      </label>
+      <button class="btn blue submit" type="submit">Join as a Founding Business</button>
+    </form>
+    <small>We respect your privacy and will never share your information.</small>
+  </div>
+</div>
+
+<div class="toast" id="successToast">Thanks — your information was received!</div>
 
 <footer>
   <span>© 2026 Price Market</span>
-  <span>PriceMarketPA.com</span>
+  <span>Built for Central Pennsylvania</span>
 </footer>
 
 <script>
-const modal = document.getElementById('waitlistModal');
-const openButtons = document.querySelectorAll('.open-waitlist');
-const closeButton = document.getElementById('closeModal');
+const LEADS_API_URL = "https://script.google.com/macros/s/AKfycbxU3krjD4BPxDjzSIbRrDVlGLS_mqZ21watyba5k2I_9y7-oHG0aYobftXK0QBVC-Bp/exec";
+
+const waitlistModal = document.getElementById('waitlistModal');
+const businessModal = document.getElementById('businessModal');
+const waitlistButtons = document.querySelectorAll('.open-waitlist');
+const businessButtons = document.querySelectorAll('.open-business');
+const closeWaitlistButton = document.getElementById('closeModal');
+const closeBusinessButton = document.getElementById('closeBusinessModal');
 const toast = document.getElementById('successToast');
 
-openButtons.forEach(button => button.addEventListener('click', () => {
+function openModal(modal) {
   modal.classList.add('show');
   modal.setAttribute('aria-hidden', 'false');
-}));
+}
 
-closeButton.addEventListener('click', () => {
+function closeModal(modal) {
   modal.classList.remove('show');
   modal.setAttribute('aria-hidden', 'true');
-});
+}
 
-modal.addEventListener('click', event => {
-  if (event.target === modal) {
-    modal.classList.remove('show');
-    modal.setAttribute('aria-hidden', 'true');
-  }
+waitlistButtons.forEach(button => button.addEventListener('click', () => openModal(waitlistModal)));
+businessButtons.forEach(button => button.addEventListener('click', () => openModal(businessModal)));
+
+closeWaitlistButton.addEventListener('click', () => closeModal(waitlistModal));
+closeBusinessButton.addEventListener('click', () => closeModal(businessModal));
+
+[waitlistModal, businessModal].forEach(modal => {
+  modal.addEventListener('click', event => {
+    if (event.target === modal) closeModal(modal);
+  });
 });
 
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape') {
-    modal.classList.remove('show');
-    modal.setAttribute('aria-hidden', 'true');
+    closeModal(waitlistModal);
+    closeModal(businessModal);
   }
 });
 
-const params = new URLSearchParams(window.location.search);
-if (params.get('joined') === 'true') {
+function showToast(message) {
+  toast.textContent = message;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 5000);
-  window.history.replaceState({}, document.title, window.location.pathname);
 }
+
+document.querySelectorAll('.lead-form').forEach(form => {
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalText = submitButton.textContent;
+    submitButton.disabled = true;
+    submitButton.textContent = 'Submitting...';
+
+    const formData = new FormData(form);
+    const payload = Object.fromEntries(formData.entries());
+    payload.leadType = form.dataset.leadType;
+
+    if (payload.businessCategory && !payload.interest.includes(payload.businessCategory)) {
+      payload.interest = payload.businessCategory + ' | ' + payload.interest;
+    }
+
+    try {
+      await fetch(LEADS_API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify(payload)
+      });
+
+      form.reset();
+      closeModal(waitlistModal);
+      closeModal(businessModal);
+
+      if (payload.leadType === 'Business') {
+        showToast('Thanks — your business interest was received!');
+      } else {
+        showToast("Thanks — you're on the waitlist!");
+      }
+    } catch (error) {
+      showToast('Something went wrong. Please try again.');
+    } finally {
+      submitButton.disabled = false;
+      submitButton.textContent = originalText;
+    }
+  });
+});
 </script>
 </body>
 </html>
