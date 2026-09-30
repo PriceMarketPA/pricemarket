@@ -139,6 +139,11 @@
       website: profileData.website?.href || '',
       notes: 'Business profile submission; pending review before publication.',
       reviewStatus: 'Pending review',
+      businessHours: profileData.hours.map(entry => `${entry.days}: ${entry.time}`).join('; '),
+      featuredDealTitle: profileData.deals[0]?.title || '',
+      featuredDealDescription: profileData.deals[0]?.description || '',
+      jobTitle: profileData.jobs[0]?.title || '',
+      jobDetails: profileData.jobs[0]?.detail || '',
       profileDataJson: JSON.stringify(profileData)
     };
 
