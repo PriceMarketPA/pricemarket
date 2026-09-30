@@ -80,8 +80,10 @@ function normalizeHappyHours(value) {
     const startTime = text(row.startTime, 5);
     const endTime = text(row.endTime, 5);
     const validTime = time => {
-      const match = /^(\\d{2}):(\\d{2})$/.exec(time);
-      return match && Number(match[1]) < 24 && Number(match[2]) < 60;
+      const parts = time.split(':');
+      return parts.length === 2 && parts[0].length === 2 && parts[1].length === 2
+        && Number.isInteger(Number(parts[0])) && Number(parts[0]) < 24
+        && Number.isInteger(Number(parts[1])) && Number(parts[1]) < 60;
     };
     if (!title || !days || !validTime(startTime) || !validTime(endTime)) return [];
     return [{
