@@ -13,7 +13,7 @@ const approved = { approved: true };
 function validProfile(overrides = {}) {
   return {
     demo: false,
-    name: 'Caf� & Co. - Harrisburg',
+    name: 'Caf\u00e9 & Co. - Harrisburg',
     category: 'Restaurant / Food',
     city: 'Harrisburg',
     state: 'PA',
@@ -44,7 +44,7 @@ test('creates a businesses.js entry from valid approved profile data', () => {
   const result = createProfileEntry(validProfile(), {}, approved);
   assert.equal(result.slug, 'cafe-and-co-harrisburg');
   assert.equal(result.profile.demo, false);
-  assert.equal(result.profile.name, 'Caf� & Co. - Harrisburg');
+  assert.equal(result.profile.name, 'Caf\u00e9 & Co. - Harrisburg');
   assert.equal(result.profile.category, 'Restaurant / Food');
   assert.equal(result.profile.website.href, 'https://example.test/');
   assert.deepEqual(result.profile.deals, [{ title: 'Coffee and croissant', description: 'Available before 10 AM.' }]);
@@ -93,7 +93,7 @@ test('falls back cleanly for optional images, website, deals, jobs, hours, and s
   assert.equal(result.profile.state, 'PA');
   assert.equal(result.profile.avatarText, 'CC');
   assert.equal(result.profile.logoImage, '');
-  assert.deepEqual(result.profile.heroImage, { src: '', alt: 'Caf� & Co. - Harrisburg storefront or business interior' });
+  assert.deepEqual(result.profile.heroImage, { src: '', alt: 'Caf\u00e9 & Co. - Harrisburg storefront or business interior' });
   assert.equal(result.profile.website, null);
   assert.deepEqual(result.profile.hours, []);
   assert.deepEqual(result.profile.deals, []);
@@ -114,7 +114,7 @@ test('normalizes valid Happy Hour entries and skips malformed optional entries',
     happyHours: [
       null,
       {},
-      { title: 'Missing schedule', days: 'Friday', startTime: '16:00', endTime: '18:00' },
+      { title: 'Missing schedule', days: 'Friday' },
       { title: 'Bad time', days: 'Friday', startTime: '25:00', endTime: '26:00' },
       {
         title: 'Weekend small plates',
@@ -180,7 +180,7 @@ test('stdin mode does not bypass the explicit approval gate', () => {
 });
 
 test('generates stable, safe slugs', () => {
-  assert.equal(slugify('  Caf� & Co. / West Shore  '), 'cafe-and-co-west-shore');
+  assert.equal(slugify('  Caf\u00e9 & Co. / West Shore  '), 'cafe-and-co-west-shore');
   assert.equal(slugify('***'), '');
 });
 
