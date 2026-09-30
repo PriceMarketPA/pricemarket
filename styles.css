@@ -132,3 +132,29 @@ footer{max-width:1240px;margin:auto;padding:28px 24px;display:flex;justify-conte
 .business-avatar{overflow:hidden}.business-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}.avatar-home{background:#fff1e7;color:#9b4b1d}.avatar-beauty{background:#f9eafa;color:#884095}.avatar-shopping{background:#eaf8f1;color:#137849}
 
 .avatar-other{background:#eef1f5;color:#536579}
+
+
+/* Happy Hour listings, profiles, and onboarding preview */
+.happy-hour-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px}
+.happy-hour-card{display:flex;flex-direction:column;align-items:flex-start;min-width:0;padding:19px;background:linear-gradient(145deg,#fff,#f5f8ff);border:1px solid var(--line);border-radius:22px;box-shadow:0 12px 32px rgba(7,21,47,.055)}
+.happy-hour-label{display:inline-flex;padding:6px 9px;border-radius:999px;background:#edf4ff;color:var(--blue-dark);font-size:.67rem;font-weight:950;letter-spacing:.06em;text-transform:uppercase}
+.happy-hour-card h4{margin:13px 0 6px;font-size:1.16rem;line-height:1.2;letter-spacing:-.03em}
+.happy-hour-card>p{flex:1;margin:0;color:var(--muted);font-size:.88rem;line-height:1.45}
+.happy-hour-meta{display:grid;gap:5px;width:100%;margin:15px 0 10px;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.happy-hour-meta span,.happy-hour-notes{color:var(--muted);font-size:.76rem;line-height:1.4}
+.happy-hour-meta strong{color:var(--navy);font-size:.81rem}
+.happy-hour-card>a{margin-top:13px;color:var(--blue);font-size:.82rem;font-weight:950;text-decoration:none}
+.happy-hour-card>a:hover{text-decoration:underline}
+.profile-happy-hour-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px}
+.profile-happy-hour-card{min-width:0;padding:17px;border:1px solid #dce6ff;border-radius:20px;background:linear-gradient(140deg,#fff,#f3f6ff)}
+.profile-happy-hour-card h3{margin:13px 0 6px;font-size:1.06rem;line-height:1.2;letter-spacing:-.025em}
+.profile-happy-hour-card>p{margin:0;color:var(--muted);font-size:.86rem;line-height:1.45}
+.profile-happy-hour-schedule{display:block;margin-top:14px;color:var(--blue-dark);font-size:.82rem;line-height:1.4}
+.profile-happy-hour-notes{display:block;margin-top:10px;color:var(--muted);font-size:.74rem;line-height:1.4}
+.onboarding-preview-happy-hour{display:grid;gap:6px;margin:0 14px 14px;padding:13px;border:1px solid #dce6ff;border-radius:16px;background:linear-gradient(135deg,#f2f6ff,#fff7e8)}
+.onboarding-preview-happy-hour[hidden]{display:none}
+.onboarding-preview-happy-hour>span{color:var(--blue);font-size:.59rem;font-weight:950;letter-spacing:.07em}
+.onboarding-preview-happy-hour strong{font-size:.87rem}
+.onboarding-preview-happy-hour p{margin:0;color:var(--muted);font-size:.76rem;line-height:1.4}
+.onboarding-preview-happy-hour small{margin:0;color:var(--muted);font-size:.69rem;line-height:1.4}
+@media(max-width:600px){.happy-hour-grid,.profile-happy-hour-list{grid-template-columns:1fr}.happy-hour-card{padding:17px}}
