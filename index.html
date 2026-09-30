@@ -93,6 +93,86 @@
       </div>
     </section>
 
+    <section class="marketplace section" id="marketplace" aria-labelledby="marketplaceTitle">
+      <div class="marketplace-heading">
+        <div>
+          <p class="small-title">Your neighborhood, for less</p>
+          <h2 id="marketplaceTitle">Good finds are closer than you think.</h2>
+          <p>Explore the local businesses and offers that make Central PA worth staying local for.</p>
+        </div>
+        <span class="preview-note">Marketplace preview</span>
+      </div>
+
+      <form class="market-search" id="marketSearch" role="search">
+        <label class="search-field">
+          <span class="sr-only">Search deals, businesses, and categories</span>
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input id="marketQuery" type="search" placeholder="Try “pizza”, “coffee”, or “fitness”" autocomplete="off">
+        </label>
+        <label class="city-field">
+          <span class="sr-only">Choose a Central Pennsylvania city</span>
+          <span aria-hidden="true">⌖</span>
+          <select id="cityFilter">
+            <option value="">All Central PA</option>
+            <option>Mechanicsburg</option>
+            <option>Camp Hill</option>
+            <option>Carlisle</option>
+            <option>Harrisburg</option>
+            <option>Hershey</option>
+          </select>
+        </label>
+        <button class="btn blue" type="submit">Search</button>
+      </form>
+
+      <div class="browse-categories" aria-labelledby="categoryTitle">
+        <div class="browse-heading"><h3 id="categoryTitle">Browse by category</h3><button type="button" class="text-button" id="clearFilters">Clear filters</button></div>
+        <div class="category-list" role="group" aria-label="Filter by category">
+          <button type="button" class="category-chip is-active" data-category-filter="">✦ <span>Everything local</span></button>
+          <button type="button" class="category-chip" data-category-filter="food">☕ <span>Food & drink</span></button>
+          <button type="button" class="category-chip" data-category-filter="fitness">◉ <span>Health & fitness</span></button>
+          <button type="button" class="category-chip" data-category-filter="home">⌂ <span>Home services</span></button>
+          <button type="button" class="category-chip" data-category-filter="shopping">◇ <span>Shopping</span></button>
+          <button type="button" class="category-chip" data-category-filter="beauty">✳ <span>Beauty</span></button>
+        </div>
+      </div>
+
+      <div class="market-results" id="marketResults" aria-live="polite">
+        <section class="market-section" aria-labelledby="dealsTitle">
+          <div class="market-section-heading"><div><p class="small-title">Worth a closer look</p><h3 id="dealsTitle">Featured deals</h3></div><span class="sample-caption">Example offers</span></div>
+          <div class="deal-grid">
+            <article class="deal-card market-item" data-category="food" data-city="Mechanicsburg" data-search="keystone pizza restaurant family large pizza dinner food">
+              <div class="deal-art deal-art-pizza"><span>LOCAL FAVORITE</span><b aria-hidden="true">✦</b></div>
+              <div class="deal-content"><div class="deal-meta"><span>Food & drink</span><span>Mechanicsburg</span></div><h4>Pizza night, handled.</h4><p>Two large pizzas for $24.99 at Keystone Pizza Co.</p><div class="deal-footer"><span class="preview-pill">Example offer</span><a href="keystone-pizza.html">See business <span aria-hidden="true">→</span></a></div></div>
+            </article>
+            <article class="deal-card market-item" data-category="food" data-city="Camp Hill" data-search="camp hill coffee cafe breakfast coffee food drink combo">
+              <div class="deal-art deal-art-coffee"><span>YOUR MORNING, MADE</span><b aria-hidden="true">☕</b></div>
+              <div class="deal-content"><div class="deal-meta"><span>Food & drink</span><span>Camp Hill</span></div><h4>A little more morning.</h4><p>Breakfast combo for $5 at a neighborhood coffee shop.</p><div class="deal-footer"><span class="preview-pill">Example offer</span><a href="#featuredBusinesses">Meet local spots <span aria-hidden="true">→</span></a></div></div>
+            </article>
+            <article class="deal-card market-item" data-category="fitness" data-city="Carlisle" data-search="carlisle fitness studio health workout gym fitness class">
+              <div class="deal-art deal-art-fitness"><span>MOVE YOUR WAY</span><b aria-hidden="true">↗</b></div>
+              <div class="deal-content"><div class="deal-meta"><span>Health & fitness</span><span>Carlisle</span></div><h4>Try a new kind of strong.</h4><p>First class on the house at a local fitness studio.</p><div class="deal-footer"><span class="preview-pill">Example offer</span><a href="#featuredBusinesses">Meet local spots <span aria-hidden="true">→</span></a></div></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="market-section businesses-section" id="featuredBusinesses" aria-labelledby="featuredBusinessesTitle">
+          <div class="market-section-heading"><div><p class="small-title">The people behind the places</p><h3 id="featuredBusinessesTitle">Featured businesses</h3></div><a class="text-link" href="#businesses">Own a business? Get featured <span aria-hidden="true">→</span></a></div>
+          <div class="business-grid">
+            <a class="business-tile market-item" href="keystone-pizza.html" data-category="food" data-city="Mechanicsburg" data-search="keystone pizza co restaurant italian food mechanicsburg">
+              <span class="business-avatar avatar-pizza">KP</span><span class="business-info"><strong>Keystone Pizza Co.</strong><small>Restaurant · Mechanicsburg</small><small class="business-promo">View demo listing <span aria-hidden="true">→</span></small></span><span class="tile-arrow" aria-hidden="true">↗</span>
+            </a>
+            <div class="business-tile market-item" data-category="food" data-city="Camp Hill" data-search="camp hill coffee co cafe coffee food">
+              <span class="business-avatar avatar-coffee">CC</span><span class="business-info"><strong>Camp Hill Coffee Co.</strong><small>Café · Camp Hill</small><small class="business-promo">Sample business</small></span>
+            </div>
+            <div class="business-tile market-item" data-category="fitness" data-city="Carlisle" data-search="carlisle fitness studio gym wellness health">
+              <span class="business-avatar avatar-fitness">CF</span><span class="business-info"><strong>Carlisle Fitness Studio</strong><small>Fitness · Carlisle</small><small class="business-promo">Sample business</small></span>
+            </div>
+          </div>
+        </section>
+        <p class="no-results" id="noResults" hidden>No matches yet. Try another search or clear your filters.</p>
+      </div>
+    </section>
+
     <section class="banner">
       <span>Founding Business Access Open</span>
       <strong>Early partners get priority visibility before launch.</strong>
@@ -302,6 +382,48 @@ document.querySelectorAll('.lead-form').forEach(form => {
     }
   });
 });
+
+const marketForm = document.getElementById('marketSearch');
+const marketQuery = document.getElementById('marketQuery');
+const cityFilter = document.getElementById('cityFilter');
+const marketItems = [...document.querySelectorAll('.market-item')];
+const categoryButtons = [...document.querySelectorAll('[data-category-filter]')];
+const noResults = document.getElementById('noResults');
+let activeCategory = '';
+
+function filterMarket() {
+  const query = marketQuery.value.trim().toLocaleLowerCase();
+  const city = cityFilter.value;
+  let visible = 0;
+  marketItems.forEach(item => {
+    const matchesQuery = !query || item.dataset.search.includes(query);
+    const matchesCity = !city || item.dataset.city === city;
+    const matchesCategory = !activeCategory || item.dataset.category === activeCategory;
+    const show = matchesQuery && matchesCity && matchesCategory;
+    item.hidden = !show;
+    if (show) visible++;
+  });
+  noResults.hidden = visible > 0;
+}
+
+marketForm.addEventListener('submit', event => { event.preventDefault(); filterMarket(); if (typeof gtag === 'function') gtag('event', 'marketplace_search'); });
+marketQuery.addEventListener('input', filterMarket);
+cityFilter.addEventListener('change', () => { filterMarket(); if (typeof gtag === 'function') gtag('event', 'marketplace_city_filter', { city: cityFilter.value || 'all' }); });
+categoryButtons.forEach(button => button.addEventListener('click', () => {
+  activeCategory = button.dataset.categoryFilter;
+  categoryButtons.forEach(option => option.classList.toggle('is-active', option === button));
+  filterMarket();
+  if (typeof gtag === 'function') gtag('event', 'marketplace_category_filter', { category: activeCategory || 'all' });
+}));
+document.getElementById('clearFilters').addEventListener('click', () => {
+  marketQuery.value = '';
+  cityFilter.value = '';
+  activeCategory = '';
+  categoryButtons.forEach((button, index) => button.classList.toggle('is-active', index === 0));
+  filterMarket();
+  if (typeof gtag === 'function') gtag('event', 'marketplace_clear_filters');
+});
 </script>
 </body>
 </html>
+
