@@ -27,6 +27,14 @@ function validProfile(overrides = {}) {
     hours: [{ days: 'Monday - Friday', time: '8 AM - 5 PM' }],
     deals: [{ title: 'Coffee and croissant', description: 'Available before 10 AM.' }],
     jobs: [{ title: 'Barista', detail: 'Part-time mornings.' }],
+    happyHours: [{
+      title: 'Late afternoon latte',
+      description: 'A drink special for the after-work crowd.',
+      days: 'Monday – Thursday',
+      startTime: '16:00',
+      endTime: '18:00',
+      restrictions: 'One per customer.'
+    }],
     gallery: [{ src: 'assets/cafe.jpg', alt: 'Cafe counter', caption: 'Welcome in' }],
     ...overrides
   };
@@ -41,6 +49,14 @@ test('creates a businesses.js entry from valid approved profile data', () => {
   assert.equal(result.profile.website.href, 'https://example.test/');
   assert.deepEqual(result.profile.deals, [{ title: 'Coffee and croissant', description: 'Available before 10 AM.' }]);
   assert.deepEqual(result.profile.jobs, [{ title: 'Barista', detail: 'Part-time mornings.' }]);
+  assert.deepEqual(result.profile.happyHours, [{
+    title: 'Late afternoon latte',
+    description: 'A drink special for the after-work crowd.',
+    days: 'Monday – Thursday',
+    startTime: '16:00',
+    endTime: '18:00',
+    restrictions: 'One per customer.'
+  }]);
 });
 
 test('rejects profile data missing required fields', () => {
@@ -70,6 +86,7 @@ test('falls back cleanly for optional images, website, deals, jobs, hours, and s
     hours: null,
     deals: null,
     jobs: null,
+    happyHours: null,
     gallery: [{ src: '//untrusted.example/image.jpg' }]
   }), {}, approved);
 
@@ -81,7 +98,43 @@ test('falls back cleanly for optional images, website, deals, jobs, hours, and s
   assert.deepEqual(result.profile.hours, []);
   assert.deepEqual(result.profile.deals, []);
   assert.deepEqual(result.profile.jobs, []);
+  assert.deepEqual(result.profile.happyHours, []);
   assert.deepEqual(result.profile.gallery, []);
+});
+
+test('Happy Hour remains optional when the profile has no happyHours field', () => {
+  const profile = validProfile();
+  delete profile.happyHours;
+  const result = createProfileEntry(profile, {}, approved);
+  assert.deepEqual(result.profile.happyHours, []);
+});
+
+test('normalizes valid Happy Hour entries and skips malformed optional entries', () => {
+  const result = createProfileEntry(validProfile({
+    happyHours: [
+      null,
+      {},
+      { title: 'Missing schedule', days: 'Friday', startTime: '16:00', endTime: '18:00' },
+      { title: 'Bad time', days: 'Friday', startTime: '25:00', endTime: '26:00' },
+      {
+        title: 'Weekend small plates',
+        description: 'Specials on appetizers.',
+        days: ['Friday', 'Saturday'],
+        startTime: '17:30',
+        endTime: '20:00',
+        notes: 'Dine-in only.'
+      }
+    ]
+  }), {}, approved);
+
+  assert.deepEqual(result.profile.happyHours, [{
+    title: 'Weekend small plates',
+    description: 'Specials on appetizers.',
+    days: 'Friday, Saturday',
+    startTime: '17:30',
+    endTime: '20:00',
+    restrictions: 'Dine-in only.'
+  }]);
 });
 
 test('requires an explicit human approval confirmation', () => {
