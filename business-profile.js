@@ -55,7 +55,7 @@
   };
   addAction('Call the business', business.phone ? `tel:${business.phone.replace(/[^+\d]/g, '')}` : '', 'blue');
   addAction('Visit website', business.website?.href, 'white', true);
-  addAction('View active deals', '#profileOffers', 'dark');
+  addAction('View active deals', '#deals', 'dark');
   addAction('Claim this business', 'index.html#businesses', 'ghost');
 
   const deals = document.getElementById('businessDeals');
@@ -76,7 +76,7 @@
 
   const jobs = business.jobs || [];
   if (jobs.length) {
-    document.getElementById('profileJobs').hidden = false;
+    document.getElementById('jobs').hidden = false;
     const list = document.getElementById('businessJobs');
     jobs.forEach(job => {
       const row = document.createElement('article');
