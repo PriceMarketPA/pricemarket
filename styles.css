@@ -79,3 +79,21 @@ footer{max-width:1240px;margin:auto;padding:28px 24px;display:flex;justify-conte
 @media(max-width:980px){.showcase-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.profile-concept:last-child{grid-column:1/-1}.profile-concept:last-child .profile-photo{height:220px}}
 @media(max-width:600px){.business-showcase{padding:20px;border-radius:28px}.showcase-heading{align-items:flex-start;flex-direction:column;gap:12px}.showcase-heading h2{font-size:2.4rem}.showcase-grid{grid-template-columns:1fr}.profile-concept:last-child{grid-column:auto}.profile-concept:last-child .profile-photo,.profile-photo{height:170px}}
 
+
+
+/* Price Market custom dropdown component for interactive marketplace filters. */
+.market-search .city-field{position:relative;z-index:5}
+.pm-dropdown{position:relative;flex:1;min-width:0}
+.pm-dropdown-trigger{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-width:0;min-height:46px;margin:0;padding:11px 3px 11px 0;border:0;border-radius:12px;background:transparent;color:var(--ink);font:inherit;font-size:.94rem;font-weight:850;text-align:left;cursor:pointer;transition:color .16s ease,background-color .16s ease}
+.pm-dropdown-trigger:hover{color:var(--blue)}
+.pm-dropdown-trigger:focus-visible{outline:3px solid rgba(20,84,230,.2);outline-offset:3px}
+.pm-dropdown-chevron{width:9px;height:9px;flex:0 0 auto;margin:0 4px 4px 0;border-right:2px solid var(--blue);border-bottom:2px solid var(--blue);transform:rotate(45deg);transition:transform .18s ease}
+.pm-dropdown[data-open="true"] .pm-dropdown-chevron{transform:rotate(225deg);margin-bottom:-4px}
+.pm-dropdown-listbox{position:absolute;top:calc(100% + 9px);left:-8px;z-index:40;width:max(100%,230px);max-width:min(320px,calc(100vw - 36px));padding:7px;border:1px solid rgba(220,228,238,.95);border-radius:18px;background:#fff;box-shadow:0 18px 50px rgba(7,21,47,.16);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-7px) scale(.985);transform-origin:top left;transition:opacity .16s ease,transform .16s ease,visibility .16s ease}
+.pm-dropdown[data-open="true"] .pm-dropdown-listbox{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0) scale(1)}
+.pm-dropdown-option{display:flex;align-items:center;gap:10px;width:100%;min-height:43px;padding:10px 12px;border-radius:12px;color:var(--ink);font-size:.9rem;font-weight:750;line-height:1.25;cursor:pointer;transition:background-color .14s ease,color .14s ease}
+.pm-dropdown-option:hover,.pm-dropdown-option.is-active{background:#eaf0ff;color:var(--blue-dark)}
+.pm-dropdown-option[aria-selected="true"]{color:var(--blue-dark);font-weight:900}
+.pm-dropdown-option[aria-selected="true"]::after{content:"✓";margin-left:auto;color:var(--blue);font-size:1rem;font-weight:950}
+@media(max-width:600px){.pm-dropdown-listbox{width:max(100%,230px);max-width:calc(100vw - 42px)}}
+@media(prefers-reduced-motion:reduce){.pm-dropdown-chevron,.pm-dropdown-listbox,.pm-dropdown-option{transition:none}}
