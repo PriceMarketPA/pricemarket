@@ -150,6 +150,7 @@
           <button type="button" class="category-chip" data-category-filter="home">⌂ <span>Home services</span></button>
           <button type="button" class="category-chip" data-category-filter="shopping">◇ <span>Shopping</span></button>
           <button type="button" class="category-chip" data-category-filter="beauty">✳ <span>Beauty</span></button>
+          <button type="button" class="category-chip" data-category-filter="other">◇ <span>Other local</span></button>
         </div>
       </div>
 
@@ -608,11 +609,12 @@ let activeType = 'all';
 
 function profileCategory(profile) {
   const category = (profile.category || '').toLocaleLowerCase();
+  if (/food|restaurant|pizza|cafe|coffee|bakery|dining|bar|cater|drink/.test(category)) return 'food';
   if (/fitness|health|wellness|gym/.test(category)) return 'fitness';
   if (/home|contract|service|repair/.test(category)) return 'home';
   if (/beauty|salon|spa/.test(category)) return 'beauty';
   if (/shop|retail/.test(category)) return 'shopping';
-  return 'food';
+  return 'other';
 }
 
 function profileHref(slug) {
@@ -635,17 +637,20 @@ function renderProfiles() {
     business.dataset.search = (identity + ' ' + (profile.category || '') + ' ' + city + ' ' + (profile.description || '')).toLocaleLowerCase();
     const avatar = document.createElement('span');
     avatar.className = 'business-avatar avatar-' + category;
-    if (profile.logoImage || (profile.heroImage && profile.heroImage.src)) {
+    const avatarImage = [profile.logoImage, profile.heroImage && profile.heroImage.src]
+      .find(src => typeof src === 'string' && src.trim());
+    if (avatarImage) {
       const photo = document.createElement('img');
-      photo.src = profile.logoImage || profile.heroImage.src;
-      photo.alt = profile.heroImage && profile.heroImage.alt ? profile.heroImage.alt : identity;
+      photo.src = avatarImage;
+      photo.alt = avatarImage === profile.logoImage
+        ? (profile.logoAlt || identity)
+        : (profile.heroImage.alt || identity);
       photo.loading = 'lazy';
       photo.decoding = 'async';
       avatar.append(photo);
     } else {
       avatar.textContent = initials;
     }
-    avatar.textContent = initials;
     const info = document.createElement('span');
     info.className = 'business-info';
     const name = document.createElement('strong');
