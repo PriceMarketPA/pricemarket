@@ -558,11 +558,11 @@ function createPmDropdown(select, { root, trigger, listbox, value }) {
     if (event.key === 'End' && isOpen()) { event.preventDefault(); activeIndex = options.length - 1; updateActiveDescendant(); return; }
     if ((event.key === 'Enter' || event.key === ' ') && isOpen()) { event.preventDefault(); choose(activeIndex); return; }
     if ((event.key === 'Enter' || event.key === ' ') && !isOpen()) { event.preventDefault(); open(); return; }
-    if (event.key.length === 1 && /[\\p{L}\\p{N} ]/u.test(event.key)) {
+    if (event.key.length === 1 && event.key !== ' ') {
       typeAhead += event.key.toLocaleLowerCase();
       clearTimeout(typeAheadTimer);
       typeAheadTimer = setTimeout(() => { typeAhead = ''; }, 700);
-      const match = select.options.findIndex(option => option.textContent.trim().toLocaleLowerCase().startsWith(typeAhead));
+      const match = [...select.options].findIndex(option => option.textContent.trim().toLocaleLowerCase().startsWith(typeAhead));
       if (match >= 0) {
         if (!isOpen()) open(match);
         activeIndex = match;
