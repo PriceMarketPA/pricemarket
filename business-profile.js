@@ -53,9 +53,9 @@
     if (external) { link.target = '_blank'; link.rel = 'noopener noreferrer'; }
     actions.append(link);
   };
-  addAction('Call the business', business.phone ? `tel:${business.phone.replace(/[^+\d]/g, '')}` : '', 'blue');
+  addAction('Call', business.phone ? `tel:${business.phone.replace(/[^+\d]/g, '')}` : '', 'blue');
   addAction('Visit website', business.website?.href, 'white', true);
-  addAction('View active deals', '#deals', 'dark');
+  addAction('View Deals', '#deals', 'dark');
   addAction('Claim this business', 'index.html#businesses', 'ghost');
 
   const deals = document.getElementById('businessDeals');
