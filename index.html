@@ -109,10 +109,17 @@
           <span class="search-icon" aria-hidden="true">⌕</span>
           <input id="marketQuery" type="search" placeholder="Try “pizza”, “coffee”, or “fitness”" autocomplete="off">
         </label>
-        <label class="city-field">
-          <span class="sr-only">Choose a Central Pennsylvania city</span>
+        <div class="city-field">
+          <span class="sr-only" id="cityFilterLabel">Choose a Central Pennsylvania city</span>
           <span aria-hidden="true">⌖</span>
-          <select id="cityFilter" class="pm-select">
+          <div class="pm-dropdown" id="cityDropdown" data-pm-dropdown data-open="false">
+            <button class="pm-dropdown-trigger" id="cityFilterTrigger" type="button" role="combobox" aria-label="Choose a Central Pennsylvania city" aria-haspopup="listbox" aria-expanded="false" aria-controls="cityFilterListbox" aria-autocomplete="none">
+              <span id="cityFilterValue">All Central PA</span>
+              <span class="pm-dropdown-chevron" aria-hidden="true"></span>
+            </button>
+            <div class="pm-dropdown-listbox" id="cityFilterListbox" role="listbox" aria-labelledby="cityFilterLabel" aria-hidden="true"></div>
+          </div>
+          <select id="cityFilter" class="sr-only" aria-hidden="true" tabindex="-1">
             <option value="">All Central PA</option>
             <option>Mechanicsburg</option>
             <option>Camp Hill</option>
@@ -120,7 +127,7 @@
             <option>Harrisburg</option>
             <option>Hershey</option>
           </select>
-        </label>
+        </div>
         <button class="btn blue" type="submit">Search</button>
       </form>
 
@@ -467,6 +474,123 @@ const categoryButtons = [...document.querySelectorAll('[data-category-filter]')]
 const noResults = document.getElementById('noResults');
 let activeCategory = '';
 
+/* Reusable interactive filter pattern: point createPmDropdown at a native select plus its trigger/listbox/value nodes. The source select preserves option values and change events for existing filters. */
+function createPmDropdown(select, { root, trigger, listbox, value }) {
+  let activeIndex = Math.max(0, select.selectedIndex);
+  let typeAhead = '';
+  let typeAheadTimer;
+
+  const options = [...select.options].map((option, index) => {
+    const node = document.createElement('div');
+    node.className = 'pm-dropdown-option';
+    node.id = `${listbox.id}-option-${index}`;
+    node.setAttribute('role', 'option');
+    node.setAttribute('aria-selected', 'false');
+    node.dataset.value = option.value;
+    node.textContent = option.textContent.trim();
+    listbox.append(node);
+    return node;
+  });
+
+  const isOpen = () => root.dataset.open === 'true';
+  const selectedIndex = () => Math.max(0, select.selectedIndex);
+
+  function sync() {
+    const selected = selectedIndex();
+    value.textContent = select.options[selected].textContent.trim();
+    options.forEach((option, index) => option.setAttribute('aria-selected', String(index === selected)));
+    if (!isOpen()) activeIndex = selected;
+    updateActiveDescendant();
+  }
+
+  function updateActiveDescendant() {
+    options.forEach((option, index) => option.classList.toggle('is-active', isOpen() && index === activeIndex));
+    if (isOpen()) trigger.setAttribute('aria-activedescendant', options[activeIndex].id);
+    else trigger.removeAttribute('aria-activedescendant');
+  }
+
+  function open(index = selectedIndex()) {
+    activeIndex = index;
+    root.dataset.open = 'true';
+    trigger.setAttribute('aria-expanded', 'true');
+    listbox.setAttribute('aria-hidden', 'false');
+    updateActiveDescendant();
+  }
+
+  function close(restoreFocus = false) {
+    if (!isOpen()) return;
+    root.dataset.open = 'false';
+    trigger.setAttribute('aria-expanded', 'false');
+    listbox.setAttribute('aria-hidden', 'true');
+    updateActiveDescendant();
+    if (restoreFocus) trigger.focus();
+  }
+
+  function moveActive(direction) {
+    activeIndex = (activeIndex + direction + options.length) % options.length;
+    updateActiveDescendant();
+    options[activeIndex].scrollIntoView({ block: 'nearest' });
+  }
+
+  function choose(index) {
+    select.value = select.options[index].value;
+    sync();
+    close(true);
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  trigger.addEventListener('click', () => isOpen() ? close() : open());
+  trigger.addEventListener('keydown', event => {
+    if (event.key === 'Tab') { close(); return; }
+    if (event.key === 'Escape' && isOpen()) { event.preventDefault(); close(true); return; }
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      if (isOpen()) moveActive(1); else open(selectedIndex());
+      return;
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      if (isOpen()) moveActive(-1);
+      else open((selectedIndex() - 1 + options.length) % options.length);
+      return;
+    }
+    if (event.key === 'Home' && isOpen()) { event.preventDefault(); activeIndex = 0; updateActiveDescendant(); return; }
+    if (event.key === 'End' && isOpen()) { event.preventDefault(); activeIndex = options.length - 1; updateActiveDescendant(); return; }
+    if ((event.key === 'Enter' || event.key === ' ') && isOpen()) { event.preventDefault(); choose(activeIndex); return; }
+    if ((event.key === 'Enter' || event.key === ' ') && !isOpen()) { event.preventDefault(); open(); return; }
+    if (event.key.length === 1 && /[\\p{L}\\p{N} ]/u.test(event.key)) {
+      typeAhead += event.key.toLocaleLowerCase();
+      clearTimeout(typeAheadTimer);
+      typeAheadTimer = setTimeout(() => { typeAhead = ''; }, 700);
+      const match = select.options.findIndex(option => option.textContent.trim().toLocaleLowerCase().startsWith(typeAhead));
+      if (match >= 0) {
+        if (!isOpen()) open(match);
+        activeIndex = match;
+        updateActiveDescendant();
+      }
+    }
+  });
+
+  options.forEach((option, index) => {
+    option.addEventListener('pointerenter', () => { activeIndex = index; updateActiveDescendant(); });
+    option.addEventListener('click', () => choose(index));
+  });
+  document.addEventListener('pointerdown', event => {
+    if (!root.contains(event.target)) close();
+  });
+  select.addEventListener('change', sync);
+  sync();
+
+  return { sync, open: () => open(), close: () => close() };
+}
+
+const cityDropdown = createPmDropdown(cityFilter, {
+  root: document.getElementById('cityDropdown'),
+  trigger: document.getElementById('cityFilterTrigger'),
+  listbox: document.getElementById('cityFilterListbox'),
+  value: document.getElementById('cityFilterValue')
+});
+
 function filterMarket() {
   const query = marketQuery.value.trim().toLocaleLowerCase();
   const city = cityFilter.value;
@@ -494,6 +618,7 @@ categoryButtons.forEach(button => button.addEventListener('click', () => {
 document.getElementById('clearFilters').addEventListener('click', () => {
   marketQuery.value = '';
   cityFilter.value = '';
+  cityDropdown.sync();
   activeCategory = '';
   categoryButtons.forEach((button, index) => button.classList.toggle('is-active', index === 0));
   filterMarket();
