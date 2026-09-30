@@ -183,6 +183,12 @@
       featuredDealDescription: profileData.deals[0]?.description || '',
       jobTitle: profileData.jobs[0]?.title || '',
       jobDetails: profileData.jobs[0]?.detail || '',
+      happyHourTitle,
+      happyHourDescription,
+      happyHourDays,
+      happyHourStartTime,
+      happyHourEndTime,
+      happyHourRestrictions,
       profileDataJson: JSON.stringify(profileData)
     };
 
