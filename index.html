@@ -634,7 +634,17 @@ function renderProfiles() {
     business.dataset.city = city;
     business.dataset.search = (identity + ' ' + (profile.category || '') + ' ' + city + ' ' + (profile.description || '')).toLocaleLowerCase();
     const avatar = document.createElement('span');
-    avatar.className = 'business-avatar';
+    avatar.className = 'business-avatar avatar-' + category;
+    if (profile.logoImage || (profile.heroImage && profile.heroImage.src)) {
+      const photo = document.createElement('img');
+      photo.src = profile.logoImage || profile.heroImage.src;
+      photo.alt = profile.heroImage && profile.heroImage.alt ? profile.heroImage.alt : identity;
+      photo.loading = 'lazy';
+      photo.decoding = 'async';
+      avatar.append(photo);
+    } else {
+      avatar.textContent = initials;
+    }
     avatar.textContent = initials;
     const info = document.createElement('span');
     info.className = 'business-info';
