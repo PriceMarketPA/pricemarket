@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Profile | Price Market</title>
+  <meta name="description" content="Explore a sample local business profile on Price Market, Central Pennsylvania’s marketplace for local businesses, deals, and jobs.">
+  <meta name="theme-color" content="#1454e6">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="site profile-site">
+    <header class="nav">
+      <a class="brand" href="index.html">
+        <img src="pm-logo.png" alt="Price Market PM logo">
+        <div><span>Price Market</span><small>Central PA Marketplace</small></div>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="index.html#marketplace">Deals</a>
+        <a href="index.html#featuredBusinesses">Businesses</a>
+      </nav>
+      <a class="btn dark small" href="index.html#businesses">For Businesses</a>
+    </header>
+
+    <main class="profile-page" id="profileRoot" hidden>
+      <section class="profile-hero" aria-labelledby="businessName">
+        <div class="profile-cover">
+          <img id="businessHero" src="" alt="">
+          <span class="profile-demo-label" id="businessDemoLabel">Fictional demo profile</span>
+          <span class="profile-cover-caption" id="businessCoverCaption"></span>
+        </div>
+        <div class="profile-identity">
+          <div class="profile-avatar" id="businessAvatar" aria-hidden="true"></div>
+          <div class="profile-heading">
+            <p class="profile-kicker" id="businessCategoryCity"></p>
+            <h1 id="businessName"></h1>
+            <p class="profile-summary" id="businessDescription"></p>
+            <div class="profile-tags" id="businessTags"></div>
+          </div>
+          <div class="profile-actions" id="businessActions" aria-label="Business actions"></div>
+        </div>
+      </section>
+
+      <div class="profile-content-grid">
+        <div class="profile-main-column">
+          <section class="profile-panel" id="deals" aria-labelledby="offersTitle">
+            <div class="profile-panel-heading">
+              <div><p class="small-title">Local perks</p><h2 id="offersTitle">Active deals</h2></div>
+              <span class="profile-example-tag" id="dealExampleTag">Example offers</span>
+            </div>
+            <div class="profile-deal-grid" id="businessDeals"></div>
+          </section>
+
+          <section class="profile-panel" id="jobs" aria-labelledby="jobsTitle" hidden>
+            <div class="profile-panel-heading">
+              <div><p class="small-title">Join the team</p><h2 id="jobsTitle">Open opportunities</h2></div>
+              <span class="profile-example-tag" id="jobExampleTag">Example openings</span>
+            </div>
+            <div class="profile-job-list" id="businessJobs"></div>
+          </section>
+
+          <section class="profile-panel" id="profileGallery" aria-labelledby="galleryTitle" hidden>
+            <div class="profile-panel-heading">
+              <div><p class="small-title">A closer look</p><h2 id="galleryTitle">Inside the business</h2></div>
+              <span class="profile-example-tag">Demo gallery</span>
+            </div>
+            <div class="profile-gallery-grid" id="businessGallery"></div>
+          </section>
+        </div>
+
+        <aside class="profile-sidebar" aria-label="Business details">
+          <section class="profile-panel" id="profileContact" aria-labelledby="contactTitle">
+            <p class="small-title">Find your next local favorite</p>
+            <h2 id="contactTitle">Business details</h2>
+            <div class="profile-contact-list" id="businessContact"></div>
+          </section>
+          <section class="profile-panel" id="profileHours" aria-labelledby="hoursTitle" hidden>
+            <p class="small-title">Plan a visit</p>
+            <h2 id="hoursTitle">Hours</h2>
+            <ul class="profile-hours-list" id="businessHours"></ul>
+          </section>
+          <div class="profile-demo-note" id="profileDemoNote"><span aria-hidden="true">✦</span><p>This fictional example shows how a local business can share its story, offers, and opportunities on Price Market.</p></div>
+        </aside>
+      </div>
+
+      <section class="profile-bottom-cta">
+        <div><p class="small-title">For local business owners</p><h2>Give your business a place to shine.</h2><p>Join the founding business list and help shape Price Market for Central PA.</p></div>
+        <a class="btn white" href="index.html#businesses">Become a Founding Business <span aria-hidden="true">→</span></a>
+      </section>
+    </main>
+
+    <main class="profile-not-found" id="profileNotFound" hidden>
+      <p class="small-title">Local businesses</p>
+      <h1>We couldn’t find that profile.</h1>
+      <p>Choose a business from the Price Market homepage to explore a sample listing.</p>
+      <a class="btn blue" href="index.html#featuredBusinesses">Browse local businesses</a>
+    </main>
+  </div>
+
+  <footer><span>© 2026 Price Market</span><span id="profileFooterNote">Demo profile · Central Pennsylvania</span></footer>
+  <script src="businesses.js"></script>
+  <script src="business-profile.js"></script>
+</body>
+</html>
+
