@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>List Your Business | Price Market</title>
+  <meta name="description" content="Create a Price Market business profile for your Central Pennsylvania business. Every submission is reviewed before it is published.">
+  <meta name="theme-color" content="#1454e6">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-KC4258L331"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-KC4258L331');
+  </script>
+</head>
+<body>
+  <div class="site onboarding-site">
+    <header class="nav">
+      <a class="brand" href="index.html" aria-label="Price Market home">
+        <img src="pm-logo.png" alt="Price Market PM logo">
+        <div><span>Price Market</span><small>Central PA Marketplace</small></div>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="index.html#marketplace">Explore deals</a>
+        <a href="index.html#businesses">For businesses</a>
+      </nav>
+      <a class="btn dark small" href="index.html">Back to Price Market</a>
+    </header>
+
+    <main class="onboarding-page">
+      <section class="onboarding-intro">
+        <p class="small-title">For Central PA business owners</p>
+        <h1>Give your business a place to shine.</h1>
+        <p>Build a profile that helps neighbors discover what makes your business special. Share the essentials now; our team will review everything before it appears on Price Market.</p>
+        <div class="review-promise"><span aria-hidden="true">✓</span><div><strong>Every profile is reviewed first</strong><span>Your submission stays private and pending review. It will not be published automatically.</span></div></div>
+      </section>
+
+      <div class="onboarding-layout">
+        <form class="onboarding-form" id="businessProfileForm" novalidate>
+          <section class="onboarding-section" aria-labelledby="basicsTitle">
+            <div class="onboarding-section-heading"><span>01</span><div><h2 id="basicsTitle">The business basics</h2><p>Start with the name and location customers will recognize.</p></div></div>
+            <div class="onboarding-fields">
+              <label class="field-wide">Business name <span class="required-mark">*</span><input name="businessName" id="businessNameInput" type="text" placeholder="e.g. Keystone Pizza Co." maxlength="90" required></label>
+              <label>Category <span class="required-mark">*</span>
+                <select name="businessCategory" id="businessCategory" class="pm-select" required>
+                  <option value="">Choose a category</option>
+                  <option>Restaurant / Food</option><option>Retail / Shopping</option><option>Health / Fitness</option><option>Beauty / Salon</option><option>Home Services / Trades</option><option>Professional Services</option><option>Nonprofit / Community</option><option>Other</option>
+                </select>
+              </label>
+              <label>City <span class="required-mark">*</span>
+                <select name="city" id="businessCity" class="pm-select" required>
+                  <option value="">Choose a Central PA city</option>
+                  <option>Mechanicsburg</option><option>Camp Hill</option><option>Carlisle</option><option>Harrisburg</option><option>Hershey</option><option>Other Central PA</option>
+                </select>
+              </label>
+              <label class="field-wide">Street address <span class="required-mark">*</span><input name="streetAddress" id="businessAddress" type="text" autocomplete="street-address" placeholder="Street address, city, and ZIP" maxlength="180" required></label>
+              <label class="field-wide">Short business description <span class="required-mark">*</span><textarea name="description" id="businessDescription" rows="3" maxlength="240" placeholder="What should local customers know about your business?" required></textarea><small class="field-hint"><span id="descriptionCount">0</span>/240 characters</small></label>
+            </div>
+          </section>
+
+          <section class="onboarding-section" aria-labelledby="contactTitle">
+            <div class="onboarding-section-heading"><span>02</span><div><h2 id="contactTitle">How customers can reach you</h2><p>Add the contact details and link you want shown on your profile.</p></div></div>
+            <div class="onboarding-fields">
+              <label>Phone<input name="phone" id="businessPhone" type="tel" autocomplete="tel" placeholder="717-555-0123"></label>
+              <label>Email <span class="required-mark">*</span><input name="email" id="businessEmail" type="email" autocomplete="email" placeholder="hello@yourbusiness.com" required></label>
+              <label class="field-wide">Website<input name="website" id="businessWebsite" type="url" inputmode="url" placeholder="https://yourbusiness.com"></label>
+            </div>
+          </section>
+
+          <section class="onboarding-section" aria-labelledby="hoursTitle">
+            <div class="onboarding-section-heading"><span>03</span><div><h2 id="hoursTitle">Business hours</h2><p>Set your usual hours. You can leave days blank if they vary.</p></div></div>
+            <div class="hours-editor" id="hoursEditor" aria-label="Weekly business hours"></div>
+          </section>
+
+          <section class="onboarding-section" aria-labelledby="imagesTitle">
+            <div class="onboarding-section-heading"><span>04</span><div><h2 id="imagesTitle">Make it yours</h2><p>Add image links so your profile can show your logo and a great first impression.</p></div></div>
+            <div class="onboarding-fields">
+              <label class="field-wide">Logo image URL<input name="logoImage" id="logoImage" type="url" inputmode="url" placeholder="https://... (optional)"></label>
+              <label class="field-wide">Business or cover image URL<input name="heroImage" id="heroImage" type="url" inputmode="url" placeholder="https://... (optional)"></label>
+              <label class="field-wide">Image description<input name="imageAlt" id="imageAlt" type="text" maxlength="140" placeholder="Describe the image for screen readers"></label>
+              <p class="field-hint field-wide">Image links are collected for review. This form does not upload files.</p>
+            </div>
+          </section>
+
+          <section class="onboarding-section" aria-labelledby="dealTitleHeading">
+            <div class="onboarding-section-heading"><span>05</span><div><h2 id="dealTitleHeading">Feature a local deal <span class="optional-tag">Optional</span></h2><p>Give neighbors a reason to visit with an offer or special.</p></div></div>
+            <div class="onboarding-fields">
+              <label class="field-wide">Deal title<input name="dealTitle" id="dealTitle" type="text" maxlength="90" placeholder="e.g. Two large pizzas for $24.99"></label>
+              <label class="field-wide">Deal description<textarea name="dealDescription" id="dealDescription" rows="2" maxlength="220" placeholder="Share any details or limits for this offer"></textarea></label>
+            </div>
+          </section>
+
+          <section class="onboarding-section" aria-labelledby="jobsTitle">
+            <div class="onboarding-section-heading"><span>06</span><div><h2 id="jobsTitle">Hiring anyone? <span class="optional-tag">Optional</span></h2><p>Add one opening to help local people find your opportunity.</p></div></div>
+            <label class="job-toggle"><input type="checkbox" id="includeJob"> <span>Add a job opening to my submission</span></label>
+            <div class="onboarding-fields job-fields" id="jobFields" hidden>
+              <label class="field-wide">Job title<input name="jobTitle" id="jobTitle" type="text" maxlength="90" placeholder="e.g. Front desk associate"></label>
+              <label class="field-wide">Job details<textarea name="jobDescription" id="jobDescription" rows="2" maxlength="220" placeholder="Hours, schedule, experience, or how to apply"></textarea></label>
+            </div>
+          </section>
+
+          <div class="onboarding-submit-panel">
+            <p>By submitting, you’re asking Price Market to review this business profile. <strong>Nothing goes live until it’s approved.</strong></p>
+            <button class="btn blue" type="submit" id="submitBusinessProfile">Submit for review <span aria-hidden="true">→</span></button>
+            <p class="onboarding-status" id="onboardingStatus" role="status" aria-live="polite" hidden></p>
+          </div>
+        </form>
+
+        <aside class="onboarding-preview-wrap" aria-label="Business profile preview">
+          <div class="preview-sticky">
+            <div class="preview-label-row"><div><p class="small-title">Your profile concept</p><h2>Live preview</h2></div><span class="preview-demo-pill">Preview only</span></div>
+            <p class="preview-explainer">This example updates as you fill out the form. Your business will stay pending review after submission.</p>
+            <article class="onboarding-preview-card">
+              <div class="onboarding-preview-cover"><img id="previewImage" src="assets/showcase-restaurant.jpg" alt=""><span>PREVIEW · NOT PUBLISHED</span></div>
+              <div class="onboarding-preview-identity">
+                <div class="onboarding-preview-avatar" id="previewAvatar">B</div>
+                <div class="onboarding-preview-name"><p id="previewCategoryCity">Your category · Your city, PA</p><h3 id="previewBusinessName">Your Business Name</h3></div>
+              </div>
+              <p class="onboarding-preview-description" id="previewDescription">Your short business introduction will appear here, helping neighbors get to know you.</p>
+              <div class="onboarding-preview-details"><span id="previewAddress">Your address</span><span id="previewHours">Add your hours</span></div>
+              <div class="onboarding-preview-deal" id="previewDeal"><span>FEATURED DEAL · EXAMPLE PREVIEW</span><strong id="previewDealTitle">Your featured deal</strong><p id="previewDealDescription">A quick look at the offer you’d like to share.</p></div>
+              <span class="preview-profile-cta">View business profile <span aria-hidden="true">→</span></span>
+            </article>
+            <div class="pending-preview-note"><span aria-hidden="true">✓</span><p><strong>Always reviewed first</strong><br>Your preview is only visible here. Submitted profiles are checked by Price Market before publication.</p></div>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <footer><span>© 2026 Price Market</span><span>Built for Central Pennsylvania</span></footer>
+  <script src="business-onboarding.js"></script>
+</body>
+</html>
