@@ -4,6 +4,8 @@
   const hoursEditor = document.getElementById('hoursEditor');
   const jobToggle = document.getElementById('includeJob');
   const jobFields = document.getElementById('jobFields');
+  const happyHourToggle = document.getElementById('includeHappyHour');
+  const happyHourFields = document.getElementById('happyHourFields');
   const status = document.getElementById('onboardingStatus');
   const submitButton = document.getElementById('submitBusinessProfile');
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -76,6 +78,22 @@
     byId('previewImage').src = image || 'assets/showcase-restaurant.jpg';
     byId('previewImage').alt = read('imageAlt') || (name ? `${name} business preview` : 'Sample local business preview image');
     byId('previewDeal').hidden = !dealTitle && !dealDescription;
+
+    const happyHourEnabled = happyHourToggle.checked;
+    const happyHourTitle = read('happyHourTitleInput');
+    const happyHourDays = read('happyHourDays');
+    const happyHourStartTime = read('happyHourStartTime');
+    const happyHourEndTime = read('happyHourEndTime');
+    const happyHourDescription = read('happyHourDescription');
+    const happyHourRestrictions = read('happyHourRestrictions');
+    const happyHourRange = [formatTime(happyHourStartTime), formatTime(happyHourEndTime)].filter(Boolean).join('–');
+    setText('previewHappyHourTitle', happyHourTitle, 'Your Happy Hour offer');
+    setText('previewHappyHourSchedule', [happyHourDays, happyHourRange].filter(Boolean).join(' · '), 'Add the days and times');
+    setText('previewHappyHourDescription', happyHourDescription, 'A recurring special for your neighbors.');
+    const restrictions = byId('previewHappyHourRestrictions');
+    restrictions.textContent = happyHourRestrictions;
+    restrictions.hidden = !happyHourRestrictions;
+    byId('previewHappyHour').hidden = !happyHourEnabled;
   }
 
   form.addEventListener('input', refreshPreview);
@@ -84,6 +102,13 @@
   jobToggle.addEventListener('change', () => {
     jobFields.hidden = !jobToggle.checked;
     byId('jobTitle').required = jobToggle.checked;
+  });
+  happyHourToggle.addEventListener('change', () => {
+    happyHourFields.hidden = !happyHourToggle.checked;
+    ['happyHourTitleInput', 'happyHourDays', 'happyHourStartTime', 'happyHourEndTime'].forEach(id => {
+      byId(id).required = happyHourToggle.checked;
+    });
+    refreshPreview();
   });
   hoursEditor.addEventListener('change', event => {
     const row = event.target.closest('.hours-row');
@@ -98,6 +123,12 @@
     const dealDescription = read('dealDescription');
     const jobTitle = jobToggle.checked ? read('jobTitle') : '';
     const jobDescription = jobToggle.checked ? read('jobDescription') : '';
+    const happyHourTitle = happyHourToggle.checked ? read('happyHourTitleInput') : '';
+    const happyHourDescription = happyHourToggle.checked ? read('happyHourDescription') : '';
+    const happyHourDays = happyHourToggle.checked ? read('happyHourDays') : '';
+    const happyHourStartTime = happyHourToggle.checked ? read('happyHourStartTime') : '';
+    const happyHourEndTime = happyHourToggle.checked ? read('happyHourEndTime') : '';
+    const happyHourRestrictions = happyHourToggle.checked ? read('happyHourRestrictions') : '';
     const heroUrl = validImageUrl(read('heroImage'));
     const logoUrl = validImageUrl(read('logoImage'));
     return {
@@ -117,7 +148,15 @@
       website: websiteUrl ? { label: websiteUrl.replace(/^https?:\/\//, '').replace(/\/$/, ''), href: websiteUrl } : null,
       hours: collectHours(),
       deals: dealTitle || dealDescription ? [{ title: dealTitle, description: dealDescription }] : [],
-      jobs: jobTitle ? [{ title: jobTitle, detail: jobDescription }] : []
+      jobs: jobTitle ? [{ title: jobTitle, detail: jobDescription }] : [],
+      happyHours: happyHourTitle ? [{
+        title: happyHourTitle,
+        description: happyHourDescription,
+        days: happyHourDays,
+        startTime: happyHourStartTime,
+        endTime: happyHourEndTime,
+        restrictions: happyHourRestrictions
+      }] : []
     };
   }
 
@@ -163,6 +202,10 @@
       form.reset();
       jobFields.hidden = true;
       byId('jobTitle').required = false;
+      happyHourFields.hidden = true;
+      ['happyHourTitleInput', 'happyHourDays', 'happyHourStartTime', 'happyHourEndTime'].forEach(id => {
+        byId(id).required = false;
+      });
       hoursEditor.querySelectorAll('.hours-row').forEach((row, index) => {
         const closed = row.querySelector('.hours-closed input');
         closed.checked = index === 6;
