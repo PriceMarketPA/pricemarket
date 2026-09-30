@@ -6,16 +6,22 @@ This workflow converts an approved Google Sheets onboarding submission into an e
 
 1. Review the submission in the `Price Market Leads` sheet, including its contact details, business information, hours, images, deal, and any job opening.
 2. Change that row's **Review Status** to **Approved** only after a person has reviewed it. New onboarding submissions start as **Pending review**.
-3. Copy the row's **Profile Data JSON** cell into a local file such as `approved-profile.json`. Save the cell contents as JSON; don't include the surrounding spreadsheet quotes.
-4. From the repository root, run:
+3. Copy the row's **Profile Data JSON** cell. You can save the cell contents as JSON in `approved-profile.json` (without the surrounding spreadsheet quotes), or paste/pipe the copied JSON directly to the utility.
+4. From the repository root, use either input method:
 
    ```sh
    node scripts/create-business-profile.js --approved --input approved-profile.json
    ```
 
-   `--approved` is a required human confirmation. The utility checks the current `businesses.js` IDs and names, validates required fields, normalizes optional data, and prints a JSON entry. It never writes to `businesses.js` itself.
+   ```sh
+   pbpaste | node scripts/create-business-profile.js --approved
+   # Or paste JSON into stdin and send EOF (Ctrl+D on macOS/Linux; Ctrl+Z then Enter in Windows cmd).
+   node scripts/create-business-profile.js --approved
+   ```
 
-5. Review the generated entry and slug. Copy the new keyed entry into `window.priceMarketBusinesses` in `businesses.js`. The key is the profile ID used by `business-profile.html?business=<slug>`.
+   `--input -` is also an explicit stdin alias. `--approved` is a required human confirmation for either mode. The utility checks the current `businesses.js` IDs and names, validates required fields, normalizes optional data, and prints the generated slug, final profile URL path, and ready-to-paste object entry. It never writes to `businesses.js` itself.
+
+5. Review the generated slug, URL path, and object entry. Copy the new keyed entry into `window.priceMarketBusinesses` in `businesses.js`. The key is the profile ID used by `business-profile.html?business=<slug>`.
 6. Run the utility tests with `node --test scripts/create-business-profile.test.js`, review the diff, and create a PR. Merge the PR only after the normal human review; the deployment then makes the profile available.
 
 The generated key must be unique. If a profile already uses the same normalized business name or slug, the utility stops with an error so the reviewer can resolve the duplicate instead of overwriting or creating a second listing.
@@ -28,4 +34,5 @@ The onboarding form's `profileDataJson` follows the profile data shape in `busin
 
 ## Tests
 
-The dependency-free Node test suite covers valid entry generation, missing required data, duplicate slugs and IDs, approval gating, safe slug generation, and optional-field fallbacks.
+The dependency-free Node test suite covers valid entry generation, missing required data, duplicate slugs and IDs, approval gating, file and stdin input, generated slug/profile URL output, safe slug generation, and optional-field fallbacks.
+
