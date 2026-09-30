@@ -109,10 +109,17 @@
           <span class="search-icon" aria-hidden="true">⌕</span>
           <input id="marketQuery" type="search" placeholder="Try “pizza”, “coffee”, or “fitness”" autocomplete="off">
         </label>
-        <label class="city-field">
-          <span class="sr-only">Choose a Central Pennsylvania city</span>
+        <div class="city-field">
+          <span class="sr-only" id="cityFilterLabel">Choose a Central Pennsylvania city</span>
           <span aria-hidden="true">⌖</span>
-          <select id="cityFilter">
+          <div class="pm-dropdown" id="cityDropdown" data-pm-dropdown data-open="false">
+            <button class="pm-dropdown-trigger" id="cityFilterTrigger" type="button" role="combobox" aria-label="Choose a Central Pennsylvania city" aria-haspopup="listbox" aria-expanded="false" aria-controls="cityFilterListbox" aria-autocomplete="none">
+              <span id="cityFilterValue">All Central PA</span>
+              <span class="pm-dropdown-chevron" aria-hidden="true"></span>
+            </button>
+            <div class="pm-dropdown-listbox" id="cityFilterListbox" role="listbox" aria-labelledby="cityFilterLabel" aria-hidden="true"></div>
+          </div>
+          <select id="cityFilter" class="sr-only" aria-hidden="true" tabindex="-1">
             <option value="">All Central PA</option>
             <option>Mechanicsburg</option>
             <option>Camp Hill</option>
@@ -120,7 +127,7 @@
             <option>Harrisburg</option>
             <option>Hershey</option>
           </select>
-        </label>
+        </div>
         <button class="btn blue" type="submit">Search</button>
       </form>
 
@@ -141,15 +148,15 @@
           <div class="market-section-heading"><div><p class="small-title">Worth a closer look</p><h3 id="dealsTitle">Featured deals</h3></div><span class="sample-caption">Example offers</span></div>
           <div class="deal-grid">
             <article class="deal-card market-item" data-category="food" data-city="Mechanicsburg" data-search="keystone pizza restaurant family large pizza dinner food">
-              <div class="deal-art deal-art-pizza"><span>LOCAL FAVORITE</span><b aria-hidden="true">✦</b></div>
+              <div class="deal-art deal-art-pizza"><img src="assets/showcase-restaurant.jpg" alt="Freshly baked pizza at a neighborhood restaurant" loading="lazy" decoding="async"><span>LOCAL FAVORITE</span></div>
               <div class="deal-content"><div class="deal-meta"><span>Food & drink</span><span>Mechanicsburg</span></div><h4>Pizza night, handled.</h4><p>Two large pizzas for $24.99 at Keystone Pizza Co.</p><div class="deal-footer"><span class="preview-pill">Example offer</span><a href="keystone-pizza.html">See business <span aria-hidden="true">→</span></a></div></div>
             </article>
             <article class="deal-card market-item" data-category="food" data-city="Camp Hill" data-search="camp hill coffee cafe breakfast coffee food drink combo">
-              <div class="deal-art deal-art-coffee"><span>YOUR MORNING, MADE</span><b aria-hidden="true">☕</b></div>
+              <div class="deal-art deal-art-coffee"><img src="assets/deal-coffee.jpg" alt="Latte and breakfast sandwich at a neighborhood cafe" loading="lazy" decoding="async"><span>YOUR MORNING, MADE</span></div>
               <div class="deal-content"><div class="deal-meta"><span>Food & drink</span><span>Camp Hill</span></div><h4>A little more morning.</h4><p>Breakfast combo for $5 at a neighborhood coffee shop.</p><div class="deal-footer"><span class="preview-pill">Example offer</span><a href="#featuredBusinesses">Meet local spots <span aria-hidden="true">→</span></a></div></div>
             </article>
             <article class="deal-card market-item" data-category="fitness" data-city="Carlisle" data-search="carlisle fitness studio health workout gym fitness class">
-              <div class="deal-art deal-art-fitness"><span>MOVE YOUR WAY</span><b aria-hidden="true">↗</b></div>
+              <div class="deal-art deal-art-fitness"><img src="assets/showcase-fitness.jpg" alt="A personal training session in a local fitness studio" loading="lazy" decoding="async"><span>MOVE YOUR WAY</span></div>
               <div class="deal-content"><div class="deal-meta"><span>Health & fitness</span><span>Carlisle</span></div><h4>Try a new kind of strong.</h4><p>First class on the house at a local fitness studio.</p><div class="deal-footer"><span class="preview-pill">Example offer</span><a href="#featuredBusinesses">Meet local spots <span aria-hidden="true">→</span></a></div></div>
             </article>
           </div>
@@ -189,6 +196,82 @@
         <div><span>01</span><section><h3>Promote offers</h3><p>Share coupons, limited-time specials, seasonal offers, and weekly deals.</p></section></div>
         <div><span>02</span><section><h3>Increase discovery</h3><p>Help local residents find your business without relying only on social media.</p></section></div>
         <div><span>03</span><section><h3>Hire locally</h3><p>Post opportunities for people already looking to work nearby.</p></section></div>
+      </div>
+    </section>
+
+    <section class="business-showcase section" aria-labelledby="businessShowcaseTitle">
+      <div class="showcase-heading">
+        <div>
+          <p class="small-title">A profile that feels like your business</p>
+          <h2 id="businessShowcaseTitle">See how your business could look on Price Market.</h2>
+          <p>These sample profiles show how local photos, useful details, and a featured offer can come together in one clear place.</p>
+        </div>
+        <span class="showcase-count">3 example profiles</span>
+      </div>
+
+      <div class="showcase-grid">
+        <article class="profile-concept">
+          <div class="profile-photo">
+            <img src="assets/showcase-restaurant.jpg" alt="Fresh wood-fired pizza in a neighborhood restaurant" loading="lazy" decoding="async">
+            <span class="demo-label">Demo profile</span>
+            <span class="photo-category">Restaurant</span>
+          </div>
+          <div class="profile-content">
+            <div class="profile-business">
+              <span class="profile-avatar avatar-food" aria-hidden="true">KP</span>
+              <div><h3>Keystone Pizza Co.</h3><p>Restaurant <span aria-hidden="true">·</span> Mechanicsburg, PA</p></div>
+            </div>
+            <p class="profile-description">Wood-fired pies, fresh ingredients, and an easy family-night favorite.</p>
+            <div class="profile-offer">
+              <span class="offer-label">Example featured deal</span>
+              <strong>Pizza night, handled.</strong>
+              <span>Two large pizzas for $24.99</span>
+            </div>
+            <div class="profile-foot"><span>Sample business profile</span><span>Central PA</span></div>
+          </div>
+        </article>
+
+        <article class="profile-concept">
+          <div class="profile-photo">
+            <img src="assets/showcase-home-service.jpg" alt="Home service technician inspecting a kitchen faucet" loading="lazy" decoding="async">
+            <span class="demo-label">Demo profile</span>
+            <span class="photo-category">Home services</span>
+          </div>
+          <div class="profile-content">
+            <div class="profile-business">
+              <span class="profile-avatar avatar-home" aria-hidden="true">WS</span>
+              <div><h3>West Shore Home &amp; Repair</h3><p>Home services <span aria-hidden="true">·</span> Camp Hill, PA</p></div>
+            </div>
+            <p class="profile-description">Small repairs and thoughtful upgrades from a neighborhood team.</p>
+            <div class="profile-offer">
+              <span class="offer-label">Example featured deal</span>
+              <strong>A little help goes a long way.</strong>
+              <span>10% off your first home repair</span>
+            </div>
+            <div class="profile-foot"><span>Sample business profile</span><span>Central PA</span></div>
+          </div>
+        </article>
+
+        <article class="profile-concept">
+          <div class="profile-photo">
+            <img src="assets/showcase-fitness.jpg" alt="Personal trainer coaching a client in a bright fitness studio" loading="lazy" decoding="async">
+            <span class="demo-label">Demo profile</span>
+            <span class="photo-category">Fitness</span>
+          </div>
+          <div class="profile-content">
+            <div class="profile-business">
+              <span class="profile-avatar avatar-fitness" aria-hidden="true">SS</span>
+              <div><h3>Summit Strength Studio</h3><p>Fitness <span aria-hidden="true">·</span> Carlisle, PA</p></div>
+            </div>
+            <p class="profile-description">Small-group coaching for building strength at your own pace.</p>
+            <div class="profile-offer">
+              <span class="offer-label">Example featured deal</span>
+              <strong>Find your first class.</strong>
+              <span>Your first small-group class is free</span>
+            </div>
+            <div class="profile-foot"><span>Sample business profile</span><span>Central PA</span></div>
+          </div>
+        </article>
       </div>
     </section>
 
@@ -241,7 +324,7 @@
       <label>Email Address<input type="email" name="email" placeholder="you@example.com" required></label>
       <label>ZIP Code<input type="text" name="zipCode" placeholder="17055"></label>
       <label>I am a...
-        <select name="interest" required>
+        <select name="interest" class="pm-select" required>
           <option value="">Select one</option>
           <option>Shopper</option>
           <option>Local Business Owner</option>
@@ -268,7 +351,7 @@
       <label>Email Address<input type="email" name="email" placeholder="you@example.com" required></label>
       <label>Phone Number<input type="tel" name="phone" placeholder="717-555-1234"></label>
       <label>Business Category
-        <select name="businessCategory" required>
+        <select name="businessCategory" class="pm-select" required>
           <option value="">Select one</option>
           <option>Restaurant / Food</option>
           <option>Retail / Shopping</option>
@@ -281,7 +364,7 @@
         </select>
       </label>
       <label>I am interested in...
-        <select name="interest" required>
+        <select name="interest" class="pm-select" required>
           <option value="">Select one</option>
           <option>Business Listing</option>
           <option>Deals & Coupons</option>
@@ -391,6 +474,123 @@ const categoryButtons = [...document.querySelectorAll('[data-category-filter]')]
 const noResults = document.getElementById('noResults');
 let activeCategory = '';
 
+/* Reusable interactive filter pattern: point createPmDropdown at a native select plus its trigger/listbox/value nodes. The source select preserves option values and change events for existing filters. */
+function createPmDropdown(select, { root, trigger, listbox, value }) {
+  let activeIndex = Math.max(0, select.selectedIndex);
+  let typeAhead = '';
+  let typeAheadTimer;
+
+  const options = [...select.options].map((option, index) => {
+    const node = document.createElement('div');
+    node.className = 'pm-dropdown-option';
+    node.id = `${listbox.id}-option-${index}`;
+    node.setAttribute('role', 'option');
+    node.setAttribute('aria-selected', 'false');
+    node.dataset.value = option.value;
+    node.textContent = option.textContent.trim();
+    listbox.append(node);
+    return node;
+  });
+
+  const isOpen = () => root.dataset.open === 'true';
+  const selectedIndex = () => Math.max(0, select.selectedIndex);
+
+  function sync() {
+    const selected = selectedIndex();
+    value.textContent = select.options[selected].textContent.trim();
+    options.forEach((option, index) => option.setAttribute('aria-selected', String(index === selected)));
+    if (!isOpen()) activeIndex = selected;
+    updateActiveDescendant();
+  }
+
+  function updateActiveDescendant() {
+    options.forEach((option, index) => option.classList.toggle('is-active', isOpen() && index === activeIndex));
+    if (isOpen()) trigger.setAttribute('aria-activedescendant', options[activeIndex].id);
+    else trigger.removeAttribute('aria-activedescendant');
+  }
+
+  function open(index = selectedIndex()) {
+    activeIndex = index;
+    root.dataset.open = 'true';
+    trigger.setAttribute('aria-expanded', 'true');
+    listbox.setAttribute('aria-hidden', 'false');
+    updateActiveDescendant();
+  }
+
+  function close(restoreFocus = false) {
+    if (!isOpen()) return;
+    root.dataset.open = 'false';
+    trigger.setAttribute('aria-expanded', 'false');
+    listbox.setAttribute('aria-hidden', 'true');
+    updateActiveDescendant();
+    if (restoreFocus) trigger.focus();
+  }
+
+  function moveActive(direction) {
+    activeIndex = (activeIndex + direction + options.length) % options.length;
+    updateActiveDescendant();
+    options[activeIndex].scrollIntoView({ block: 'nearest' });
+  }
+
+  function choose(index) {
+    select.value = select.options[index].value;
+    sync();
+    close(true);
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  trigger.addEventListener('click', () => isOpen() ? close() : open());
+  trigger.addEventListener('keydown', event => {
+    if (event.key === 'Tab') { close(); return; }
+    if (event.key === 'Escape' && isOpen()) { event.preventDefault(); close(true); return; }
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      if (isOpen()) moveActive(1); else open(selectedIndex());
+      return;
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      if (isOpen()) moveActive(-1);
+      else open((selectedIndex() - 1 + options.length) % options.length);
+      return;
+    }
+    if (event.key === 'Home' && isOpen()) { event.preventDefault(); activeIndex = 0; updateActiveDescendant(); return; }
+    if (event.key === 'End' && isOpen()) { event.preventDefault(); activeIndex = options.length - 1; updateActiveDescendant(); return; }
+    if ((event.key === 'Enter' || event.key === ' ') && isOpen()) { event.preventDefault(); choose(activeIndex); return; }
+    if ((event.key === 'Enter' || event.key === ' ') && !isOpen()) { event.preventDefault(); open(); return; }
+    if (event.key.length === 1 && event.key !== ' ') {
+      typeAhead += event.key.toLocaleLowerCase();
+      clearTimeout(typeAheadTimer);
+      typeAheadTimer = setTimeout(() => { typeAhead = ''; }, 700);
+      const match = [...select.options].findIndex(option => option.textContent.trim().toLocaleLowerCase().startsWith(typeAhead));
+      if (match >= 0) {
+        if (!isOpen()) open(match);
+        activeIndex = match;
+        updateActiveDescendant();
+      }
+    }
+  });
+
+  options.forEach((option, index) => {
+    option.addEventListener('pointerenter', () => { activeIndex = index; updateActiveDescendant(); });
+    option.addEventListener('click', () => choose(index));
+  });
+  document.addEventListener('pointerdown', event => {
+    if (!root.contains(event.target)) close();
+  });
+  select.addEventListener('change', sync);
+  sync();
+
+  return { sync, open: () => open(), close: () => close() };
+}
+
+const cityDropdown = createPmDropdown(cityFilter, {
+  root: document.getElementById('cityDropdown'),
+  trigger: document.getElementById('cityFilterTrigger'),
+  listbox: document.getElementById('cityFilterListbox'),
+  value: document.getElementById('cityFilterValue')
+});
+
 function filterMarket() {
   const query = marketQuery.value.trim().toLocaleLowerCase();
   const city = cityFilter.value;
@@ -418,6 +618,7 @@ categoryButtons.forEach(button => button.addEventListener('click', () => {
 document.getElementById('clearFilters').addEventListener('click', () => {
   marketQuery.value = '';
   cityFilter.value = '';
+  cityDropdown.sync();
   activeCategory = '';
   categoryButtons.forEach((button, index) => button.classList.toggle('is-active', index === 0));
   filterMarket();
