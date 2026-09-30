@@ -74,6 +74,49 @@
   });
   if (!deals.childElementCount) deals.innerHTML = '<p class="profile-empty-state">Check back soon for local offers.</p>';
 
+  function formatHappyHourTime(value) {
+    const match = /^(\\d{2}):(\\d{2})$/.exec(value || '');
+    if (!match) return value || '';
+    const hour = Number(match[1]);
+    const minute = match[2];
+    if (hour > 23 || Number(minute) > 59) return value;
+    return (hour % 12 || 12) + ':' + minute + (hour < 12 ? ' AM' : ' PM');
+  }
+
+  const happyHours = Array.isArray(business.happyHours)
+    ? business.happyHours.filter(item => item && typeof item === 'object' && typeof item.title === 'string' && item.title.trim())
+    : [];
+  if (happyHours.length) {
+    const section = document.getElementById('happyHours');
+    section.hidden = false;
+    document.getElementById('happyHourExampleTag').textContent = business.demo ? 'Example Happy Hour' : 'Current Happy Hour';
+    const list = document.getElementById('businessHappyHours');
+    happyHours.forEach(happyHour => {
+      const card = document.createElement('article');
+      card.className = 'profile-happy-hour-card';
+      const label = document.createElement('span');
+      label.className = 'profile-deal-label';
+      label.textContent = business.demo ? 'Example Happy Hour' : 'Happy Hour';
+      const title = document.createElement('h3');
+      title.textContent = happyHour.title;
+      const description = document.createElement('p');
+      description.textContent = happyHour.description || 'Ask the business for offer details.';
+      const schedule = document.createElement('strong');
+      const times = [formatHappyHourTime(happyHour.startTime), formatHappyHourTime(happyHour.endTime)].filter(Boolean).join('–');
+      schedule.className = 'profile-happy-hour-schedule';
+      schedule.textContent = [happyHour.days || '', times].filter(Boolean).join(' · ');
+      card.append(label, title, description, schedule);
+      const notes = happyHour.restrictions || happyHour.notes;
+      if (notes) {
+        const restriction = document.createElement('small');
+        restriction.className = 'profile-happy-hour-notes';
+        restriction.textContent = notes;
+        card.append(restriction);
+      }
+      list.append(card);
+    });
+  }
+
   const jobs = business.jobs || [];
   if (jobs.length) {
     document.getElementById('jobs').hidden = false;
