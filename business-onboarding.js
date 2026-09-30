@@ -166,6 +166,7 @@
     if (!form.reportValidity()) return;
 
     const profileData = makeProfileData();
+    const happyHour = profileData.happyHours[0] || {};
     const payload = {
       leadType: 'Business',
       businessName: profileData.name,
@@ -183,12 +184,12 @@
       featuredDealDescription: profileData.deals[0]?.description || '',
       jobTitle: profileData.jobs[0]?.title || '',
       jobDetails: profileData.jobs[0]?.detail || '',
-      happyHourTitle,
-      happyHourDescription,
-      happyHourDays,
-      happyHourStartTime,
-      happyHourEndTime,
-      happyHourRestrictions,
+      happyHourTitle: happyHour.title || '',
+      happyHourDescription: happyHour.description || '',
+      happyHourDays: happyHour.days || '',
+      happyHourStartTime: happyHour.startTime || '',
+      happyHourEndTime: happyHour.endTime || '',
+      happyHourRestrictions: happyHour.restrictions || '',
       profileDataJson: JSON.stringify(profileData)
     };
 
