@@ -75,12 +75,12 @@
   if (!deals.childElementCount) deals.innerHTML = '<p class="profile-empty-state">Check back soon for local offers.</p>';
 
   function formatHappyHourTime(value) {
-  if (!value) return '';
-  const parts = value.split(':');
-  if (parts.length !== 2 || parts[0].length !== 2 || parts[1].length !== 2) return value;
-  const hour = Number(parts[0]);
-  const minute = parts[1];
-  if (!Number.isInteger(hour) || hour > 23 || !/^\\d{2}$/.test(minute) || Number(minute) > 59) return value;
-  return (hour % 12 || 12) + ':' + minute + (hour < 12 ? ' AM' : ' PM');
-})();
+    if (!value) return '';
+    const parts = value.split(':');
+    if (parts.length !== 2 || parts[0].length !== 2 || parts[1].length !== 2) return value;
+    const hour = Number(parts[0]);
+    const minute = parts[1];
+    if (!Number.isInteger(hour) || hour > 23 || !Number.isInteger(Number(minute)) || Number(minute) > 59) return value;
+    return (hour % 12 || 12) + ':' + minute + (hour < 12 ? ' AM' : ' PM');
+  })();
 
