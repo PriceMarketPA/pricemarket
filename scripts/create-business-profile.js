@@ -164,7 +164,10 @@ function parseArgs(args) {
   for (let index = 0; index < args.length; index++) {
     const arg = args[index];
     if (arg === '--approved') options.approved = true;
-    else if (arg === '--input') options.input = args[++index] || '';
+    else if (arg === '--input') {
+      options.input = args[++index] || '';
+      if (!options.input) throw new Error('Provide a file path or "-" after --input.');
+    }
     else if (arg === '--businesses') options.businessesFile = path.resolve(args[++index] || '');
     else if (arg === '--help' || arg === '-h') options.help = true;
     else throw new Error(`Unknown option: ${arg}`);
@@ -172,29 +175,50 @@ function parseArgs(args) {
   return options;
 }
 
-function main(args = process.argv.slice(2)) {
+function readStdin() {
+  return new Promise((resolve, reject) => {
+    let input = '';
+    process.stdin.setEncoding('utf8');
+    process.stdin.on('data', chunk => { input += chunk; });
+    process.stdin.on('end', () => resolve(input));
+    process.stdin.on('error', reject);
+  });
+}
+
+function formatBusinessEntry(slug, profile) {
+  const lines = JSON.stringify(profile, null, 2).split('\n');
+  return `  ${JSON.stringify(slug)}: ${lines[0]}\n${lines.slice(1).map(line => `  ${line}`).join('\n')},`;
+}
+
+async function main(args = process.argv.slice(2)) {
   const options = parseArgs(args);
   if (options.help) {
-    process.stdout.write('Usage: node scripts/create-business-profile.js --approved --input approved-profile.json [--businesses businesses.js]\n');
+    process.stdout.write('Usage: node scripts/create-business-profile.js --approved [--input approved-profile.json | --input -] [--businesses businesses.js]\n');
+    process.stdout.write('Without --input, profileDataJson is read from stdin.\n');
     return;
   }
   if (!options.approved) throw new Error('Approval confirmation required. Verify the Google Sheet Review Status is Approved, then pass --approved.');
-  if (!options.input) throw new Error('Provide the exported profileDataJson file with --input.');
 
-  const rawProfile = JSON.parse(fs.readFileSync(path.resolve(options.input), 'utf8'));
+  const inputText = !options.input || options.input === '-'
+    ? await readStdin()
+    : fs.readFileSync(path.resolve(options.input), 'utf8');
+  if (!inputText.trim()) throw new Error('No profileDataJson was provided. Pass --input <file> or pipe/paste JSON through stdin.');
+
+  const rawProfile = JSON.parse(inputText);
   const existing = loadExistingBusinesses(options.businessesFile);
   const { slug, profile } = createProfileEntry(rawProfile, existing, { approved: true });
-  process.stdout.write(`// Review this entry, then add it inside window.priceMarketBusinesses in businesses.js.\n`);
-  process.stdout.write(`${JSON.stringify({ [slug]: profile }, null, 2)}\n`);
+  process.stdout.write(`Generated business slug: ${slug}\n`);
+  process.stdout.write(`Final profile URL path: /business-profile.html?business=${encodeURIComponent(slug)}\n\n`);
+  process.stdout.write('Ready-to-paste businesses.js object entry:\n');
+  process.stdout.write(`${formatBusinessEntry(slug, profile)}\n`);
 }
 
 if (require.main === module) {
-  try {
-    main();
-  } catch (error) {
+  main().catch(error => {
     console.error(error.message);
     process.exitCode = 1;
-  }
+  });
 }
 
 module.exports = { createProfileEntry, loadExistingBusinesses, normalizeProfile, slugify };
+
