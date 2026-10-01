@@ -77,7 +77,7 @@ test('Onboarding navigation uses a refreshed stylesheet and stacks every step on
   const css = read('styles.css');
   const html = read('business-onboarding.html');
   assert.match(html, /href="\/styles\.css\?v=onboarding-mobile-nav-2"/);
-  assert.match(css, /@media\(max-width:430px\)\{\.onboarding-site \.onboarding-step-panel \.onboarding-step-controls,\.onboarding-site \.onboarding-submit-panel \.onboarding-step-controls\{display:flex!important;flex-direction:column!important/);
+  assert.match(css, /@media\(max-width:480px\)\{\.onboarding-site \.onboarding-step-panel \.onboarding-step-controls,\.onboarding-site \.onboarding-submit-panel \.onboarding-step-controls\{display:flex!important;flex-direction:column!important/);
   assert.match(css, /\.onboarding-site \.onboarding-step-panel \.onboarding-step-controls>\.btn,\.onboarding-site \.onboarding-submit-panel \.onboarding-step-controls>\.btn\{[^}]*width:100%!important;[^}]*flex:0 0 auto!important/);
   assert.match(css, /font-size:1rem;line-height:1\.25;white-space:normal!important/);
   assert.match(html, /onboarding-final-controls/);
