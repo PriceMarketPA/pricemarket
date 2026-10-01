@@ -58,8 +58,9 @@
       options.forEach((option, index) => option.setAttribute('aria-selected', String(index === selected)));
       if (!isOpen()) activeIndex = selected;
       if (error) {
-        error.hidden = Boolean(select.value);
-        trigger.setAttribute('aria-invalid', String(!select.value));
+        const invalid = root.dataset.validationAttempted === 'true' && !select.value;
+        error.hidden = !invalid;
+        trigger.setAttribute('aria-invalid', String(invalid));
       }
       updateActiveDescendant();
     }
@@ -134,6 +135,12 @@
       if (!root.contains(event.target)) close();
     });
     select.addEventListener('change', sync);
+    if (select.form) {
+      select.form.addEventListener('reset', () => setTimeout(() => {
+        delete root.dataset.validationAttempted;
+        sync();
+      }, 0));
+    }
     sync();
     return { sync, open: () => open(), close: () => close() };
   }
@@ -145,6 +152,7 @@
       if (select && select.value) continue;
       const trigger = root.querySelector('[role="combobox"]');
       const error = root.querySelector('.pm-dropdown-error');
+      root.dataset.validationAttempted = 'true';
       trigger.setAttribute('aria-invalid', 'true');
       if (error) error.hidden = false;
       trigger.focus();
