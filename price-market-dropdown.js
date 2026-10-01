@@ -153,6 +153,22 @@
     return true;
   }
 
+  function initPmDropdowns(container = document) {
+    const instances = window.pmDropdownInstances || (window.pmDropdownInstances = {});
+    container.querySelectorAll('[data-pm-dropdown][data-select-id]').forEach(root => {
+      if (root.dataset.pmDropdownInitialized === 'true') return;
+      const select = document.getElementById(root.dataset.selectId);
+      const trigger = root.querySelector('.pm-dropdown-trigger');
+      const listbox = root.querySelector('[role="listbox"]');
+      const value = root.querySelector('.pm-dropdown-value');
+      if (!select || !trigger || !listbox || !value) return;
+      instances[root.id] = createPmDropdown(select, { root, trigger, listbox, value });
+      root.dataset.pmDropdownInitialized = 'true';
+    });
+    return instances;
+  }
+
   window.createPmDropdown = createPmDropdown;
+  window.initPmDropdowns = initPmDropdowns;
   window.validatePmDropdowns = validatePmDropdowns;
 })();
