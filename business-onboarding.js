@@ -9,6 +9,7 @@
   const status = document.getElementById('onboardingStatus');
   const submitButton = document.getElementById('submitBusinessProfile');
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  window.initPmDropdowns(document);
 
   // Native selects keep form dropdowns keyboard- and screen-reader-friendly on desktop and mobile.
   days.forEach((day, index) => {
@@ -163,7 +164,7 @@
   form.addEventListener('submit', async event => {
     event.preventDefault();
     status.hidden = true;
-    if (!form.reportValidity()) return;
+    if (!form.reportValidity() || !window.validatePmDropdowns(form)) return;
 
     const profileData = makeProfileData();
     const happyHour = profileData.happyHours[0] || {};
