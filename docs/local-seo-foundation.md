@@ -18,7 +18,7 @@ When that gate is met, rerun `node scripts/generate-local-seo-pages.js`. The gen
 
 ## Business profile URLs and schema
 
-New approved profiles have a clean URL: `/business/<slug>/`. Vercel rewrites this to the existing reusable `business-profile.html` renderer with the `business` query parameter. The existing `business-profile.html?business=<slug>` route stays functional, and `keystone-pizza.html` remains the legacy demo redirect. Demo content is `noindex,follow` and is never listed in the sitemap.
+New approved profiles get a static clean URL at `/business/<slug>/` (generated as `business/<slug>/index.html`) using the existing reusable profile renderer. The generator writes the approved profile's title, description, canonical, social metadata, and eligible JSON-LD into the initial HTML response; the renderer hydrates that same structured data for visitors. The existing `business-profile.html?business=<slug>` route stays functional and `noindex,follow`, and `keystone-pizza.html` remains the legacy demo redirect. Demo and pending content are never generated as clean profile pages or listed in the sitemap.
 
 `LocalBusiness` JSON-LD is emitted only for an explicitly approved (`demo:false`) profile with an unambiguous, complete postal address that matches its city/state data. Incomplete or inconsistent addresses result in no LocalBusiness schema. No rating, review, price range, opening hours, or offer schema is synthesized. Keep the site's organization as `Organization`; Price Market has no asserted storefront address.
 
@@ -28,7 +28,7 @@ After adding an approved profile through the existing human-reviewed publishing 
 
 1. Verify `demo:false`, city, listing fields, slug, and any address against the reviewed source.
 2. Add the profile entry to `businesses.js` and ensure no duplicate slug exists.
-3. Run `node scripts/generate-local-seo-pages.js` to regenerate city/category pages and `sitemap.xml`.
+3. Run `node scripts/generate-local-seo-pages.js` to regenerate city/category pages, approved clean profile pages, and `sitemap.xml`.
 4. Review the generated page's title, canonical, robots directive, visible copy, links, and JSON-LD. Confirm that city/type pages remain `noindex` until the threshold is met.
 5. Run `node --test scripts/*.test.js business-onboarding.test.js` and the responsive browser checks.
 6. Create a PR and retain human review/merge as the publication gate.

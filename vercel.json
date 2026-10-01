@@ -1,14 +1,4 @@
 {
   "cleanUrls": true,
-  "trailingSlash": true,
-  "rewrites": [
-    {
-      "source": "/business/:slug/",
-      "destination": "/business-profile?business=:slug"
-    },
-    {
-      "source": "/business/:slug",
-      "destination": "/business-profile?business=:slug"
-    }
-  ]
+  "trailingSlash": true
 }

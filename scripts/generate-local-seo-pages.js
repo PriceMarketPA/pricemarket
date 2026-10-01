@@ -4,6 +4,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
+const { absoluteAsset, buildLocalBusinessSchema, profileUrl } = require('../local-seo');
 
 const SITE_ORIGIN = 'https://pricemarketpa.com';
 const ROOT = path.resolve(__dirname, '..');
@@ -48,6 +49,37 @@ function categoryIsIndexable(profiles, city, category) {
 }
 
 function absoluteUrl(route) { return `${SITE_ORIGIN}${route}`; }
+
+function safeBusinessSlug(slug) {
+  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
+}
+
+function replaceProfileMeta(html, profile, slug) {
+  const canonical = profileUrl(slug);
+  const title = `${profile.name} | Business Profile | Price Market`;
+  const description = String(profile.description || `Explore ${profile.name} in ${profile.city}, ${profile.state} on Price Market.`).trim().slice(0, 300);
+  const image = absoluteAsset(profile.heroImage && profile.heroImage.src) || `${SITE_ORIGIN}/favicon-32x32.png`;
+  const setContent = (id, value) => {
+    const escaped = escapeHtml(value);
+    const pattern = new RegExp(`(<[^>]+id="${id}"[^>]*content=")[^"]*(")`);
+    html = html.replace(pattern, (_match, prefix, suffix) => `${prefix}${escaped}${suffix}`);
+  };
+  html = html.replace(/<title>[\s\S]*?<\/title>/, () => `<title>${escapeHtml(title)}</title>`);
+  html = html.replace(/<meta name="description" content="[^"]*">/, () => `<meta name="description" content="${escapeHtml(description)}">`);
+  setContent('profileRobots', 'index,follow,max-image-preview:large');
+  setContent('profileOgTitle', title);
+  setContent('profileOgDescription', description);
+  setContent('profileTwitterTitle', title);
+  setContent('profileTwitterDescription', description);
+  setContent('profileOgImage', image);
+  setContent('profileTwitterImage', image);
+  html = html.replace(/(<link rel="canonical" id="profileCanonical" href=")[^"]*(")/, (_match, prefix, suffix) => `${prefix}${canonical}${suffix}`);
+  html = html.replace(/(<meta property="og:url" id="profileOgUrl" content=")[^"]*(")/, (_match, prefix, suffix) => `${prefix}${canonical}${suffix}`);
+  const schema = buildLocalBusinessSchema(profile, slug);
+  const jsonLd = schema ? JSON.stringify(schema).replace(/</g, '\\u003c') : '';
+  html = html.replace(/(<script type="application\/ld\+json" id="profileStructuredData">)[\s\S]*?(<\/script>)/, (_match, prefix, suffix) => `${prefix}${jsonLd}${suffix}`);
+  return html;
+}
 
 function jsonLdGraph({ route, title, description, breadcrumbs }) {
   const pageUrl = absoluteUrl(route);
@@ -185,7 +217,7 @@ function renderSitemap(data, profiles) {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
 
-function generateLocalSeoPages({ rootDir = ROOT, data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')), profiles = loadBusinesses() } = {}) {
+function generateLocalSeoPages({ rootDir = ROOT, data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')), profiles = loadBusinesses(), profileTemplate = fs.readFileSync(path.join(ROOT, 'business-profile.html'), 'utf8') } = {}) {
   const generated = [];
   for (const city of data.cities) {
     const cityDir = path.join(rootDir, city.slug);
@@ -198,6 +230,13 @@ function generateLocalSeoPages({ rootDir = ROOT, data = JSON.parse(fs.readFileSy
       fs.writeFileSync(path.join(categoryDir, 'index.html'), renderCategoryPage(city, category, data, profiles));
       generated.push(`${city.slug}/${category.slug}/index.html`);
     }
+  }
+  for (const [slug, profile] of getPublishedProfiles(profiles)) {
+    if (!safeBusinessSlug(slug)) throw new Error(`Approved business has an unsafe slug: ${slug}`);
+    const profileDir = path.join(rootDir, 'business', slug);
+    fs.mkdirSync(profileDir, { recursive: true });
+    fs.writeFileSync(path.join(profileDir, 'index.html'), replaceProfileMeta(profileTemplate, profile, slug));
+    generated.push(`business/${slug}/index.html`);
   }
   fs.writeFileSync(path.join(rootDir, 'sitemap.xml'), renderSitemap(data, profiles));
   return generated;
@@ -217,6 +256,7 @@ module.exports = {
   homeFilterUrl,
   renderCategoryPage,
   renderCityPage,
+  renderProfileMeta: replaceProfileMeta,
   renderSitemap,
   routeForCategory,
   routeForCity

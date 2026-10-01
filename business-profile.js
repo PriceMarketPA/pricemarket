@@ -14,14 +14,14 @@
   }
 
   root.hidden = false;
-  const isPublicProfile = business.demo === false;
-  const canonicalUrl = isPublicProfile
+  const isCanonicalProfileRoute = business.demo === false && !!routeMatch && !querySlug;
+  const canonicalUrl = business.demo === false
     ? `https://pricemarketpa.com/business/${encodeURIComponent(slug)}/`
     : `https://pricemarketpa.com/business-profile.html?business=${encodeURIComponent(slug)}`;
-  const title = `${business.name} | ${isPublicProfile ? 'Business Profile' : 'Demo Business Profile'} | Price Market`;
+  const title = `${business.name} | ${business.demo === false ? 'Business Profile' : 'Demo Business Profile'} | Price Market`;
   const description = String(business.description || 'Explore a Price Market Central Pennsylvania business profile.').trim().slice(0, 300);
   document.title = title;
-  document.getElementById('profileRobots').content = isPublicProfile ? 'index,follow,max-image-preview:large' : 'noindex,follow';
+  document.getElementById('profileRobots').content = isCanonicalProfileRoute ? 'index,follow,max-image-preview:large' : 'noindex,follow';
   document.getElementById('profileCanonical').href = canonicalUrl;
   document.getElementById('profileOgTitle').content = title;
   document.getElementById('profileOgDescription').content = description;
@@ -33,7 +33,7 @@
     document.getElementById('profileOgImage').content = socialImage;
     document.getElementById('profileTwitterImage').content = socialImage;
   }
-  const localBusinessSchema = isPublicProfile && window.PriceMarketSEO?.buildLocalBusinessSchema
+  const localBusinessSchema = isCanonicalProfileRoute && window.PriceMarketSEO?.buildLocalBusinessSchema
     ? window.PriceMarketSEO.buildLocalBusinessSchema(business, slug)
     : null;
   if (localBusinessSchema) document.getElementById('profileStructuredData').textContent = JSON.stringify(localBusinessSchema);

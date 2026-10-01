@@ -81,6 +81,42 @@ test('only explicitly approved real profiles enter indexable route lists', () =>
   assert.doesNotMatch(sitemap, /keystone-pizza/);
 });
 
+test('approved profiles get static clean-URL HTML with metadata and eligible schema in the initial response', () => {
+  const tempRoot = fs.mkdtempSync(path.join(__dirname, '.local-seo-profile-test-'));
+  const approved = {
+    'river-street-cafe': {
+      demo: false,
+      name: 'River Street Cafe',
+      category: 'Cafe',
+      city: 'Mechanicsburg',
+      state: 'PA',
+      address: '10 Main Street, Mechanicsburg, PA 17055',
+      description: 'A reviewed business profile with owner-provided information.',
+      phone: '717-555-0100',
+      heroImage: { src: '/assets/approved-business.jpg', alt: 'Cafe counter' },
+      deals: [], jobs: [], hours: [], happyHours: [], gallery: []
+    },
+    pending: { demo: true, name: 'Pending Example' }
+  };
+  try {
+    const generated = generateLocalSeoPages({ rootDir: tempRoot, data, profiles: approved });
+    assert.ok(generated.includes('business/river-street-cafe/index.html'));
+    assert.ok(!generated.some(file => file.includes('/pending/')));
+    const page = fs.readFileSync(path.join(tempRoot, 'business', 'river-street-cafe', 'index.html'), 'utf8');
+    assert.match(page, /<title>River Street Cafe \| Business Profile \| Price Market<\/title>/);
+    assert.match(page, /name="robots" id="profileRobots" content="index,follow,max-image-preview:large"/);
+    assert.match(page, /rel="canonical" id="profileCanonical" href="https:\/\/pricemarketpa\.com\/business\/river-street-cafe\/"/);
+    const jsonLd = JSON.parse(page.match(/<script type="application\/ld\+json" id="profileStructuredData">([\s\S]*?)<\/script>/)[1]);
+    assert.equal(jsonLd['@type'], 'LocalBusiness');
+    assert.equal(jsonLd.address.addressLocality, 'Mechanicsburg');
+    const sitemap = fs.readFileSync(path.join(tempRoot, 'sitemap.xml'), 'utf8');
+    assert.match(sitemap, /https:\/\/pricemarketpa\.com\/business\/river-street-cafe\//);
+    assert.doesNotMatch(sitemap, /\/business\/pending\//);
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
 test('LocalBusiness schema requires approved profile and a complete matching address', () => {
   const valid = {
     demo: false,
@@ -118,7 +154,7 @@ test('profile page implements clean approved URL and demo-safe metadata handling
   assert.match(html, /src="\/business-profile\.js"/);
 });
 
-test('homepage, crawl controls, and clean profile rewrite use the production origin', () => {
+test('homepage and crawl controls use the production origin and Vercel clean URLs', () => {
   const root = path.join(__dirname, '..');
   const home = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   const robots = fs.readFileSync(path.join(root, 'robots.txt'), 'utf8');
@@ -133,8 +169,7 @@ test('homepage, crawl controls, and clean profile rewrite use the production ori
   assert.match(robots, /Sitemap: https:\/\/pricemarketpa\.com\/sitemap\.xml/);
   assert.doesNotMatch(sitemap, /www\.pricemarketpa\.com|onboarding|keystone-pizza|business-profile/);
   assert.match(onboarding, /name="robots" content="noindex,follow"/);
+  assert.equal(vercel.cleanUrls, true);
   assert.equal(vercel.trailingSlash, true);
-  assert.ok(vercel.rewrites.some(rule => rule.source === '/business/:slug/' && rule.destination === '/business-profile?business=:slug'));
-  assert.ok(vercel.rewrites.some(rule => rule.source === '/business/:slug' && rule.destination === '/business-profile?business=:slug'));
 });
 
