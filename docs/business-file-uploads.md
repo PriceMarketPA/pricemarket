@@ -13,6 +13,8 @@ Add these variables to the Price Market Vercel project for **Preview** and **Pro
 | `SUPABASE_URL` | `https://ofjykpqfdogdpmpneuaz.supabase.co` |
 | `SUPABASE_SERVICE_ROLE_KEY` | The server-side service-role/secret key from the Price Market Supabase project. Store it as a Vercel encrypted environment variable. |
 
+For `SUPABASE_SERVICE_ROLE_KEY`, you can use Supabase's current `sb_secret_...` key or the legacy `service_role` JWT. The endpoint sends modern secret keys only in the `apikey` header; legacy JWT keys are sent in both `apikey` and `Authorization: Bearer` headers. The environment variable name stays the same for either key type.
+
 Do not name the key `NEXT_PUBLIC_*`, add it to any HTML/JS asset, commit it, or expose it in browser configuration. Rotate it in Supabase if it has ever been exposed. Redeploy after setting or rotating it.
 
 The public Storage buckets remain `business-images` (JPG, PNG, WebP, HEIC, HEIF; 10 MB) and `business-documents` (PDF; 15 MB). Keep those limits and MIME allowlists configured in Supabase as a second enforcement layer. Because these buckets are public, anyone who obtains an uploaded URL can read that file; upload only materials meant for eventual public business profiles, not private/confidential documents. Pending files are not displayed on the marketplace and are not published into a profile automatically.
