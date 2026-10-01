@@ -279,3 +279,21 @@ footer{max-width:1240px;margin:auto;padding:28px 24px;display:flex;justify-conte
 /* Photo-led Central PA closing CTA. Keep the background and overlay intact across breakpoints. */
 .final-cta{background-repeat:no-repeat;background-attachment:scroll}
 @media(max-width:720px){.final-cta{padding:20px 15px;border-radius:24px;margin-top:28px;background-position:52% center}.final-cta .small-title{margin-bottom:7px;font-size:.65rem;padding:6px 9px}.final-cta h2{font-size:clamp(1.5rem,6.7vw,1.8rem);line-height:1.05;margin-bottom:8px}.final-cta p{font-size:.84rem;line-height:1.36}.final-cta .actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-content:center;gap:7px;margin-top:10px}.final-cta .actions .btn{width:100%;min-height:42px;padding:8px 7px;font-size:.7rem;line-height:1.15;white-space:normal}.final-cta .actions .btn:nth-child(3){grid-column:1/-1}}
+
+
+/* Phone onboarding: keep contact controls full width and give native time fields room. */
+@media(max-width:600px){
+  .onboarding-fields label.contact-phone,
+  .onboarding-fields label.contact-email{grid-column:1/-1;width:100%;min-width:0}
+  .onboarding-fields label.contact-phone input,
+  .onboarding-fields label.contact-email input,
+  .onboarding-fields #businessWebsite{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+  .hours-row{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);grid-template-rows:auto auto;grid-template-areas:"day day closed" "open separator close";align-items:center;gap:9px 7px;padding:10px}
+  .hours-row>strong{grid-area:day;font-size:.82rem}
+  .hours-row .hours-open{grid-area:open;width:100%;min-width:0}
+  .hours-row .hours-separator{grid-area:separator;justify-self:center;font-size:.76rem}
+  .hours-row .hours-close{grid-area:close;width:100%;min-width:0}
+  .hours-row .hours-closed{grid-area:closed;justify-self:end;gap:7px;font-size:.75rem}
+  .hours-row .hours-closed input{width:18px;height:18px}
+  .hours-row input[type="time"]{-webkit-appearance:auto;appearance:auto;width:100%;min-width:0;min-height:44px;margin:0;padding:7px 8px;font-size:16px;line-height:1.2}
+}
