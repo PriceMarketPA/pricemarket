@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Price Market | Central PA’s Marketplace for Local Deals & Businesses</title>
   <meta name="description" content="Price Market is Central PA’s marketplace for local deals, businesses, and job opportunities. Save local, buy local, and hire local across Mechanicsburg, Camp Hill, Carlisle, Harrisburg, and Hershey.">
   <meta name="keywords" content="Central PA deals, local businesses, Mechanicsburg deals, Harrisburg businesses, Camp Hill coupons, Carlisle jobs, Hershey local marketplace, Price Market PA">
@@ -33,6 +33,7 @@
   gtag('config', 'G-KC4258L331');
 </script>
   <script src="businesses.js"></script>
+  <script src="price-market-dropdown.js"></script>
 </head>
 <body>
 <div class="site">
@@ -48,7 +49,7 @@
       <a href="#cities">Cities</a>
     </div>
     <div class="nav-actions">
-      <button class="btn ghost open-waitlist">Join Waitlist</button>
+      <button class="btn ghost open-waitlist"><span class="desktop-join-label">Join Waitlist</span><span class="mobile-join-label">Join</span></button>
       <button class="btn dark open-business">For Businesses</button>
     </div>
   </header>
@@ -57,8 +58,8 @@
     <section class="hero">
       <div class="hero-copy">
         <div class="eyebrow">Launching soon in Central Pennsylvania</div>
-        <h1>Local deals, businesses, and jobs — all in one place.</h1>
-        <p class="hero-sub">Price Market helps Central PA residents save locally, discover nearby businesses, and find opportunities close to home.</p>
+        <h1><span class="desktop-hero-title">Local deals, businesses, and jobs — all in one place.</span><span class="mobile-hero-title">Find what’s happening nearby.</span></h1>
+        <div class="hero-sub"><span class="desktop-hero-copy">Price Market helps Central PA residents save locally, discover nearby businesses, and find opportunities close to home.</span><div class="mobile-hero-copy"><span class="mobile-hero-location">HARRISBURG · CENTRAL PA</span><div class="mobile-hero-types" role="group" aria-label="Explore local listing types"><span>Deals</span><span>Happy Hours</span><span>Businesses</span><span>Jobs</span></div></div></div>
         <div class="actions">
           <button class="btn blue open-waitlist">Join the Waitlist</button>
           <button class="btn white open-business">Become a Founding Business</button>
@@ -99,7 +100,7 @@
       <div class="marketplace-heading">
         <div>
           <p class="small-title">Your neighborhood, for less</p>
-          <h2 id="marketplaceTitle">Good finds are closer than you think.</h2>
+          <h2 id="marketplaceTitle"><span class="desktop-market-title">Good finds are closer than you think.</span><span class="mobile-market-title">Popular near you</span></h2>
           <p>Explore the local businesses and offers that make Central PA worth staying local for.</p>
         </div>
         <span class="preview-note">Central PA · example listings</span>
@@ -114,9 +115,9 @@
         <div class="city-field">
           <span class="sr-only" id="cityFilterLabel">Choose a Central Pennsylvania city</span>
           <span aria-hidden="true">⌖</span>
-          <div class="pm-dropdown" id="cityDropdown" data-pm-dropdown data-open="false">
+          <div class="pm-dropdown" id="cityDropdown" data-pm-dropdown data-open="false" data-select-id="cityFilter">
             <button class="pm-dropdown-trigger" id="cityFilterTrigger" type="button" role="combobox" aria-label="Choose a Central Pennsylvania city" aria-haspopup="listbox" aria-expanded="false" aria-controls="cityFilterListbox" aria-autocomplete="none">
-              <span id="cityFilterValue">All Central PA</span>
+              <span class="pm-dropdown-value" id="cityFilterValue">All Central PA</span>
               <span class="pm-dropdown-chevron" aria-hidden="true"></span>
             </button>
             <div class="pm-dropdown-listbox" id="cityFilterListbox" role="listbox" aria-labelledby="cityFilterLabel" aria-hidden="true"></div>
@@ -132,6 +133,23 @@
         </div>
         <button class="btn blue" type="submit">Search</button>
       </form>
+      <section class="mobile-discovery" aria-label="Explore local listings">
+        <div class="mobile-discovery-heading"><h3>Find local favorites</h3><span>Central PA examples</span></div>
+        <div class="discovery-tile-grid">
+          <button class="discovery-tile" type="button" data-discovery-type="deal" aria-pressed="false">
+            <img src="assets/showcase-restaurant.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"><span class="discovery-tile-shade"></span><span class="discovery-tile-copy"><strong>Deals</strong><small>Neighborhood offers</small></span><span class="discovery-example">LOCAL EXAMPLES</span>
+          </button>
+          <button class="discovery-tile" type="button" data-discovery-type="happy-hour" aria-pressed="false">
+            <img src="assets/profile-garlic-knots.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"><span class="discovery-tile-shade"></span><span class="discovery-tile-copy"><strong>Happy Hour</strong><small>Local restaurant specials</small></span><span class="discovery-example">LOCAL EXAMPLES</span>
+          </button>
+          <button class="discovery-tile" type="button" data-discovery-type="business" aria-pressed="false">
+            <img src="assets/showcase-home-service.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"><span class="discovery-tile-shade"></span><span class="discovery-tile-copy"><strong>Businesses</strong><small>Meet local owners</small></span><span class="discovery-example">LOCAL EXAMPLES</span>
+          </button>
+          <button class="discovery-tile" type="button" data-discovery-type="job" aria-pressed="false">
+            <img src="assets/showcase-fitness.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"><span class="discovery-tile-shade"></span><span class="discovery-tile-copy"><strong>Jobs</strong><small>Local teams hiring</small></span><span class="discovery-example">LOCAL EXAMPLES</span>
+          </button>
+        </div>
+      </section>
 
       <div class="market-type-switch" role="group" aria-label="Browse listing type">
         <button type="button" class="market-type-button is-active" data-market-type="all" aria-pressed="true">All listings</button>
@@ -155,6 +173,7 @@
         </div>
       </div>
 
+      <div class="mobile-results-intro"><h3>Popular Near You</h3><p>Local examples around Central Pennsylvania</p></div>
       <div class="market-results" id="marketResults" aria-live="polite">
         <section class="market-section" aria-labelledby="dealsTitle">
           <div class="market-section-heading"><div><p class="small-title">Worth a closer look</p><h3 id="dealsTitle">Featured deals</h3></div><span class="sample-caption">Example offers</span></div>
@@ -293,9 +312,18 @@
     <section class="section how" id="how-it-works">
       <div class="section-heading"><p class="small-title">Easy for everyone</p><h2>Simple by design.</h2></div>
       <div class="steps">
-        <div class="step"><span>1</span><h3>Join early</h3><p>Residents join the waitlist. Businesses request founding access.</p></div>
-        <div class="step"><span>2</span><h3>Get listed</h3><p>Businesses will be able to showcase offers, services, and hiring needs.</p></div>
-        <div class="step"><span>3</span><h3>Discover local</h3><p>People browse local deals, businesses, and jobs from one clean marketplace.</p></div>
+        <article class="step">
+          <img class="step-photo" src="assets/harrisburg-marketplace-cta.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+          <div class="step-content"><span class="step-number">1</span><div class="step-main"><div class="step-kicker">Harrisburg + Central PA</div><h3>Join early</h3><p>Residents join the waitlist. Businesses request founding access.</p></div><button type="button" class="step-cta open-waitlist">Join the Waitlist →</button></div>
+        </article>
+        <article class="step">
+          <img class="step-photo" src="assets/showcase-home-service.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+          <div class="step-content"><span class="step-number">2</span><div class="step-main"><div class="step-kicker">For Central PA businesses</div><h3>Get listed</h3><p>Businesses can showcase offers, services, and hiring needs.</p></div><a class="step-cta" href="business-onboarding.html">Create Your Profile →</a></div>
+        </article>
+        <article class="step">
+          <img class="step-photo" src="assets/showcase-restaurant.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+          <div class="step-content"><span class="step-number">3</span><div class="step-main"><div class="step-kicker">Your neighborhood marketplace</div><h3>Discover local</h3><p>Browse local deals, businesses, Happy Hours, and jobs in one place.</p></div><a class="step-cta" href="#marketplace">Explore Now →</a></div>
+        </article>
       </div>
     </section>
 
@@ -308,10 +336,25 @@
 
     <section class="section cards">
       <div class="section-heading"><p class="small-title">One marketplace</p><h2>Save Local. Buy Local. Hire Local.</h2></div>
-      <div class="card-grid">
-        <article class="feature-card"><div class="feature-icon">Save</div><h3>Find local savings</h3><p>Discover deals, promotions, and weekly specials from businesses nearby.</p></article>
-        <article class="feature-card"><div class="feature-icon">Buy</div><h3>Support local businesses</h3><p>Explore restaurants, shops, salons, gyms, services, and community organizations.</p></article>
-        <article class="feature-card"><div class="feature-icon">Hire</div><h3>Find local opportunities</h3><p>Connect with businesses hiring in your area and discover work close to home.</p></article>
+      <div class="card-grid value-card-grid">
+        <article class="feature-card value-card value-save">
+          <img class="value-card-photo" src="assets/showcase-restaurant.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+          <div class="feature-icon">Save</div>
+          <div class="value-card-copy"><h3>Find local savings</h3><p>Discover deals, promotions, and weekly specials from businesses nearby.</p></div>
+          <button class="value-card-cta" type="button" data-discovery-type="deal">Explore Deals <span aria-hidden="true">→</span></button>
+        </article>
+        <article class="feature-card value-card value-buy">
+          <img class="value-card-photo" src="assets/deal-coffee.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+          <div class="feature-icon">Buy</div>
+          <div class="value-card-copy"><h3>Support local businesses</h3><p>Explore restaurants, shops, salons, gyms, services, and community organizations.</p></div>
+          <button class="value-card-cta" type="button" data-discovery-type="business">Explore Businesses <span aria-hidden="true">→</span></button>
+        </article>
+        <article class="feature-card value-card value-hire">
+          <img class="value-card-photo" src="assets/showcase-home-service.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+          <div class="feature-icon">Hire</div>
+          <div class="value-card-copy"><h3>Find local opportunities</h3><p>Connect with businesses hiring in your area and discover work close to home.</p></div>
+          <button class="value-card-cta" type="button" data-discovery-type="job">Find Local Jobs <span aria-hidden="true">→</span></button>
+        </article>
       </div>
     </section>
 
@@ -334,13 +377,17 @@
     <img class="modal-logo" src="pm-logo.png" alt="Price Market PM logo">
     <h2 id="waitlistTitle">Join the Price Market Waitlist</h2>
     <p>Be first to know when local deals, businesses, and jobs go live.</p>
-    <form class="lead-form" data-lead-type="Waitlist">
+    <form class="lead-form" data-lead-type="Waitlist" novalidate>
       <label>First Name<input type="text" name="firstName" placeholder="First name" required></label>
       <label>Last Name<input type="text" name="lastName" placeholder="Last name"></label>
       <label>Email Address<input type="email" name="email" placeholder="you@example.com" required></label>
       <label>ZIP Code<input type="text" name="zipCode" placeholder="17055"></label>
-      <label>I am a...
-        <select name="interest" class="pm-select" required>
+      <div class="lead-dropdown-field"><span class="field-label" id="waitlistInterestLabel">I am a...</span>
+        <div class="pm-dropdown form-pm-dropdown" id="waitlistInterestDropdown" data-pm-dropdown data-open="false" data-select-id="waitlistInterestSelect" data-required="true">
+            <button class="pm-dropdown-trigger" id="waitlistInterestTrigger" type="button" aria-labelledby="waitlistInterestLabel" aria-haspopup="listbox" aria-expanded="false" aria-controls="waitlistInterestListbox" aria-autocomplete="none"><span class="pm-dropdown-value" id="waitlistInterestValue">Select one</span><span class="pm-dropdown-chevron" aria-hidden="true"></span></button>
+            <div class="pm-dropdown-listbox" id="waitlistInterestListbox" role="listbox" aria-label="Waitlist interest options" aria-hidden="true"></div>
+          </div>
+          <select name="interest" class="pm-dropdown-source sr-only" id="waitlistInterestSelect" aria-hidden="true" tabindex="-1">
           <option value="">Select one</option>
           <option>Shopper</option>
           <option>Local Business Owner</option>
@@ -348,7 +395,7 @@
           <option>Community Organization</option>
           <option>Other</option>
         </select>
-      </label>
+      </div>
       <button class="btn blue submit" type="submit">Join Waitlist</button>
     </form>
     <small>We respect your privacy and will never share your information.</small>
@@ -361,13 +408,17 @@
     <img class="modal-logo" src="pm-logo.png" alt="Price Market PM logo">
     <h2 id="businessTitle">Become a Founding Business</h2>
     <p>Get early access to promote your business, feature deals, and share local hiring opportunities before launch.</p>
-    <form class="lead-form" data-lead-type="Business">
+    <form class="lead-form" data-lead-type="Business" novalidate>
       <label>Business Name<input type="text" name="businessName" placeholder="Business name" required></label>
       <label>Contact Name<input type="text" name="contactName" placeholder="Your name" required></label>
       <label>Email Address<input type="email" name="email" placeholder="you@example.com" required></label>
       <label>Phone Number<input type="tel" name="phone" placeholder="717-555-1234"></label>
-      <label>Business Category
-        <select name="businessCategory" class="pm-select" required>
+      <div class="lead-dropdown-field"><span class="field-label" id="businessCategoryLabel">Business Category</span>
+        <div class="pm-dropdown form-pm-dropdown" id="businessCategoryDropdown" data-pm-dropdown data-open="false" data-select-id="businessCategorySelect" data-required="true">
+            <button class="pm-dropdown-trigger" id="businessCategoryTrigger" type="button" aria-labelledby="businessCategoryLabel" aria-haspopup="listbox" aria-expanded="false" aria-controls="businessCategoryListbox" aria-autocomplete="none"><span class="pm-dropdown-value" id="businessCategoryValue">Select one</span><span class="pm-dropdown-chevron" aria-hidden="true"></span></button>
+            <div class="pm-dropdown-listbox" id="businessCategoryListbox" role="listbox" aria-label="Business category options" aria-hidden="true"></div>
+          </div>
+          <select name="businessCategory" class="pm-dropdown-source sr-only" id="businessCategorySelect" aria-hidden="true" tabindex="-1">
           <option value="">Select one</option>
           <option>Restaurant / Food</option>
           <option>Retail / Shopping</option>
@@ -378,9 +429,13 @@
           <option>Nonprofit / Community</option>
           <option>Other</option>
         </select>
-      </label>
-      <label>I am interested in...
-        <select name="interest" class="pm-select" required>
+      </div>
+      <div class="lead-dropdown-field"><span class="field-label" id="businessInterestLabel">I am interested in...</span>
+        <div class="pm-dropdown form-pm-dropdown" id="businessInterestDropdown" data-pm-dropdown data-open="false" data-select-id="businessInterestSelect" data-required="true">
+            <button class="pm-dropdown-trigger" id="businessInterestTrigger" type="button" aria-labelledby="businessInterestLabel" aria-haspopup="listbox" aria-expanded="false" aria-controls="businessInterestListbox" aria-autocomplete="none"><span class="pm-dropdown-value" id="businessInterestValue">Select one</span><span class="pm-dropdown-chevron" aria-hidden="true"></span></button>
+            <div class="pm-dropdown-listbox" id="businessInterestListbox" role="listbox" aria-label="Business services interest options" aria-hidden="true"></div>
+          </div>
+          <select name="interest" class="pm-dropdown-source sr-only" id="businessInterestSelect" aria-hidden="true" tabindex="-1">
           <option value="">Select one</option>
           <option>Business Listing</option>
           <option>Deals & Coupons</option>
@@ -388,7 +443,7 @@
           <option>Advertising</option>
           <option>All of the Above</option>
         </select>
-      </label>
+      </div>
       <label>Notes<textarea name="notes" placeholder="Tell us about your business or what you would like help promoting."></textarea></label>
       <button class="btn blue submit" type="submit">Join as a Founding Business</button>
     </form>
@@ -402,6 +457,26 @@
   <span>© 2026 Price Market</span>
   <span>Built for Central Pennsylvania</span>
 </footer>
+
+
+<nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+  <a class="mobile-nav-home" href="#top" aria-label="Home" data-mobile-home>Home</a>
+  <button type="button" data-mobile-type="deal" aria-pressed="false">Deals</button>
+  <button type="button" data-mobile-type="happy-hour" aria-pressed="false">Happy Hour</button>
+  <button type="button" data-mobile-type="job" aria-pressed="false">Jobs</button>
+  <div class="mobile-more-wrap">
+    <button type="button" class="mobile-more-button" id="mobileMoreButton" aria-expanded="false" aria-controls="mobileMoreMenu">More</button>
+    <div class="mobile-more-menu" id="mobileMoreMenu" role="group" aria-label="More navigation" hidden>
+      <button type="button" data-mobile-type="business" aria-pressed="false">Businesses</button>
+      <button type="button" data-mobile-type="all" aria-pressed="false">All listings</button>
+      <a href="business-onboarding.html">List your business</a>
+      <button type="button" class="open-waitlist">Join the waitlist</button>
+      <button type="button" class="open-business">For businesses</button>
+      <a href="#how-it-works">How it works</a>
+      <a href="#cities">Central PA cities</a>
+    </div>
+  </div>
+</nav>
 
 <script>
 const LEADS_API_URL = "https://script.google.com/macros/s/AKfycbxU3krjD4BPxDjzSIbRrDVlGLS_mqZ21watyba5k2I_9y7-oHG0aYobftXK0QBVC-Bp/exec";
@@ -450,6 +525,7 @@ function showToast(message) {
 document.querySelectorAll('.lead-form').forEach(form => {
   form.addEventListener('submit', async event => {
     event.preventDefault();
+    if (!form.reportValidity() || !window.validatePmDropdowns(form)) return;
     const submitButton = form.querySelector('button[type="submit"]');
     const originalText = submitButton.textContent;
     submitButton.disabled = true;
@@ -489,122 +565,8 @@ const categoryButtons = [...document.querySelectorAll('[data-category-filter]')]
 const noResults = document.getElementById('noResults');
 let activeCategory = '';
 
-/* Reusable interactive filter pattern: point createPmDropdown at a native select plus its trigger/listbox/value nodes. The source select preserves option values and change events for existing filters. */
-function createPmDropdown(select, { root, trigger, listbox, value }) {
-  let activeIndex = Math.max(0, select.selectedIndex);
-  let typeAhead = '';
-  let typeAheadTimer;
-
-  const options = [...select.options].map((option, index) => {
-    const node = document.createElement('div');
-    node.className = 'pm-dropdown-option';
-    node.id = `${listbox.id}-option-${index}`;
-    node.setAttribute('role', 'option');
-    node.setAttribute('aria-selected', 'false');
-    node.dataset.value = option.value;
-    node.textContent = option.textContent.trim();
-    listbox.append(node);
-    return node;
-  });
-
-  const isOpen = () => root.dataset.open === 'true';
-  const selectedIndex = () => Math.max(0, select.selectedIndex);
-
-  function sync() {
-    const selected = selectedIndex();
-    value.textContent = select.options[selected].textContent.trim();
-    options.forEach((option, index) => option.setAttribute('aria-selected', String(index === selected)));
-    if (!isOpen()) activeIndex = selected;
-    updateActiveDescendant();
-  }
-
-  function updateActiveDescendant() {
-    options.forEach((option, index) => option.classList.toggle('is-active', isOpen() && index === activeIndex));
-    if (isOpen()) trigger.setAttribute('aria-activedescendant', options[activeIndex].id);
-    else trigger.removeAttribute('aria-activedescendant');
-  }
-
-  function open(index = selectedIndex()) {
-    activeIndex = index;
-    root.dataset.open = 'true';
-    trigger.setAttribute('aria-expanded', 'true');
-    listbox.setAttribute('aria-hidden', 'false');
-    updateActiveDescendant();
-  }
-
-  function close(restoreFocus = false) {
-    if (!isOpen()) return;
-    root.dataset.open = 'false';
-    trigger.setAttribute('aria-expanded', 'false');
-    listbox.setAttribute('aria-hidden', 'true');
-    updateActiveDescendant();
-    if (restoreFocus) trigger.focus();
-  }
-
-  function moveActive(direction) {
-    activeIndex = (activeIndex + direction + options.length) % options.length;
-    updateActiveDescendant();
-    options[activeIndex].scrollIntoView({ block: 'nearest' });
-  }
-
-  function choose(index) {
-    select.value = select.options[index].value;
-    sync();
-    close(true);
-    select.dispatchEvent(new Event('change', { bubbles: true }));
-  }
-
-  trigger.addEventListener('click', () => isOpen() ? close() : open());
-  trigger.addEventListener('keydown', event => {
-    if (event.key === 'Tab') { close(); return; }
-    if (event.key === 'Escape' && isOpen()) { event.preventDefault(); close(true); return; }
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      if (isOpen()) moveActive(1); else open(selectedIndex());
-      return;
-    }
-    if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      if (isOpen()) moveActive(-1);
-      else open((selectedIndex() - 1 + options.length) % options.length);
-      return;
-    }
-    if (event.key === 'Home' && isOpen()) { event.preventDefault(); activeIndex = 0; updateActiveDescendant(); return; }
-    if (event.key === 'End' && isOpen()) { event.preventDefault(); activeIndex = options.length - 1; updateActiveDescendant(); return; }
-    if ((event.key === 'Enter' || event.key === ' ') && isOpen()) { event.preventDefault(); choose(activeIndex); return; }
-    if ((event.key === 'Enter' || event.key === ' ') && !isOpen()) { event.preventDefault(); open(); return; }
-    if (event.key.length === 1 && event.key !== ' ') {
-      typeAhead += event.key.toLocaleLowerCase();
-      clearTimeout(typeAheadTimer);
-      typeAheadTimer = setTimeout(() => { typeAhead = ''; }, 700);
-      const match = [...select.options].findIndex(option => option.textContent.trim().toLocaleLowerCase().startsWith(typeAhead));
-      if (match >= 0) {
-        if (!isOpen()) open(match);
-        activeIndex = match;
-        updateActiveDescendant();
-      }
-    }
-  });
-
-  options.forEach((option, index) => {
-    option.addEventListener('pointerenter', () => { activeIndex = index; updateActiveDescendant(); });
-    option.addEventListener('click', () => choose(index));
-  });
-  document.addEventListener('pointerdown', event => {
-    if (!root.contains(event.target)) close();
-  });
-  select.addEventListener('change', sync);
-  sync();
-
-  return { sync, open: () => open(), close: () => close() };
-}
-
-const cityDropdown = createPmDropdown(cityFilter, {
-  root: document.getElementById('cityDropdown'),
-  trigger: document.getElementById('cityFilterTrigger'),
-  listbox: document.getElementById('cityFilterListbox'),
-  value: document.getElementById('cityFilterValue')
-});
+window.initPmDropdowns(document);
+const cityDropdown = window.pmDropdownInstances.cityDropdown;
 
 const businessGrid = document.getElementById('businessGrid');
 const jobGrid = document.getElementById('jobGrid');
@@ -783,6 +745,16 @@ function filterMarket() {
     else if (section.classList.contains('businesses-section')) section.hidden = counts.business === 0;
     else section.hidden = counts.deal === 0;
   });
+  document.querySelectorAll('[data-discovery-type]').forEach(tile => {
+    const selected = tile.dataset.discoveryType === activeType;
+    tile.classList.toggle('is-active', selected);
+    tile.setAttribute('aria-pressed', String(selected));
+  });
+  document.querySelectorAll('[data-mobile-type]').forEach(button => {
+    const selected = button.dataset.mobileType === activeType;
+    button.classList.toggle('is-active', selected);
+    button.setAttribute('aria-pressed', String(selected));
+  });
   noResults.hidden = visible > 0;
   const total = counts.deal + counts.business + counts.job + counts['happy-hour'];
   resultsSummary.textContent = visible
@@ -838,6 +810,43 @@ document.getElementById('clearFilters').addEventListener('click', () => {
   if (typeof gtag === 'function') gtag('event', 'marketplace_clear_filters');
 });
 document.getElementById('emptyReset').addEventListener('click', resetMarketFilters);
+const discoveryButtons = [...document.querySelectorAll('[data-discovery-type]')];
+discoveryButtons.forEach(button => button.addEventListener('click', () => {
+  document.querySelector('[data-market-type="' + button.dataset.discoveryType + '"]').click();
+  document.getElementById('marketResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}));
+const mobileMoreButton = document.getElementById('mobileMoreButton');
+const mobileMoreMenu = document.getElementById('mobileMoreMenu');
+function closeMobileMore(restoreFocus = false) {
+  mobileMoreMenu.hidden = true;
+  mobileMoreButton.setAttribute('aria-expanded', 'false');
+  mobileMoreButton.classList.remove('is-active');
+  if (restoreFocus) mobileMoreButton.focus();
+}
+mobileMoreButton.addEventListener('click', () => {
+  const opening = mobileMoreMenu.hidden;
+  mobileMoreMenu.hidden = !opening;
+  mobileMoreButton.setAttribute('aria-expanded', String(opening));
+  mobileMoreButton.classList.toggle('is-active', opening);
+});
+document.querySelectorAll('[data-mobile-type]').forEach(button => button.addEventListener('click', () => {
+  document.querySelector('[data-market-type="' + button.dataset.mobileType + '"]').click();
+  closeMobileMore();
+  document.getElementById('marketResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}));
+mobileMoreMenu.addEventListener('click', event => {
+  if (event.target.closest('a, button.open-waitlist, button.open-business')) closeMobileMore();
+});
+document.addEventListener('pointerdown', event => {
+  if (!mobileMoreMenu.hidden && !mobileMoreMenu.contains(event.target) && !mobileMoreButton.contains(event.target)) closeMobileMore();
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && !mobileMoreMenu.hidden) closeMobileMore(true);
+});
+document.querySelector('[data-mobile-home]').addEventListener('click', () => {
+  resetMarketFilters();
+  closeMobileMore();
+});
 filterMarket();
 </script>
 </body>
