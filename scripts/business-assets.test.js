@@ -371,6 +371,18 @@ test('valid trusted Vercel Preview origin can initialize and sign while other pr
   assert.equal((await call(handler, { action: 'challenge' }, { host: 'attacker.vercel.app', origin: 'https://attacker.vercel.app' })).status, 403);
 });
 
+test('current Supabase secret keys use apikey without an invalid Bearer JWT header', async () => {
+  const modernSecret = 'sb_secret_example-for-tests-only';
+  const { fakeFetch, calls } = mockBackend(productionEnv.SUPABASE_URL, modernSecret);
+  const handler = createHandler({ env: { ...productionEnv, SUPABASE_SERVICE_ROLE_KEY: modernSecret }, fetchImpl: fakeFetch });
+  const { initialized, session } = await createSession(handler);
+  assert.equal(initialized.status, 200);
+  const signed = await call(handler, { action: 'sign', ...session, role: 'logo', contentType: 'image/png', size: 8 });
+  assert.equal(signed.status, 200);
+  assert.ok(calls.every(entry => entry.options.headers?.apikey === modernSecret));
+  assert.ok(calls.every(entry => entry.options.headers?.Authorization === undefined));
+});
+
 test('server enforces per-session role and gallery quotas through the atomic quota ledger', async () => {
   const base = 'https://ofjykpqfdogdpmpneuaz.supabase.co';
   const { fakeFetch } = mockBackend(base, secret);

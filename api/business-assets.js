@@ -36,7 +36,9 @@ function createHandler({ env = process.env, fetchImpl = global.fetch, now = Date
     if (parsedUrl.protocol !== 'https:') return json(res, 503, { error: 'Storage must use HTTPS.' });
     const storageBase = `${supabaseUrl}/storage/v1`;
     const secret = serviceKey;
-    const adminHeaders = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
+    // Supabase's current sb_secret keys are API keys, not JWTs; legacy service_role keys also need Bearer auth.
+    const adminHeaders = { apikey: serviceKey };
+    if (!serviceKey.startsWith('sb_secret_')) adminHeaders.Authorization = `Bearer ${serviceKey}`;
     const storageRequest = (path, options = {}) => fetchImpl(`${storageBase}${path}`, { ...options, headers: { ...adminHeaders, ...options.headers } });
     const databaseRequest = (path, options = {}) => fetchImpl(`${supabaseUrl}/rest/v1${path}`, { ...options, headers: { ...adminHeaders, ...options.headers } });
     const rpc = async (name, args) => {
