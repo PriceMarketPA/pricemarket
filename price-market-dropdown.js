@@ -2,7 +2,7 @@
 (() => {
   function createPmDropdown(select, config) {
     const { root, trigger, listbox, value } = config;
-    const required = config.required ?? select.required;
+    const required = config.required ?? (root.dataset.required === 'true' || select.required);
     let activeIndex = Math.max(0, select.selectedIndex);
     let typeAhead = '';
     let typeAheadTimer;
