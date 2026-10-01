@@ -332,10 +332,10 @@ footer{max-width:1240px;margin:auto;padding:28px 24px;display:flex;justify-conte
   #how-it-works .step-main p{margin:0;color:rgba(255,255,255,.9);font-size:.76rem;line-height:1.35}
   #how-it-works .step-cta{grid-area:cta;display:inline-flex;align-items:center;justify-content:center;justify-self:start;gap:9px;min-height:38px;margin:1px 0 0 53px;padding:8px 12px;border:1px solid rgba(255,255,255,.88);border-radius:999px;background:#fff;color:var(--blue-dark);font-size:.73rem;font-weight:950;line-height:1.1;text-decoration:none;white-space:nowrap;box-shadow:0 6px 16px rgba(0,0,0,.12)}
   #how-it-works .step-cta:focus-visible{outline:3px solid #9fc1ff;outline-offset:3px}
-  .hours-row{grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr);grid-template-rows:auto auto;grid-template-areas:"day day closed" "open separator close";gap:8px 5px;padding:10px}
+  .hours-row{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto auto;grid-template-areas:"day closed" "open close";gap:8px 11px;padding:10px}
   .hours-row .hours-open,.hours-row .hours-close{display:grid;grid-template-rows:auto auto;align-content:start;gap:4px;width:100%;min-width:0}
   .hours-row .hours-visible-label{display:block;color:var(--muted);font-size:.65rem;font-weight:850;line-height:1.1}
-  .hours-row .hours-separator{align-self:end;margin-bottom:16px}
+  .hours-row .hours-separator{display:none}
   .hours-row input[type="time"]{-webkit-appearance:auto;appearance:auto;width:100%;max-width:100%;min-width:0;box-sizing:border-box;min-height:44px;margin:0;padding:6px 5px;font-size:16px;line-height:1.2}
 }
 
