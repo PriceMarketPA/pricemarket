@@ -28,7 +28,7 @@ test('generates five distinct city hubs and twenty city/listing guides', () => {
       const html = fs.readFileSync(path.join(tempRoot, city.slug, 'index.html'), 'utf8');
       assert.match(html, /<h1\b/);
       assert.match(html, new RegExp(`<title>[^<]*${city.name}`));
-      assert.match(html, new RegExp(`<link rel="canonical" href="https:\/\/pricemarketpa\.com\/${city.slug}\/">`));
+      assert.match(html, new RegExp(`<link rel="canonical" href="https:\/\/pricemarketpa\.com\/${city.slug}">`));
       assert.doesNotMatch(html, /Keystone Pizza|example\.com|717-555|\b\d+ reviews?\b|\b[1-5](?:\.\d)? stars?\b/i);
       titles.add(html.match(/<title>(.*?)<\/title>/)[1]);
       for (const category of data.categories) {
@@ -105,12 +105,12 @@ test('approved profiles get static clean-URL HTML with metadata and eligible sch
     const page = fs.readFileSync(path.join(tempRoot, 'business', 'river-street-cafe', 'index.html'), 'utf8');
     assert.match(page, /<title>River Street Cafe \| Business Profile \| Price Market<\/title>/);
     assert.match(page, /name="robots" id="profileRobots" content="index,follow,max-image-preview:large"/);
-    assert.match(page, /rel="canonical" id="profileCanonical" href="https:\/\/pricemarketpa\.com\/business\/river-street-cafe\/"/);
+    assert.match(page, /rel="canonical" id="profileCanonical" href="https:\/\/pricemarketpa\.com\/business\/river-street-cafe"/);
     const jsonLd = JSON.parse(page.match(/<script type="application\/ld\+json" id="profileStructuredData">([\s\S]*?)<\/script>/)[1]);
     assert.equal(jsonLd['@type'], 'LocalBusiness');
     assert.equal(jsonLd.address.addressLocality, 'Mechanicsburg');
     const sitemap = fs.readFileSync(path.join(tempRoot, 'sitemap.xml'), 'utf8');
-    assert.match(sitemap, /https:\/\/pricemarketpa\.com\/business\/river-street-cafe\//);
+    assert.match(sitemap, /https:\/\/pricemarketpa\.com\/business\/river-street-cafe<\/loc>/);
     assert.doesNotMatch(sitemap, /\/business\/pending\//);
   } finally {
     fs.rmSync(tempRoot, { recursive: true, force: true });
@@ -134,7 +134,7 @@ test('LocalBusiness schema requires approved profile and a complete matching add
   const schema = buildLocalBusinessSchema(valid, 'approved-sample');
   assert.equal(schema['@type'], 'LocalBusiness');
   assert.equal(schema.address.postalCode, '17055');
-  assert.equal(schema.url, 'https://pricemarketpa.com/business/approved-sample/');
+  assert.equal(schema.url, 'https://pricemarketpa.com/business/approved-sample');
   assert.ok(!('aggregateRating' in schema));
   assert.ok(!('review' in schema));
   assert.ok(!('priceRange' in schema));
@@ -150,6 +150,8 @@ test('profile page implements clean approved URL and demo-safe metadata handling
   assert.match(js, /business\.demo === false/);
   assert.match(js, /buildLocalBusinessSchema/);
   assert.match(html, /id="profileCanonical"/);
+  assert.match(html, /href="https:\/\/pricemarketpa\.com\/business-profile\?business=keystone-pizza"/);
+  assert.match(js, /https:\/\/pricemarketpa\.com\/business-profile\?business=/);
   assert.match(html, /src="\/businesses\.js"/);
   assert.match(html, /src="\/business-profile\.js"/);
 });
@@ -170,6 +172,31 @@ test('homepage and crawl controls use the production origin and Vercel clean URL
   assert.doesNotMatch(sitemap, /www\.pricemarketpa\.com|onboarding|keystone-pizza|business-profile/);
   assert.match(onboarding, /name="robots" content="noindex,follow"/);
   assert.equal(vercel.cleanUrls, true);
-  assert.equal(vercel.trailingSlash, true);
+  assert.equal(vercel.trailingSlash, false);
+  assert.match(onboarding, /href="styles\.css"/);
+  assert.equal(new URL('styles.css', 'https://pricemarketpa.com/business-onboarding').href, 'https://pricemarketpa.com/styles.css');
+  assert.equal(new URL('styles.css', 'https://pricemarketpa.com/business-onboarding/').href, 'https://pricemarketpa.com/business-onboarding/styles.css');
+});
+
+test('clean routes and legacy .html links share one no-slash destination', () => {
+  const config = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'vercel.json'), 'utf8'));
+  const canonicalPath = value => {
+    const url = new URL(value, 'https://pricemarketpa.com');
+    let pathname = url.pathname.replace(/\.html$/, '');
+    if (config.trailingSlash === false && pathname.length > 1) pathname = pathname.replace(/\/$/, '');
+    url.pathname = pathname || '/';
+    return `${url.pathname}${url.search}${url.hash}`;
+  };
+
+  assert.equal(canonicalPath('/'), '/');
+  assert.equal(canonicalPath('/index.html'), '/index');
+  assert.equal(canonicalPath('/business-onboarding.html'), '/business-onboarding');
+  assert.equal(canonicalPath('/business-profile.html?business=keystone-pizza'), '/business-profile?business=keystone-pizza');
+  assert.equal(canonicalPath('/keystone-pizza.html'), '/keystone-pizza');
+  assert.equal(canonicalPath('/?city=Harrisburg&type=happy-hour#marketplace'), '/?city=Harrisburg&type=happy-hour#marketplace');
+  assert.equal(canonicalPath('/mechanicsburg/'), '/mechanicsburg');
+  assert.equal(canonicalPath('/mechanicsburg/deals/'), '/mechanicsburg/deals');
+  assert.equal(canonicalPath('/business/keystone-pizza/'), '/business/keystone-pizza');
+  assert.equal(canonicalPath('/styles.css'), '/styles.css');
 });
 

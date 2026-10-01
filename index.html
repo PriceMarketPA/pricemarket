@@ -597,7 +597,7 @@ function profileCategory(profile) {
 function profileHref(slug) {
   const profile = window.priceMarketBusinesses && window.priceMarketBusinesses[slug];
   return profile && profile.demo === false
-    ? '/business/' + encodeURIComponent(slug) + '/'
+    ? '/business/' + encodeURIComponent(slug)
     : 'business-profile.html?business=' + encodeURIComponent(slug);
 }
 

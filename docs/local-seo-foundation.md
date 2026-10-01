@@ -2,23 +2,25 @@
 
 ## Public URLs and indexability
 
-The static generator `scripts/generate-local-seo-pages.js` builds these five indexable city hubs:
+The static generator `scripts/generate-local-seo-pages.js` builds these five indexable city hubs (canonical URLs omit the final slash to match Vercel's existing routing):
 
-- `/mechanicsburg/`
-- `/camp-hill/`
-- `/carlisle/`
-- `/harrisburg/`
-- `/hershey/`
+- `/mechanicsburg`
+- `/camp-hill`
+- `/carlisle`
+- `/harrisburg`
+- `/hershey`
 
 Each city hub has its own title, description, intro, city context, discovery guidance, and links to the existing marketplace. The copy does not claim that a city has participating businesses or inventory that is not present in approved data.
 
-The generator also creates these four route types for each city (20 total): `/deals/`, `/happy-hour/`, `/businesses/`, and `/jobs/`. For example, `/mechanicsburg/deals/` and `/hershey/jobs/`. They provide type-specific guidance and link to the existing homepage filters with city and listing type preselected. They are `noindex,follow` and excluded from the sitemap until the city/type is supported by at least three `demo:false` businesses with that listing type and at least 35 words of city-specific discovery guidance. This avoids indexing empty/thin doorway pages. Do not lower the gate to pad page count.
+The generator also creates these four route types for each city (20 total): `/deals`, `/happy-hour`, `/businesses`, and `/jobs`. For example, `/mechanicsburg/deals` and `/hershey/jobs`. They provide type-specific guidance and link to the existing homepage filters with city and listing type preselected. They are `noindex,follow` and excluded from the sitemap until the city/type is supported by at least three `demo:false` businesses with that listing type and at least 35 words of city-specific discovery guidance. This avoids indexing empty/thin doorway pages. Do not lower the gate to pad page count.
 
 When that gate is met, rerun `node scripts/generate-local-seo-pages.js`. The generator will make that route indexable and add it to the sitemap. An approved profile's deals, Happy Hours, jobs, and business presence are inferred only from the corresponding fields in `businesses.js`; `demo:true`, missing, or otherwise ambiguous approval status is never eligible.
 
 ## Business profile URLs and schema
 
-New approved profiles get a static clean URL at `/business/<slug>/` (generated as `business/<slug>/index.html`) using the existing reusable profile renderer. The generator writes the approved profile's title, description, canonical, social metadata, and eligible JSON-LD into the initial HTML response; the renderer hydrates that same structured data for visitors. The existing `business-profile.html?business=<slug>` route stays functional and `noindex,follow`, and `keystone-pizza.html` remains the legacy demo redirect. Demo and pending content are never generated as clean profile pages or listed in the sitemap.
+New approved profiles get a static clean URL at `/business/<slug>` (generated as `business/<slug>/index.html`) using the existing reusable profile renderer. The generator writes the approved profile's title, description, canonical, social metadata, and eligible JSON-LD into the initial HTML response; the renderer hydrates that same structured data for visitors. The existing `business-profile.html?business=<slug>` route stays functional and `noindex,follow`, and `keystone-pizza.html` remains the legacy demo redirect. Demo and pending content are never generated as clean profile pages or listed in the sitemap.
+
+Vercel keeps `cleanUrls:true` and the pre-existing `trailingSlash:false`. Legacy `.html` requests receive Vercel's 308 redirect to the extensionless URL while retaining query strings; slash-suffixed clean paths receive one 308 to the no-slash canonical. For example, `/business-profile.html?business=keystone-pizza` resolves to `/business-profile?business=keystone-pizza`. The query-profile canonical and social URL use that final extensionless destination. Keeping the original slash policy also preserves the onboarding page's root-relative asset resolution at `/business-onboarding`, where its relative `styles.css` and script URLs resolve from the site root.
 
 `LocalBusiness` JSON-LD is emitted only for an explicitly approved (`demo:false`) profile with an unambiguous, complete postal address that matches its city/state data. Incomplete or inconsistent addresses result in no LocalBusiness schema. No rating, review, price range, opening hours, or offer schema is synthesized. Keep the site's organization as `Organization`; Price Market has no asserted storefront address.
 

@@ -17,8 +17,8 @@ function escapeHtml(value) {
   })[char]);
 }
 
-function routeForCity(city) { return `/${city.slug}/`; }
-function routeForCategory(city, category) { return `/${city.slug}/${category.slug}/`; }
+function routeForCity(city) { return `/${city.slug}`; }
+function routeForCategory(city, category) { return `/${city.slug}/${category.slug}`; }
 function homeFilterUrl(city, category) {
   const params = new URLSearchParams({ city: city.name, type: category?.filterType || "all" });
   return `/?${params.toString()}#marketplace`;
@@ -212,7 +212,7 @@ function renderSitemap(data, profiles) {
       if (categoryIsIndexable(profiles, city, category)) routes.push(routeForCategory(city, category));
     }
   }
-  for (const [slug] of getPublishedProfiles(profiles)) routes.push(`/business/${encodeURIComponent(slug)}/`);
+  for (const [slug] of getPublishedProfiles(profiles)) routes.push(`/business/${encodeURIComponent(slug)}`);
   const urls = [...new Set(routes)].map(route => `  <url><loc>${absoluteUrl(route)}</loc></url>`).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }

@@ -16,8 +16,8 @@
   root.hidden = false;
   const isCanonicalProfileRoute = business.demo === false && !!routeMatch && !querySlug;
   const canonicalUrl = business.demo === false
-    ? `https://pricemarketpa.com/business/${encodeURIComponent(slug)}/`
-    : `https://pricemarketpa.com/business-profile.html?business=${encodeURIComponent(slug)}`;
+    ? `https://pricemarketpa.com/business/${encodeURIComponent(slug)}`
+    : `https://pricemarketpa.com/business-profile?business=${encodeURIComponent(slug)}`;
   const title = `${business.name} | ${business.demo === false ? 'Business Profile' : 'Demo Business Profile'} | Price Market`;
   const description = String(business.description || 'Explore a Price Market Central Pennsylvania business profile.').trim().slice(0, 300);
   document.title = title;

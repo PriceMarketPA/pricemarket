@@ -42,7 +42,7 @@
   }
 
   function profileUrl(slug) {
-    return `${ORIGIN}/business/${encodeURIComponent(slug)}/`;
+    return `${ORIGIN}/business/${encodeURIComponent(slug)}`;
   }
 
   function buildLocalBusinessSchema(profile, slug) {
