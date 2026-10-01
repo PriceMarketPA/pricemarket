@@ -179,9 +179,9 @@ test('homepage and crawl controls use the production origin and Vercel clean URL
   assert.match(legacyProfile, /rel="canonical" href="https:\/\/pricemarketpa\.com\/business-profile\?business=keystone-pizza"/);
   assert.equal(vercel.cleanUrls, true);
   assert.equal(vercel.trailingSlash, false);
-  assert.match(onboarding, /href="\/styles\.css\?v=onboarding-mobile-nav-3"/);
-  assert.equal(new URL('/styles.css?v=onboarding-mobile-nav-3', 'https://pricemarketpa.com/business-onboarding').href, 'https://pricemarketpa.com/styles.css?v=onboarding-mobile-nav-3');
-  assert.equal(new URL('/styles.css?v=onboarding-mobile-nav-3', 'https://pricemarketpa.com/business-onboarding/').href, 'https://pricemarketpa.com/styles.css?v=onboarding-mobile-nav-3');
+  assert.match(onboarding, /href="\/styles\.css\?v=onboarding-time-visibility-4"/);
+  assert.equal(new URL('/styles.css?v=onboarding-time-visibility-4', 'https://pricemarketpa.com/business-onboarding').href, 'https://pricemarketpa.com/styles.css?v=onboarding-time-visibility-4');
+  assert.equal(new URL('/styles.css?v=onboarding-time-visibility-4', 'https://pricemarketpa.com/business-onboarding/').href, 'https://pricemarketpa.com/styles.css?v=onboarding-time-visibility-4');
 });
 
 test('clean routes and legacy .html links share one no-slash destination', () => {
