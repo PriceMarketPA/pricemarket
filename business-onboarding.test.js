@@ -68,6 +68,7 @@ function setupSubmission({ enabled }) {
   };
   for (const [id, value] of Object.entries(inputValues)) get(id).value = value;
   get('includeHappyHour').checked = enabled;
+  get('submissionConfirmation').hidden = true;
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   for (const day of days) {
@@ -91,7 +92,8 @@ function setupSubmission({ enabled }) {
     submit: async () => {
       await form.listeners.submit({ preventDefault() {} });
       return submittedPayload;
-    }
+    },
+    confirmationState: () => ({ formHidden: form.hidden, confirmationHidden: get('submissionConfirmation').hidden, status: get('onboardingStatus').textContent })
   };
 }
 
@@ -140,4 +142,14 @@ test('Happy Hour-disabled submissions send blank dedicated fields and an empty p
   ]) assert.equal(payload[field], '');
   assert.deepEqual(JSON.parse(payload.profileDataJson).happyHours, []);
   assert.equal(payload.reviewStatus, 'Pending review');
+});
+
+test('successful onboarding submission shows the pending-review confirmation state', async () => {
+  const flow = setupSubmission({ enabled: false });
+  await flow.submit();
+  assert.deepEqual(flow.confirmationState(), {
+    formHidden: true,
+    confirmationHidden: false,
+    status: 'Thanks — your profile submission is pending review. It has not been published.'
+  });
 });

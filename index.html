@@ -27,7 +27,7 @@
   <meta name="twitter:description" content="Discover local deals, businesses, and job opportunities across Central PA.">
   <meta name="twitter:image" content="https://pricemarketpa.com/favicon-32x32.png">
   <meta name="twitter:image:alt" content="Price Market Central PA marketplace">
-  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://pricemarketpa.com/#organization","name":"Price Market","url":"https://pricemarketpa.com/","description":"A Central Pennsylvania marketplace for local deals, Happy Hours, businesses, and jobs.","logo":{"@type":"ImageObject","url":"https://pricemarketpa.com/pm-logo.png"}},{"@type":"WebSite","@id":"https://pricemarketpa.com/#website","url":"https://pricemarketpa.com/","name":"Price Market","publisher":{"@id":"https://pricemarketpa.com/#organization"},"potentialAction":{"@type":"SearchAction","target":"https://pricemarketpa.com/?q={search_term_string}","query-input":"required name=search_term_string"}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://pricemarketpa.com/#organization","name":"Price Market LLC","url":"https://pricemarketpa.com/","description":"A Central Pennsylvania marketplace for local deals, Happy Hours, businesses, and jobs.","logo":{"@type":"ImageObject","url":"https://pricemarketpa.com/pm-logo.png"}},{"@type":"WebSite","@id":"https://pricemarketpa.com/#website","url":"https://pricemarketpa.com/","name":"Price Market","publisher":{"@id":"https://pricemarketpa.com/#organization"},"potentialAction":{"@type":"SearchAction","target":"https://pricemarketpa.com/?q={search_term_string}","query-input":"required name=search_term_string"}}]}</script>
   <link rel="preconnect" href="https://script.google.com">
   <link rel="stylesheet" href="styles.css">
   <!-- Google tag (gtag.js) -->
@@ -51,9 +51,10 @@
     </a>
     <div class="nav-links" aria-label="Main navigation">
       <a href="#businesses">Businesses</a>
-      <a href="business-onboarding.html">List your business</a>
+      <a href="/for-businesses">For Businesses</a>
       <a href="#how-it-works">How it works</a>
       <a href="#cities">Cities</a>
+      <a href="/about">About</a>
     </div>
     <div class="nav-actions">
       <button class="btn ghost open-waitlist"><span class="desktop-join-label">Join Waitlist</span><span class="mobile-join-label">Join</span></button>
@@ -463,6 +464,7 @@
 <footer>
   <span data-copyright-year>© 2026 Price Market LLC. All rights reserved.</span>
   <span>Built for Central Pennsylvania</span>
+  <nav class="site-footer-nav" aria-label="Footer navigation"><a href="/for-businesses">For Businesses</a><a href="/about">About</a></nav>
 </footer>
 
 
@@ -476,11 +478,12 @@
     <div class="mobile-more-menu" id="mobileMoreMenu" role="group" aria-label="More navigation" hidden>
       <button type="button" data-mobile-type="business" aria-pressed="false">Businesses</button>
       <button type="button" data-mobile-type="all" aria-pressed="false">All listings</button>
-      <a href="business-onboarding.html">List your business</a>
+      <a href="/for-businesses">For Businesses</a>
       <button type="button" class="open-waitlist">Join the waitlist</button>
       <button type="button" class="open-business">For businesses</button>
       <a href="#how-it-works">How it works</a>
       <a href="#cities">Central PA cities</a>
+      <a href="/about">About Price Market</a>
     </div>
   </div>
 </nav>
@@ -858,6 +861,7 @@ document.querySelector('[data-mobile-home]').addEventListener('click', () => {
   closeMobileMore();
 });
 const initialParams = new URLSearchParams(window.location.search);
+if (initialParams.get('form') === 'business') openModal(businessModal);
 if (initialParams.has('q')) marketQuery.value = initialParams.get('q') || '';
 const initialCity = initialParams.get('city');
 if (initialCity && [...cityFilter.options].some(option => option.value === initialCity)) {
