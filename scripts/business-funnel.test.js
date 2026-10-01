@@ -76,7 +76,7 @@ test('Mobile More menu groups discovery and business links without the obsolete 
 test('Onboarding navigation uses a refreshed stylesheet and stacks every step on narrow screens', () => {
   const css = read('styles.css');
   const html = read('business-onboarding.html');
-  assert.match(html, /href="\/styles\.css\?v=onboarding-time-visibility-4"/);
+  assert.match(html, /href="\/styles\.css\?v=onboarding-happy-hour-select-5"/);
   assert.match(css, /@media\(max-width:480px\)\{\.onboarding-site \.onboarding-step-panel \.onboarding-step-controls,\.onboarding-site \.onboarding-submit-panel \.onboarding-step-controls\{display:flex!important;flex-direction:column!important/);
   assert.match(css, /\.onboarding-site \.onboarding-step-panel \.onboarding-step-controls>\.btn,\.onboarding-site \.onboarding-submit-panel \.onboarding-step-controls>\.btn\{[^}]*width:100%!important;[^}]*flex:0 0 auto!important/);
   assert.match(css, /font-size:1rem;line-height:1\.25;white-space:normal!important/);
@@ -89,15 +89,16 @@ test('Happy Hour mobile fields use one full-width days row and an equal two-colu
   assert.ok(fields, 'Happy Hour fields exist');
   assert.match(fields, /<label class="happy-hour-days-field">Days offered<input name="happyHourDays" id="happyHourDays"/);
   assert.equal((fields.match(/class="happy-hour-time-field"/g) || []).length, 2);
-  assert.match(fields, /class="happy-hour-time-field">Start time<input name="happyHourStartTime" id="happyHourStartTime" type="time"/);
-  assert.match(fields, /class="happy-hour-time-field">End time<input name="happyHourEndTime" id="happyHourEndTime" type="time"/);
+  assert.match(fields, /class="happy-hour-time-field">Start time<select class="pm-select happy-hour-time-select" name="happyHourStartTime" id="happyHourStartTime"><option value="">Select time<\/option><\/select>/);
+  assert.match(fields, /class="happy-hour-time-field">End time<select class="pm-select happy-hour-time-select" name="happyHourEndTime" id="happyHourEndTime"><option value="">Select time<\/option><\/select>/);
   assert.match(fields, /class="field-wide">Restrictions or notes[\s\S]*?name="happyHourRestrictions"/);
   assert.match(css, /@media\(max-width:480px\)\{\.onboarding-fields\.happy-hour-fields\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)\}\.onboarding-fields\.happy-hour-fields>\.happy-hour-days-field\{grid-column:1\/-1\}/);
-  assert.match(css, /\.onboarding-fields\.happy-hour-fields>\.happy-hour-time-field input\[type=time\]\{width:100%;min-width:0;max-width:100%;box-sizing:border-box;text-align:center\}/);
-  assert.match(css, /@media\(max-width:480px\)\{\.happy-hour-time-field input\[type=time\]\{-webkit-appearance:auto;appearance:auto;color:var\(--navy\);-webkit-text-fill-color:var\(--navy\);color-scheme:light;opacity:1\}/);
-  for (const segment of ['date-and-time-value','datetime-edit','datetime-edit-fields-wrapper','datetime-edit-text','datetime-edit-hour-field','datetime-edit-minute-field','datetime-edit-ampm-field']) {
-    assert.ok(css.includes(`::-webkit-${segment}`), `WebKit time text rule includes ${segment}`);
-  }
+  assert.match(css, /\.onboarding-fields\.happy-hour-fields>\.happy-hour-time-field select\{width:100%;min-width:0;max-width:100%;box-sizing:border-box;text-align:center;text-align-last:center/);
+  assert.doesNotMatch(css, /happy-hour-time-field input\[type=time\]|happy-hour-time-field input\[type=time\]::-/);
+  const onboardingScript = read('business-onboarding.js');
+  assert.match(onboardingScript, /minutes \+= 15/);
+  assert.match(onboardingScript, /option\.value = value/);
+  assert.match(onboardingScript, /option\.textContent = formatTime\(value\)/);
 });
 test('Onboarding wizard centers its desktop form and restores the two-column Step 5 preview layout', () => {
   const css = read('styles.css');

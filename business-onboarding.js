@@ -61,6 +61,21 @@
     return `${hour % 12 || 12}:${String(minute).padStart(2, '0')} ${suffix}`;
   }
 
+  function populateHappyHourTimeOptions(select) {
+    const previousValue = select.value;
+    for (let minutes = 0; minutes < 24 * 60; minutes += 15) {
+      const hour = Math.floor(minutes / 60);
+      const minute = minutes % 60;
+      const value = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = formatTime(value);
+      select.append(option);
+    }
+    if (previousValue) select.value = previousValue;
+  }
+  ['happyHourStartTime', 'happyHourEndTime'].forEach(id => populateHappyHourTimeOptions(byId(id)));
+
   function collectHours() {
     return days.flatMap(day => {
       const closed = form.elements[`hoursClosed-${day}`].checked;

@@ -94,9 +94,22 @@ function setupSubmission({ enabled }) {
       return submittedPayload;
     },
     initialHoursRows: () => hoursEditor.children.map(row => row.innerHTML),
+    timeOptions: id => get(id).children.map(option => ({ value: option.value, label: option.textContent })),
     confirmationState: () => ({ formHidden: form.hidden, confirmationHidden: get('submissionConfirmation').hidden, status: get('onboardingStatus').textContent })
   };
 }
+
+test('Happy Hour time selects offer readable quarter-hour labels with 24-hour values', () => {
+  const flow = setupSubmission({ enabled: false });
+  for (const id of ['happyHourStartTime', 'happyHourEndTime']) {
+    const options = flow.timeOptions(id);
+    assert.equal(options.length, 96);
+    assert.deepEqual(options[12], { value: '03:00', label: '3:00 AM' });
+    assert.deepEqual(options[60], { value: '15:00', label: '3:00 PM' });
+    assert.deepEqual(options[72], { value: '18:00', label: '6:00 PM' });
+    assert.deepEqual(options.at(-1), { value: '23:45', label: '11:45 PM' });
+  }
+});
 
 test('Happy Hour submissions send six dedicated fields and retain reusable profileDataJson data', async () => {
   const payload = await setupSubmission({ enabled: true }).submit();
