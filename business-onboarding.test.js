@@ -23,6 +23,7 @@ class FakeElement {
     this.elements = {};
   }
   append(...children) { this.children.push(...children); }
+  replaceChildren(...children) { this.children = children; }
   addEventListener(type, callback) { this.listeners[type] = callback; }
   querySelectorAll() { return []; }
   reportValidity() { return true; }
@@ -132,6 +133,7 @@ test('Happy Hour submissions send six dedicated fields and retain reusable profi
     ]
   );
   const profileData = JSON.parse(payload.profileDataJson);
+  assert.deepEqual(profileData.media, { logoUrl: '', coverUrl: '', galleryUrls: [], documentUrl: '' });
   assert.deepEqual(profileData.happyHours, [{
     title: 'After-work special',
     description: 'Half-price appetizers.',
@@ -156,6 +158,7 @@ test('Happy Hour-disabled submissions send blank dedicated fields and an empty p
   ]) assert.equal(payload[field], '');
   assert.deepEqual(JSON.parse(payload.profileDataJson).happyHours, []);
   assert.equal(payload.reviewStatus, 'Pending review');
+  assert.deepEqual(JSON.parse(payload.profileDataJson).media, { logoUrl: '', coverUrl: '', galleryUrls: [], documentUrl: '' });
 });
 
 test('successful onboarding submission shows the pending-review confirmation state', async () => {

@@ -60,6 +60,22 @@ test('Onboarding is a five-step client flow that preserves pending-review submis
 });
 
 
+test('Business onboarding provides image and PDF uploads with URL fallback and profile preview support', () => {
+  const html = read('business-onboarding.html');
+  const script = read('business-onboarding.js');
+  for (const item of [
+    'id="logoImageFile" type="file"', 'id="coverPhotoFile" type="file"',
+    'id="galleryPhotosFile" type="file" multiple', 'id="businessDocumentFile" type="file"',
+    'image/heic', 'image/heif', 'application/pdf', 'Use image URLs instead (optional fallback)',
+    'data-upload-status="logo"', 'data-upload-status="gallery"', 'id="previewGallery"', 'id="previewDocument"'
+  ]) assert.ok(html.includes(item), item);
+  assert.match(script, /media:\s*\{[\s\S]*?logoUrl,[\s\S]*?coverUrl:[\s\S]*?galleryUrls:[\s\S]*?documentUrl:/);
+  assert.match(script, /profileDataJson: JSON\.stringify\(profileData\)/);
+  assert.match(script, /reviewStatus: 'Pending review'/);
+  assert.match(script, /uploadBytes\(signed\.uploadUrl/);
+  assert.match(script, /Uploading \$\{file\.name\} · \$\{percent\}%/);
+});
+
 test('Mobile More menu groups discovery and business links without the obsolete waitlist action', () => {
   const html = read('index.html');
   const menu = html.match(/<div class="mobile-more-menu"[\s\S]*?<\/div>\s*<\/div>\s*<\/nav>/)?.[0];
@@ -76,7 +92,7 @@ test('Mobile More menu groups discovery and business links without the obsolete 
 test('Onboarding navigation uses a refreshed stylesheet and stacks every step on narrow screens', () => {
   const css = read('styles.css');
   const html = read('business-onboarding.html');
-  assert.match(html, /href="\/styles\.css\?v=onboarding-happy-hour-select-5"/);
+  assert.match(html, /href="\/styles\.css\?v=onboarding-business-uploads-6"/);
   assert.match(css, /@media\(max-width:480px\)\{\.onboarding-site \.onboarding-step-panel \.onboarding-step-controls,\.onboarding-site \.onboarding-submit-panel \.onboarding-step-controls\{display:flex!important;flex-direction:column!important/);
   assert.match(css, /\.onboarding-site \.onboarding-step-panel \.onboarding-step-controls>\.btn,\.onboarding-site \.onboarding-submit-panel \.onboarding-step-controls>\.btn\{[^}]*width:100%!important;[^}]*flex:0 0 auto!important/);
   assert.match(css, /font-size:1rem;line-height:1\.25;white-space:normal!important/);
