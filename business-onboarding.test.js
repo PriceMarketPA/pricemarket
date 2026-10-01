@@ -85,7 +85,7 @@ function setupSubmission({ enabled }) {
     submittedPayload = JSON.parse(options.body);
     return { ok: true };
   };
-  vm.runInNewContext(source, { document, fetch, URL, console });
+  vm.runInNewContext(source, { document, fetch, URL, console, window: { initPmDropdowns() {}, validatePmDropdowns() { return true; } } });
 
   return {
     submit: async () => {
