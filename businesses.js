@@ -35,6 +35,16 @@ window.priceMarketBusinesses = {
       { title: "Pizza Cook", detail: "Full-time or part-time kitchen role · Experience preferred" },
       { title: "Cashier", detail: "Friendly front-counter team member for nights and weekends" }
     ],
+    happyHours: [
+      {
+        title: "Weeknight Slice & Soda",
+        description: "A cheese slice and fountain drink for $5.",
+        days: "Monday – Thursday",
+        startTime: "16:00",
+        endTime: "18:00",
+        restrictions: "Dine-in only. While supplies last."
+      }
+    ],
     gallery: [
       { src: "assets/showcase-restaurant.jpg", alt: "Freshly baked pizza in a wood-fired neighborhood restaurant", caption: "A neighborhood favorite" },
       { src: "assets/profile-pizza-oven.jpg", alt: "Pepperoni pizza fresh from the brick oven", caption: "Straight from the oven" },

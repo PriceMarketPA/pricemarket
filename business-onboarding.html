@@ -94,8 +94,21 @@
             </div>
           </section>
 
+          <section class="onboarding-section" aria-labelledby="happyHourTitle">
+            <div class="onboarding-section-heading"><span>06</span><div><h2 id="happyHourTitle">Does your business offer Happy Hour? <span class="optional-tag">Optional</span></h2><p>Add recurring specials with the days and times customers can enjoy them.</p></div></div>
+            <label class="job-toggle"><input type="checkbox" id="includeHappyHour" aria-controls="happyHourFields"> <span>Add Happy Hour details</span></label>
+            <div class="onboarding-fields happy-hour-fields" id="happyHourFields" hidden>
+              <label class="field-wide">Offer title<input name="happyHourTitle" id="happyHourTitleInput" type="text" maxlength="120" placeholder="e.g. Weeknight Slice & Soda"></label>
+              <label class="field-wide">Offer description<textarea name="happyHourDescription" id="happyHourDescription" rows="2" maxlength="500" placeholder="What can customers enjoy during Happy Hour?"></textarea></label>
+              <label>Days offered<input name="happyHourDays" id="happyHourDays" type="text" maxlength="120" placeholder="e.g. Monday – Thursday"></label>
+              <label>Start time<input name="happyHourStartTime" id="happyHourStartTime" type="time"></label>
+              <label>End time<input name="happyHourEndTime" id="happyHourEndTime" type="time"></label>
+              <label class="field-wide">Restrictions or notes <span class="optional-tag">Optional</span><textarea name="happyHourRestrictions" id="happyHourRestrictions" rows="2" maxlength="500" placeholder="e.g. Dine-in only; while supplies last"></textarea></label>
+            </div>
+          </section>
+
           <section class="onboarding-section" aria-labelledby="jobsTitle">
-            <div class="onboarding-section-heading"><span>06</span><div><h2 id="jobsTitle">Hiring anyone? <span class="optional-tag">Optional</span></h2><p>Add one opening to help local people find your opportunity.</p></div></div>
+            <div class="onboarding-section-heading"><span>07</span><div><h2 id="jobsTitle">Hiring anyone? <span class="optional-tag">Optional</span></h2><p>Add one opening to help local people find your opportunity.</p></div></div>
             <label class="job-toggle"><input type="checkbox" id="includeJob"> <span>Add a job opening to my submission</span></label>
             <div class="onboarding-fields job-fields" id="jobFields" hidden>
               <label class="field-wide">Job title<input name="jobTitle" id="jobTitle" type="text" maxlength="90" placeholder="e.g. Front desk associate"></label>
@@ -123,6 +136,13 @@
               <p class="onboarding-preview-description" id="previewDescription">Your short business introduction will appear here, helping neighbors get to know you.</p>
               <div class="onboarding-preview-details"><span id="previewAddress">Your address</span><span id="previewHours">Add your hours</span></div>
               <div class="onboarding-preview-deal" id="previewDeal"><span>FEATURED DEAL · EXAMPLE PREVIEW</span><strong id="previewDealTitle">Your featured deal</strong><p id="previewDealDescription">A quick look at the offer you’d like to share.</p></div>
+              <div class="onboarding-preview-happy-hour" id="previewHappyHour" hidden>
+                <span>HAPPY HOUR · PREVIEW ONLY</span>
+                <strong id="previewHappyHourTitle">Your Happy Hour offer</strong>
+                <p id="previewHappyHourSchedule">Add the days and times</p>
+                <p id="previewHappyHourDescription">A recurring special for your neighbors.</p>
+                <small id="previewHappyHourRestrictions" hidden></small>
+              </div>
               <span class="preview-profile-cta">View business profile <span aria-hidden="true">→</span></span>
             </article>
             <div class="pending-preview-note"><span aria-hidden="true">✓</span><p><strong>Always reviewed first</strong><br>Your preview is only visible here. Submitted profiles are checked by Price Market before publication.</p></div>

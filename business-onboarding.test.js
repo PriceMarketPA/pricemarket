@@ -1,0 +1,143 @@
+'use strict';
+
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
+
+const source = fs.readFileSync(path.join(__dirname, 'business-onboarding.js'), 'utf8');
+
+class FakeElement {
+  constructor() {
+    this.value = '';
+    this.checked = false;
+    this.hidden = false;
+    this.required = false;
+    this.disabled = false;
+    this.textContent = '';
+    this.innerHTML = '';
+    this.children = [];
+    this.listeners = {};
+    this.classList = { add() {}, remove() {} };
+    this.elements = {};
+  }
+  append(...children) { this.children.push(...children); }
+  addEventListener(type, callback) { this.listeners[type] = callback; }
+  querySelectorAll() { return []; }
+  reportValidity() { return true; }
+  reset() {}
+  focus() {}
+}
+
+function setupSubmission({ enabled }) {
+  const nodes = new Map();
+  const get = id => {
+    if (!nodes.has(id)) nodes.set(id, new FakeElement());
+    return nodes.get(id);
+  };
+  const form = get('businessProfileForm');
+  const hoursEditor = get('hoursEditor');
+  const happyFields = [
+    'happyHourTitleInput', 'happyHourDescription', 'happyHourDays',
+    'happyHourStartTime', 'happyHourEndTime', 'happyHourRestrictions'
+  ];
+  for (const id of happyFields) get(id).value = '';
+  const inputValues = {
+    businessNameInput: 'Test Neighborhood Cafe',
+    businessCategory: 'Restaurant / Food',
+    businessCity: 'Mechanicsburg',
+    businessAddress: '10 Market Street',
+    businessDescription: 'A friendly local cafe.',
+    businessPhone: '717-555-0110',
+    businessEmail: 'owner@example.test',
+    businessWebsite: 'https://example.test',
+    dealTitle: '',
+    dealDescription: '',
+    heroImage: '',
+    logoImage: '',
+    imageAlt: '',
+    jobTitle: '',
+    jobDescription: '',
+    happyHourTitleInput: 'After-work special',
+    happyHourDescription: 'Half-price appetizers.',
+    happyHourDays: 'Monday – Thursday',
+    happyHourStartTime: '16:30',
+    happyHourEndTime: '18:00',
+    happyHourRestrictions: 'Dine-in only.'
+  };
+  for (const [id, value] of Object.entries(inputValues)) get(id).value = value;
+  get('includeHappyHour').checked = enabled;
+
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  for (const day of days) {
+    form.elements['hoursClosed-' + day] = { checked: day === 'Sunday' };
+    form.elements['hoursOpen-' + day] = { value: '' };
+    form.elements['hoursClose-' + day] = { value: '' };
+  }
+
+  let submittedPayload;
+  const document = {
+    getElementById: get,
+    createElement: () => new FakeElement()
+  };
+  const fetch = async (_url, options) => {
+    submittedPayload = JSON.parse(options.body);
+    return { ok: true };
+  };
+  vm.runInNewContext(source, { document, fetch, URL, console });
+
+  return {
+    submit: async () => {
+      await form.listeners.submit({ preventDefault() {} });
+      return submittedPayload;
+    }
+  };
+}
+
+test('Happy Hour submissions send six dedicated fields and retain reusable profileDataJson data', async () => {
+  const payload = await setupSubmission({ enabled: true }).submit();
+  assert.deepEqual(
+    [
+      payload.happyHourTitle,
+      payload.happyHourDescription,
+      payload.happyHourDays,
+      payload.happyHourStartTime,
+      payload.happyHourEndTime,
+      payload.happyHourRestrictions
+    ],
+    [
+      'After-work special',
+      'Half-price appetizers.',
+      'Monday – Thursday',
+      '16:30',
+      '18:00',
+      'Dine-in only.'
+    ]
+  );
+  const profileData = JSON.parse(payload.profileDataJson);
+  assert.deepEqual(profileData.happyHours, [{
+    title: 'After-work special',
+    description: 'Half-price appetizers.',
+    days: 'Monday – Thursday',
+    startTime: '16:30',
+    endTime: '18:00',
+    restrictions: 'Dine-in only.'
+  }]);
+  assert.equal(payload.reviewStatus, 'Pending review');
+  assert.equal(profileData.reviewStatus, 'Pending review');
+});
+
+test('Happy Hour-disabled submissions send blank dedicated fields and an empty profile array', async () => {
+  const payload = await setupSubmission({ enabled: false }).submit();
+  for (const field of [
+    'happyHourTitle',
+    'happyHourDescription',
+    'happyHourDays',
+    'happyHourStartTime',
+    'happyHourEndTime',
+    'happyHourRestrictions'
+  ]) assert.equal(payload[field], '');
+  assert.deepEqual(JSON.parse(payload.profileDataJson).happyHours, []);
+  assert.equal(payload.reviewStatus, 'Pending review');
+});

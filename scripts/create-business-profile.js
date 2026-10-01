@@ -68,6 +68,35 @@ function optionalRows(value, { titleKey, detailKeys, maxRows = 50 }) {
   });
 }
 
+function normalizeHappyHours(value) {
+  if (!Array.isArray(value)) return [];
+  return value.slice(0, 50).flatMap(row => {
+    if (!row || typeof row !== 'object' || Array.isArray(row)) return [];
+    const title = text(row.title, 120);
+    const description = text(row.description, 500);
+    const days = Array.isArray(row.days)
+      ? row.days.map(day => text(day, 30)).filter(Boolean).join(', ')
+      : text(row.days, 120);
+    const startTime = text(row.startTime, 5);
+    const endTime = text(row.endTime, 5);
+    const validTime = time => {
+      const parts = time.split(':');
+      return parts.length === 2 && parts[0].length === 2 && parts[1].length === 2
+        && Number.isInteger(Number(parts[0])) && Number(parts[0]) < 24
+        && Number.isInteger(Number(parts[1])) && Number(parts[1]) < 60;
+    };
+    if (!title || !days || !validTime(startTime) || !validTime(endTime)) return [];
+    return [{
+      title,
+      description,
+      days,
+      startTime,
+      endTime,
+      restrictions: text(row.restrictions || row.notes, 500)
+    }];
+  });
+}
+
 function initials(name) {
   return name.normalize('NFKD').replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).filter(Boolean).map(word => word[0]).join('').slice(0, 2).toUpperCase();
 }
@@ -117,6 +146,7 @@ function normalizeProfile(profileData) {
     }),
     deals: optionalRows(profileData.deals, { titleKey: 'title', detailKeys: ['description'], maxRows: 50 }),
     jobs: optionalRows(profileData.jobs, { titleKey: 'title', detailKeys: ['detail', 'description'], maxRows: 50 }),
+    happyHours: normalizeHappyHours(profileData.happyHours),
     gallery: gallery.slice(0, 24).flatMap(photo => {
       if (!photo || typeof photo !== 'object') return [];
       const src = safeAssetSource(photo.src);

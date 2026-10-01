@@ -74,6 +74,44 @@
   });
   if (!deals.childElementCount) deals.innerHTML = '<p class="profile-empty-state">Check back soon for local offers.</p>';
 
+
+  const happyHours = (business.happyHours || []).filter(entry => entry && entry.title && entry.days);
+  if (happyHours.length) {
+    document.getElementById('happyHours').hidden = false;
+    const list = document.getElementById('businessHappyHours');
+    document.getElementById('happyHourExampleTag').textContent = business.demo ? 'Example Happy Hour' : 'Current Happy Hour';
+    happyHours.forEach(entry => {
+      const card = document.createElement('article');
+      card.className = 'profile-happy-hour-card';
+      const title = document.createElement('h3');
+      title.textContent = entry.title;
+      const description = document.createElement('p');
+      description.textContent = entry.description || '';
+      const schedule = document.createElement('p');
+      schedule.className = 'profile-happy-hour-schedule';
+      const timeRange = [formatHappyHourTime(entry.startTime), formatHappyHourTime(entry.endTime)].filter(Boolean).join(' – ');
+      schedule.textContent = [entry.days, timeRange].filter(Boolean).join(' · ');
+      card.append(title, description, schedule);
+      if (entry.restrictions || entry.notes) {
+        const notes = document.createElement('p');
+        notes.className = 'profile-happy-hour-notes';
+        notes.textContent = entry.restrictions || entry.notes;
+        card.append(notes);
+      }
+      list.append(card);
+    });
+  }
+
+  function formatHappyHourTime(value) {
+    if (!value) return '';
+    const parts = value.split(':');
+    if (parts.length !== 2 || parts[0].length !== 2 || parts[1].length !== 2) return value;
+    const hour = Number(parts[0]);
+    const minute = parts[1];
+    if (!Number.isInteger(hour) || hour > 23 || !Number.isInteger(Number(minute)) || Number(minute) > 59) return value;
+    return (hour % 12 || 12) + ':' + minute + (hour < 12 ? ' AM' : ' PM');
+  }
+
   const jobs = business.jobs || [];
   if (jobs.length) {
     document.getElementById('jobs').hidden = false;
