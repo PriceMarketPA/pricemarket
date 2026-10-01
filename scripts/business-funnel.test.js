@@ -76,11 +76,30 @@ test('Mobile More menu groups discovery and business links without the obsolete 
 test('Onboarding navigation uses a refreshed stylesheet and stacks every step on narrow screens', () => {
   const css = read('styles.css');
   const html = read('business-onboarding.html');
-  assert.match(html, /href="\/styles\.css\?v=onboarding-mobile-nav-2"/);
+  assert.match(html, /href="\/styles\.css\?v=onboarding-mobile-nav-3"/);
   assert.match(css, /@media\(max-width:480px\)\{\.onboarding-site \.onboarding-step-panel \.onboarding-step-controls,\.onboarding-site \.onboarding-submit-panel \.onboarding-step-controls\{display:flex!important;flex-direction:column!important/);
   assert.match(css, /\.onboarding-site \.onboarding-step-panel \.onboarding-step-controls>\.btn,\.onboarding-site \.onboarding-submit-panel \.onboarding-step-controls>\.btn\{[^}]*width:100%!important;[^}]*flex:0 0 auto!important/);
   assert.match(css, /font-size:1rem;line-height:1\.25;white-space:normal!important/);
   assert.match(html, /onboarding-final-controls/);
+});
+test('Happy Hour mobile fields use one full-width days row and an equal two-column time row', () => {
+  const css = read('styles.css');
+  const html = read('business-onboarding.html');
+  const fields = html.match(/<div class="onboarding-fields happy-hour-fields"[\s\S]*?<\/div>/)?.[0];
+  assert.ok(fields, 'Happy Hour fields exist');
+  assert.match(fields, /<label class="happy-hour-days-field">Days offered<input name="happyHourDays" id="happyHourDays"/);
+  assert.equal((fields.match(/class="happy-hour-time-field"/g) || []).length, 2);
+  assert.match(fields, /class="happy-hour-time-field">Start time<input name="happyHourStartTime" id="happyHourStartTime" type="time"/);
+  assert.match(fields, /class="happy-hour-time-field">End time<input name="happyHourEndTime" id="happyHourEndTime" type="time"/);
+  assert.match(fields, /class="field-wide">Restrictions or notes[\s\S]*?name="happyHourRestrictions"/);
+  assert.match(css, /@media\(max-width:480px\)\{\.onboarding-fields\.happy-hour-fields\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)\}\.onboarding-fields\.happy-hour-fields>\.happy-hour-days-field\{grid-column:1\/-1\}/);
+  assert.match(css, /\.onboarding-fields\.happy-hour-fields>\.happy-hour-time-field input\[type=time\]\{width:100%;min-width:0;max-width:100%;box-sizing:border-box;text-align:center\}/);
+});
+test('Onboarding wizard centers its desktop form and restores the two-column Step 5 preview layout', () => {
+  const css = read('styles.css');
+  assert.match(css, /\.onboarding-layout\{grid-template-columns:minmax\(0,1fr\);max-width:900px;margin-inline:auto\}/);
+  assert.match(css, /\.onboarding-layout:has\(\.onboarding-preview-wrap:not\(\[hidden\]\)\)\{grid-template-columns:minmax\(0,1\.2fr\) minmax\(300px,\.8fr\);max-width:1240px\}/);
+  assert.match(css, /@media\(max-width:980px\)\{\.onboarding-layout,\.onboarding-layout:has\(\.onboarding-preview-wrap:not\(\[hidden\]\)\)\{grid-template-columns:minmax\(0,1fr\);max-width:900px\}\}/);
 });
 test('New indexable routes are included in sitemap and linked through the site shell', () => {
   const sitemap = read('sitemap.xml');
