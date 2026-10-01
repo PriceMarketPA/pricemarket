@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Price Market | Central PA’s Marketplace for Local Deals & Businesses</title>
   <meta name="description" content="Price Market is Central PA’s marketplace for local deals, businesses, and job opportunities. Save local, buy local, and hire local across Mechanicsburg, Camp Hill, Carlisle, Harrisburg, and Hershey.">
   <meta name="keywords" content="Central PA deals, local businesses, Mechanicsburg deals, Harrisburg businesses, Camp Hill coupons, Carlisle jobs, Hershey local marketplace, Price Market PA">
@@ -48,7 +48,7 @@
       <a href="#cities">Cities</a>
     </div>
     <div class="nav-actions">
-      <button class="btn ghost open-waitlist">Join Waitlist</button>
+      <button class="btn ghost open-waitlist"><span class="desktop-join-label">Join Waitlist</span><span class="mobile-join-label">Join</span></button>
       <button class="btn dark open-business">For Businesses</button>
     </div>
   </header>
@@ -57,8 +57,8 @@
     <section class="hero">
       <div class="hero-copy">
         <div class="eyebrow">Launching soon in Central Pennsylvania</div>
-        <h1>Local deals, businesses, and jobs — all in one place.</h1>
-        <p class="hero-sub">Price Market helps Central PA residents save locally, discover nearby businesses, and find opportunities close to home.</p>
+        <h1><span class="desktop-hero-title">Local deals, businesses, and jobs — all in one place.</span><span class="mobile-hero-title">Find what’s happening nearby.</span></h1>
+        <p class="hero-sub"><span class="desktop-hero-copy">Price Market helps Central PA residents save locally, discover nearby businesses, and find opportunities close to home.</span><span class="mobile-hero-copy">Deals, Happy Hours, local businesses &amp; jobs across Central PA.</span></p>
         <div class="actions">
           <button class="btn blue open-waitlist">Join the Waitlist</button>
           <button class="btn white open-business">Become a Founding Business</button>
@@ -99,7 +99,7 @@
       <div class="marketplace-heading">
         <div>
           <p class="small-title">Your neighborhood, for less</p>
-          <h2 id="marketplaceTitle">Good finds are closer than you think.</h2>
+          <h2 id="marketplaceTitle"><span class="desktop-market-title">Good finds are closer than you think.</span><span class="mobile-market-title">Popular near you</span></h2>
           <p>Explore the local businesses and offers that make Central PA worth staying local for.</p>
         </div>
         <span class="preview-note">Central PA · example listings</span>
@@ -132,6 +132,23 @@
         </div>
         <button class="btn blue" type="submit">Search</button>
       </form>
+      <section class="mobile-discovery" aria-label="Explore local listings">
+        <div class="mobile-discovery-heading"><h3>Explore Central PA</h3><span>Example listings</span></div>
+        <div class="discovery-tile-grid">
+          <button class="discovery-tile" type="button" data-discovery-type="deal" aria-pressed="false">
+            <img src="assets/showcase-restaurant.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"><span class="discovery-tile-shade"></span><span class="discovery-tile-copy"><strong>Deals</strong><small>Local offers</small></span><span class="discovery-example">EXAMPLES</span>
+          </button>
+          <button class="discovery-tile" type="button" data-discovery-type="happy-hour" aria-pressed="false">
+            <img src="assets/deal-coffee.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"><span class="discovery-tile-shade"></span><span class="discovery-tile-copy"><strong>Happy Hour</strong><small>Food &amp; drink specials</small></span><span class="discovery-example">EXAMPLES</span>
+          </button>
+          <button class="discovery-tile" type="button" data-discovery-type="business" aria-pressed="false">
+            <img src="assets/showcase-home-service.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"><span class="discovery-tile-shade"></span><span class="discovery-tile-copy"><strong>Businesses</strong><small>People behind the places</small></span><span class="discovery-example">EXAMPLES</span>
+          </button>
+          <button class="discovery-tile" type="button" data-discovery-type="job" aria-pressed="false">
+            <img src="assets/showcase-fitness.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"><span class="discovery-tile-shade"></span><span class="discovery-tile-copy"><strong>Jobs</strong><small>Work close to home</small></span><span class="discovery-example">EXAMPLES</span>
+          </button>
+        </div>
+      </section>
 
       <div class="market-type-switch" role="group" aria-label="Browse listing type">
         <button type="button" class="market-type-button is-active" data-market-type="all" aria-pressed="true">All listings</button>
@@ -155,6 +172,7 @@
         </div>
       </div>
 
+      <div class="mobile-results-intro"><h3>Popular Near You</h3><p>Local examples around Central Pennsylvania</p></div>
       <div class="market-results" id="marketResults" aria-live="polite">
         <section class="market-section" aria-labelledby="dealsTitle">
           <div class="market-section-heading"><div><p class="small-title">Worth a closer look</p><h3 id="dealsTitle">Featured deals</h3></div><span class="sample-caption">Example offers</span></div>
@@ -402,6 +420,26 @@
   <span>© 2026 Price Market</span>
   <span>Built for Central Pennsylvania</span>
 </footer>
+
+
+<nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+  <a class="mobile-nav-home" href="#top" aria-label="Home" data-mobile-home>Home</a>
+  <button type="button" data-mobile-type="deal" aria-pressed="false">Deals</button>
+  <button type="button" data-mobile-type="happy-hour" aria-pressed="false">Happy Hour</button>
+  <button type="button" data-mobile-type="job" aria-pressed="false">Jobs</button>
+  <div class="mobile-more-wrap">
+    <button type="button" class="mobile-more-button" id="mobileMoreButton" aria-expanded="false" aria-controls="mobileMoreMenu">More</button>
+    <div class="mobile-more-menu" id="mobileMoreMenu" role="group" aria-label="More navigation" hidden>
+      <button type="button" data-mobile-type="business" aria-pressed="false">Businesses</button>
+      <button type="button" data-mobile-type="all" aria-pressed="false">All listings</button>
+      <a href="business-onboarding.html">List your business</a>
+      <button type="button" class="open-waitlist">Join the waitlist</button>
+      <button type="button" class="open-business">For businesses</button>
+      <a href="#how-it-works">How it works</a>
+      <a href="#cities">Central PA cities</a>
+    </div>
+  </div>
+</nav>
 
 <script>
 const LEADS_API_URL = "https://script.google.com/macros/s/AKfycbxU3krjD4BPxDjzSIbRrDVlGLS_mqZ21watyba5k2I_9y7-oHG0aYobftXK0QBVC-Bp/exec";
@@ -783,6 +821,16 @@ function filterMarket() {
     else if (section.classList.contains('businesses-section')) section.hidden = counts.business === 0;
     else section.hidden = counts.deal === 0;
   });
+  document.querySelectorAll('[data-discovery-type]').forEach(tile => {
+    const selected = tile.dataset.discoveryType === activeType;
+    tile.classList.toggle('is-active', selected);
+    tile.setAttribute('aria-pressed', String(selected));
+  });
+  document.querySelectorAll('[data-mobile-type]').forEach(button => {
+    const selected = button.dataset.mobileType === activeType;
+    button.classList.toggle('is-active', selected);
+    button.setAttribute('aria-pressed', String(selected));
+  });
   noResults.hidden = visible > 0;
   const total = counts.deal + counts.business + counts.job + counts['happy-hour'];
   resultsSummary.textContent = visible
@@ -838,6 +886,43 @@ document.getElementById('clearFilters').addEventListener('click', () => {
   if (typeof gtag === 'function') gtag('event', 'marketplace_clear_filters');
 });
 document.getElementById('emptyReset').addEventListener('click', resetMarketFilters);
+const discoveryButtons = [...document.querySelectorAll('[data-discovery-type]')];
+discoveryButtons.forEach(button => button.addEventListener('click', () => {
+  document.querySelector('[data-market-type="' + button.dataset.discoveryType + '"]').click();
+  document.getElementById('marketResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}));
+const mobileMoreButton = document.getElementById('mobileMoreButton');
+const mobileMoreMenu = document.getElementById('mobileMoreMenu');
+function closeMobileMore(restoreFocus = false) {
+  mobileMoreMenu.hidden = true;
+  mobileMoreButton.setAttribute('aria-expanded', 'false');
+  mobileMoreButton.classList.remove('is-active');
+  if (restoreFocus) mobileMoreButton.focus();
+}
+mobileMoreButton.addEventListener('click', () => {
+  const opening = mobileMoreMenu.hidden;
+  mobileMoreMenu.hidden = !opening;
+  mobileMoreButton.setAttribute('aria-expanded', String(opening));
+  mobileMoreButton.classList.toggle('is-active', opening);
+});
+document.querySelectorAll('[data-mobile-type]').forEach(button => button.addEventListener('click', () => {
+  document.querySelector('[data-market-type="' + button.dataset.mobileType + '"]').click();
+  closeMobileMore();
+  document.getElementById('marketResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}));
+mobileMoreMenu.addEventListener('click', event => {
+  if (event.target.closest('a, button.open-waitlist, button.open-business')) closeMobileMore();
+});
+document.addEventListener('pointerdown', event => {
+  if (!mobileMoreMenu.hidden && !mobileMoreMenu.contains(event.target) && !mobileMoreButton.contains(event.target)) closeMobileMore();
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && !mobileMoreMenu.hidden) closeMobileMore(true);
+});
+document.querySelector('[data-mobile-home]').addEventListener('click', () => {
+  resetMarketFilters();
+  closeMobileMore();
+});
 filterMarket();
 </script>
 </body>
