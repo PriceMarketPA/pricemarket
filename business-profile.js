@@ -1,7 +1,10 @@
 (() => {
   const profiles = window.priceMarketBusinesses || {};
-  const slug = new URLSearchParams(window.location.search).get('business') || 'keystone-pizza';
+  const routeMatch = window.location.pathname.match(/^\/business\/([^/]+)\/?$/);
+  const querySlug = new URLSearchParams(window.location.search).get('business');
+  const slug = querySlug || (routeMatch ? decodeURIComponent(routeMatch[1]) : 'keystone-pizza');
   const business = profiles[slug];
+  const assetUrl = value => typeof value === 'string' && value && !/^(?:[a-z]+:)?\/\//i.test(value) && !value.startsWith('/') ? `/${value}` : value;
   const root = document.getElementById('profileRoot');
   const missing = document.getElementById('profileNotFound');
 
@@ -11,7 +14,29 @@
   }
 
   root.hidden = false;
-  document.title = `${business.name} | ${business.demo ? 'Demo Business Profile' : 'Business Profile'} | Price Market`;
+  const isCanonicalProfileRoute = business.demo === false && !!routeMatch && !querySlug;
+  const canonicalUrl = business.demo === false
+    ? `https://pricemarketpa.com/business/${encodeURIComponent(slug)}`
+    : `https://pricemarketpa.com/business-profile?business=${encodeURIComponent(slug)}`;
+  const title = `${business.name} | ${business.demo === false ? 'Business Profile' : 'Demo Business Profile'} | Price Market`;
+  const description = String(business.description || 'Explore a Price Market Central Pennsylvania business profile.').trim().slice(0, 300);
+  document.title = title;
+  document.getElementById('profileRobots').content = isCanonicalProfileRoute ? 'index,follow,max-image-preview:large' : 'noindex,follow';
+  document.getElementById('profileCanonical').href = canonicalUrl;
+  document.getElementById('profileOgTitle').content = title;
+  document.getElementById('profileOgDescription').content = description;
+  document.getElementById('profileOgUrl').content = canonicalUrl;
+  document.getElementById('profileTwitterTitle').content = title;
+  document.getElementById('profileTwitterDescription').content = description;
+  if (business.heroImage?.src) {
+    const socialImage = new URL(assetUrl(business.heroImage.src), 'https://pricemarketpa.com/').href;
+    document.getElementById('profileOgImage').content = socialImage;
+    document.getElementById('profileTwitterImage').content = socialImage;
+  }
+  const localBusinessSchema = isCanonicalProfileRoute && window.PriceMarketSEO?.buildLocalBusinessSchema
+    ? window.PriceMarketSEO.buildLocalBusinessSchema(business, slug)
+    : null;
+  if (localBusinessSchema) document.getElementById('profileStructuredData').textContent = JSON.stringify(localBusinessSchema);
   document.getElementById('businessDemoLabel').hidden = !business.demo;
   document.getElementById('profileDemoNote').hidden = !business.demo;
   document.getElementById('dealExampleTag').textContent = business.demo ? 'Example offers' : 'Current offers';
@@ -22,14 +47,14 @@
   document.getElementById('businessDescription').textContent = business.description;
 
   const hero = document.getElementById('businessHero');
-  hero.src = business.heroImage.src;
+  hero.src = assetUrl(business.heroImage.src);
   hero.alt = business.heroImage.alt;
   document.getElementById('businessCoverCaption').textContent = `${business.city}, ${business.state}`;
 
   const avatar = document.getElementById('businessAvatar');
   if (business.logoImage) {
     const logo = document.createElement('img');
-    logo.src = business.logoImage;
+    logo.src = assetUrl(business.logoImage);
     logo.alt = `${business.name} logo`;
     avatar.append(logo);
   } else {
@@ -56,7 +81,7 @@
   addAction('Call', business.phone ? `tel:${business.phone.replace(/[^+\d]/g, '')}` : '', 'blue');
   addAction('Visit website', business.website?.href, 'white', true);
   addAction('View Deals', '#deals', 'dark');
-  addAction('Claim this business', 'index.html#businesses', 'ghost');
+  addAction('Claim this business', '/#businesses', 'ghost');
 
   const deals = document.getElementById('businessDeals');
   (business.deals || []).forEach(deal => {
@@ -140,7 +165,7 @@
     gallery.forEach(photo => {
       const figure = document.createElement('figure');
       const image = document.createElement('img');
-      image.src = photo.src;
+      image.src = assetUrl(photo.src);
       image.alt = photo.alt;
       image.loading = 'lazy';
       image.decoding = 'async';

@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Price Market | Central PA’s Marketplace for Local Deals & Businesses</title>
   <meta name="description" content="Price Market is Central PA’s marketplace for local deals, businesses, and job opportunities. Save local, buy local, and hire local across Mechanicsburg, Camp Hill, Carlisle, Harrisburg, and Hershey.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://pricemarketpa.com/">
   <meta name="keywords" content="Central PA deals, local businesses, Mechanicsburg deals, Harrisburg businesses, Camp Hill coupons, Carlisle jobs, Hershey local marketplace, Price Market PA">
   <meta name="theme-color" content="#1454e6">
   <link rel="icon" href="/favicon.ico" sizes="any">
@@ -13,14 +15,19 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
   <meta property="og:title" content="Price Market | Central PA’s Local Marketplace">
+  <meta property="og:site_name" content="Price Market">
+  <meta property="og:locale" content="en_US">
   <meta property="og:description" content="Discover local deals, businesses, and job opportunities across Central PA.">
-  <meta property="og:image" content="https://www.pricemarketpa.com/favicon-32x32.png">
-  <meta property="og:url" content="https://www.pricemarketpa.com">
+  <meta property="og:image" content="https://pricemarketpa.com/favicon-32x32.png">
+  <meta property="og:image:alt" content="Price Market Central PA marketplace">
+  <meta property="og:url" content="https://pricemarketpa.com/">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Price Market | Central PA’s Local Marketplace">
   <meta name="twitter:description" content="Discover local deals, businesses, and job opportunities across Central PA.">
-  <meta name="twitter:image" content="https://www.pricemarketpa.com/favicon-32x32.png">
+  <meta name="twitter:image" content="https://pricemarketpa.com/favicon-32x32.png">
+  <meta name="twitter:image:alt" content="Price Market Central PA marketplace">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://pricemarketpa.com/#organization","name":"Price Market","url":"https://pricemarketpa.com/","description":"A Central Pennsylvania marketplace for local deals, Happy Hours, businesses, and jobs.","logo":{"@type":"ImageObject","url":"https://pricemarketpa.com/pm-logo.png"}},{"@type":"WebSite","@id":"https://pricemarketpa.com/#website","url":"https://pricemarketpa.com/","name":"Price Market","publisher":{"@id":"https://pricemarketpa.com/#organization"},"potentialAction":{"@type":"SearchAction","target":"https://pricemarketpa.com/?q={search_term_string}","query-input":"required name=search_term_string"}}]}</script>
   <link rel="preconnect" href="https://script.google.com">
   <link rel="stylesheet" href="styles.css">
   <!-- Google tag (gtag.js) -->
@@ -588,7 +595,10 @@ function profileCategory(profile) {
 }
 
 function profileHref(slug) {
-  return 'business-profile.html?business=' + encodeURIComponent(slug);
+  const profile = window.priceMarketBusinesses && window.priceMarketBusinesses[slug];
+  return profile && profile.demo === false
+    ? '/business/' + encodeURIComponent(slug)
+    : 'business-profile.html?business=' + encodeURIComponent(slug);
 }
 
 function formatHappyHourTime(value) {
@@ -847,6 +857,22 @@ document.querySelector('[data-mobile-home]').addEventListener('click', () => {
   resetMarketFilters();
   closeMobileMore();
 });
+const initialParams = new URLSearchParams(window.location.search);
+if (initialParams.has('q')) marketQuery.value = initialParams.get('q') || '';
+const initialCity = initialParams.get('city');
+if (initialCity && [...cityFilter.options].some(option => option.value === initialCity)) {
+  cityFilter.value = initialCity;
+  cityDropdown.sync();
+}
+const requestedType = initialParams.get('type');
+if (requestedType && marketTypeButtons.some(button => button.dataset.marketType === requestedType)) {
+  activeType = requestedType;
+  marketTypeButtons.forEach(button => {
+    const selected = button.dataset.marketType === requestedType;
+    button.classList.toggle('is-active', selected);
+    button.setAttribute('aria-pressed', String(selected));
+  });
+}
 filterMarket();
 </script>
 </body>
