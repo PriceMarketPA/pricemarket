@@ -80,4 +80,60 @@ function inspectMagicBytes(buffer, contentType) {
   return false;
 }
 
-module.exports = { IMAGE_LIMIT, PDF_LIMIT, IMAGE_MIMES, expectedForRole, validateDescriptor, makeCapability, verifyCapability, safeObjectPath, validatePendingPath, inspectMagicBytes };
+function normalizeOrigin(origin) {
+  if (typeof origin !== 'string' || !origin || origin.length > 300) return null;
+  try {
+    const parsed = new URL(origin);
+    if (parsed.protocol !== 'https:' || parsed.username || parsed.password || parsed.origin !== origin) return null;
+    return parsed.origin;
+  } catch { return null; }
+}
+
+function vercelHost(value) {
+  if (typeof value !== 'string') return null;
+  const host = value.trim().toLowerCase();
+  if (!host || host.length > 253 || host.includes('/') || host.includes(':') || !/^[a-z0-9.-]+$/.test(host)) return null;
+  return host.endsWith('.vercel.app') && host.split('.').every(part => part && part !== '..') ? host : null;
+}
+
+function approvedOrigins(env = {}) {
+  if (env.VERCEL_ENV === 'production') return new Set(['https://pricemarketpa.com', 'https://www.pricemarketpa.com']);
+  if (env.VERCEL_ENV === 'preview') {
+    return new Set([env.VERCEL_URL, env.VERCEL_BRANCH_URL].map(vercelHost).filter(Boolean).map(host => `https://${host}`));
+  }
+  return new Set(String(env.BUSINESS_UPLOAD_ALLOWED_ORIGINS || '').split(',').map(value => normalizeOrigin(value.trim())).filter(Boolean));
+}
+
+function isApprovedOrigin(origin, env = {}) {
+  const normalized = normalizeOrigin(origin);
+  return Boolean(normalized && approvedOrigins(env).has(normalized));
+}
+
+function signPayload(payload, secret) {
+  const encoded = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const signature = crypto.createHmac('sha256', secret).update(encoded).digest('base64url');
+  return `${encoded}.${signature}`;
+}
+
+function readSignedPayload(token, secret, now = Date.now()) {
+  if (typeof token !== 'string' || token.length > 1200) return null;
+  const [encoded, signature, extra] = token.split('.');
+  if (!encoded || !signature || extra) return null;
+  const expected = crypto.createHmac('sha256', secret).update(encoded).digest();
+  let actual;
+  try { actual = Buffer.from(signature, 'base64url'); } catch { return null; }
+  if (actual.length !== expected.length || !crypto.timingSafeEqual(actual, expected)) return null;
+  try {
+    const payload = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'));
+    return Number.isFinite(payload.expiresAt) && payload.expiresAt > now ? payload : null;
+  } catch { return null; }
+}
+
+function verifyProofOfWork(nonce, counter, difficultyBits = 16) {
+  if (typeof nonce !== 'string' || nonce.length < 20 || nonce.length > 100 || !Number.isSafeInteger(Number(counter)) || Number(counter) < 0 || difficultyBits !== 16) return false;
+  const digest = crypto.createHash('sha256').update(`${nonce}:${Number(counter)}`).digest();
+  return digest[0] === 0 && digest[1] === 0;
+}
+
+module.exports = { IMAGE_LIMIT, PDF_LIMIT, IMAGE_MIMES, expectedForRole, validateDescriptor, makeCapability, verifyCapability, safeObjectPath, validatePendingPath, inspectMagicBytes, normalizeOrigin, vercelHost, approvedOrigins, isApprovedOrigin, signPayload, readSignedPayload, verifyProofOfWork };
+

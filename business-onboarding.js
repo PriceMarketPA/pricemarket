@@ -37,7 +37,7 @@
     currentStep = Math.max(1, Math.min(5, step));
     stepPanels.forEach(panel => { panel.hidden = Number(panel.dataset.stepPanel) !== currentStep; });
     form.querySelectorAll('[data-step-indicator]').forEach(item => { const active = Number(item.dataset.stepIndicator) === currentStep; if (active) item.setAttribute('aria-current', 'step'); else item.removeAttribute('aria-current'); });
-    const count = byId('onboardingStepCount'); if (count) count.textContent = 'Step ' + currentStep + ' of 5 · ' + stepNames[currentStep - 1];
+    const count = byId('onboardingStepCount'); if (count) count.textContent = 'Step ' + currentStep + ' of 5 � ' + stepNames[currentStep - 1];
     if (previewAside) previewAside.hidden = currentStep !== 5;
     if (focusHeading) { const heading = stepPanels[currentStep - 1]?.querySelector('h2'); heading?.setAttribute('tabindex', '-1'); heading?.focus(); }
   }
@@ -80,9 +80,27 @@
     return result;
   }
 
-  async function ensureUploadSession() {
+  async function solveUploadChallenge(challenge) {
+    if (!window.crypto?.subtle || typeof TextEncoder === 'undefined') throw new Error('This browser cannot prepare the secure upload. Please update your browser or use the image URL fallback.');
+    let counter = 0;
+    while (counter < 10000000) {
+      const digest = new Uint8Array(await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${challenge.nonce}:${counter}`)));
+      if (digest[0] === 0 && digest[1] === 0) return counter;
+      counter++;
+      if (counter % 512 === 0) await new Promise(resolve => window.setTimeout(resolve, 0));
+    }
+    throw new Error('Upload verification took too long. Please try again.');
+  }
+
+  async function ensureUploadSession(slot) {
     if (!uploadSession) {
-      const response = await fetch(uploadApi, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'initialize' }) });
+      setUploadStatus(slot, 'Preparing secure upload.');
+      const options = { method: 'POST', headers: { 'Content-Type': 'application/json' } };
+      const challengeResponse = await fetch(uploadApi, { ...options, body: JSON.stringify({ action: 'challenge' }) });
+      const challenge = await challengeResponse.json().catch(() => ({}));
+      if (!challengeResponse.ok || !challenge.challengeToken) throw new Error(challenge.error || 'Could not prepare upload verification. Please try again.');
+      const proof = await solveUploadChallenge(challenge);
+      const response = await fetch(uploadApi, { ...options, body: JSON.stringify({ action: 'initialize', challengeId: challenge.challengeId, challengeToken: challenge.challengeToken, proof }) });
       const result = await response.json().catch(() => ({}));
       if (!response.ok || !result.submissionId || !result.capability) throw new Error(result.error || 'Could not prepare a secure upload. Please try again.');
       uploadSession = result;
@@ -168,12 +186,13 @@
   async function uploadOne(slot, role, file) {
     const isDocument = role === 'document';
     validateSelectedFile(file, isDocument);
-    await ensureUploadSession();
+    await ensureUploadSession(slot);
+    const previousAsset = role.startsWith('gallery-') ? uploadedAssets.gallery.find(asset => asset.role === role) : uploadedAssets[slot];
     let signed;
     try {
-      signed = await callUploadApi({ action: 'sign', role, contentType: file.type, size: file.size });
-      setUploadStatus(slot, `Uploading ${file.name} · 0%`);
-      await uploadBytes(signed.uploadUrl, file, percent => setUploadStatus(slot, `Uploading ${file.name} · ${percent}%`));
+      signed = await callUploadApi({ action: 'sign', role, contentType: file.type, size: file.size, replacePath: previousAsset?.path || '' });
+      setUploadStatus(slot, `Uploading ${file.name} � 0%`);
+      await uploadBytes(signed.uploadUrl, file, percent => setUploadStatus(slot, `Uploading ${file.name} � ${percent}%`));
       const complete = await callUploadApi({ action: 'finalize', role, bucket: signed.bucket, path: signed.path, contentType: file.type, size: file.size, fileName: file.name });
       return { ...complete, role, fileName: file.name };
     } catch (error) {
@@ -194,7 +213,8 @@
       if (slot === 'gallery') {
         if (uploadedAssets.gallery.length + files.length > 5) throw new Error('You can add up to five gallery photos. Remove a photo before adding another.');
         for (const [index, file] of files.entries()) {
-          const role = `gallery-${uploadedAssets.gallery.length + 1}`;
+          const usedRoles = new Set(uploadedAssets.gallery.map(asset => asset.role));
+          const role = ['gallery-1', 'gallery-2', 'gallery-3', 'gallery-4', 'gallery-5'].find(candidate => !usedRoles.has(candidate));
           const asset = await uploadOne('gallery', role, file);
           uploadedAssets.gallery.push(asset);
           setUploadStatus('gallery', `${uploadedAssets.gallery.length} of 5 gallery photos uploaded.`);
@@ -204,7 +224,8 @@
         const previous = uploadedAssets[slot];
         uploadedAssets[slot] = asset;
         let previousRemoved = true;
-        if (previous) { try { await callUploadApi({ action: 'remove', path: previous.path, bucket: previous.bucket, role: previous.role }); } catch { previousRemoved = false; } }
+        const replacedPath = asset.replacedPath || previous?.path;
+        if (replacedPath) { try { await callUploadApi({ action: 'remove', path: replacedPath, bucket: previous?.bucket || asset.bucket, role: asset.role }); } catch { previousRemoved = false; } }
         setUploadStatus(slot, `${files[0].name} uploaded.${previous && !previousRemoved ? ' The replaced pending file could not be removed; it will not be submitted.' : ''}`, Boolean(previous && !previousRemoved));
       }
       renderUploadPreviews();
@@ -244,7 +265,7 @@
       const closing = form.elements[`hoursClose-${day}`].value;
       if (closed) return [{ days: day, time: 'Closed' }];
       if (!opening && !closing) return [];
-      return [{ days: day, time: `${formatTime(opening)} – ${formatTime(closing)}`.trim() }];
+      return [{ days: day, time: `${formatTime(opening)} - ${formatTime(closing)}`.trim() }];
     });
   }
 
@@ -259,12 +280,12 @@
     const dealDescription = read('dealDescription');
 
     setText('previewBusinessName', name, 'Your Business Name');
-    setText('previewCategoryCity', `${category || 'Your category'} · ${city || 'Your city'}, PA`);
+    setText('previewCategoryCity', `${category || 'Your category'} � ${city || 'Your city'}, PA`);
     setText('previewDescription', description, 'Your short business introduction will appear here, helping neighbors get to know you.');
     setText('previewAddress', read('businessAddress'), 'Your address');
     setText('previewHours', hours.length ? `${hours.length} day${hours.length === 1 ? '' : 's'} of hours added` : '', 'Add your hours');
     setText('previewDealTitle', dealTitle, 'Your featured deal');
-    setText('previewDealDescription', dealDescription, 'A quick look at the offer you’d like to share.');
+    setText('previewDealDescription', dealDescription, 'A quick look at the offer you'd like to share.');
     const logo = uploadedAssets.logo?.publicUrl || validImageUrl(read('logoImage'));
     byId('previewAvatar').textContent = '';
     if (logo) {
@@ -299,9 +320,9 @@
     const happyHourEndTime = read('happyHourEndTime');
     const happyHourDescription = read('happyHourDescription');
     const happyHourRestrictions = read('happyHourRestrictions');
-    const happyHourRange = [formatTime(happyHourStartTime), formatTime(happyHourEndTime)].filter(Boolean).join('–');
+    const happyHourRange = [formatTime(happyHourStartTime), formatTime(happyHourEndTime)].filter(Boolean).join('-');
     setText('previewHappyHourTitle', happyHourTitle, 'Your Happy Hour offer');
-    setText('previewHappyHourSchedule', [happyHourDays, happyHourRange].filter(Boolean).join(' · '), 'Add the days and times');
+    setText('previewHappyHourSchedule', [happyHourDays, happyHourRange].filter(Boolean).join(' � '), 'Add the days and times');
     setText('previewHappyHourDescription', happyHourDescription, 'A recurring special for your neighbors.');
     const restrictions = byId('previewHappyHourRestrictions');
     restrictions.textContent = happyHourRestrictions;
@@ -415,7 +436,7 @@
     };
 
     submitButton.disabled = true;
-    submitButton.textContent = 'Sending for review…';
+    submitButton.textContent = 'Sending for review.';
     try {
       await fetch(LEADS_API_URL, {
         method: 'POST',
@@ -425,18 +446,19 @@
       });
       const confirmation = byId('submissionConfirmation');
       if (confirmation) { form.hidden = true; if (stepper) stepper.hidden = true; if (previewAside) previewAside.hidden = true; confirmation.hidden = false; confirmation.focus(); }
-      status.textContent = 'Thanks — your profile submission is pending review. It has not been published.';
+      status.textContent = 'Thanks - your profile submission is pending review. It has not been published.';
       status.classList.add('is-success');
       status.hidden = false;
       if (typeof gtag === 'function') gtag('event', 'business_profile_submission', { business_category: profileData.category, city: profileData.city });
     } catch (error) {
-      status.textContent = 'We couldn’t send that just now. Please try again in a moment.';
+      status.textContent = 'We couldn't send that just now. Please try again in a moment.';
       status.classList.remove('is-success');
       status.hidden = false;
     } finally {
-      if (!byId('submissionConfirmation')?.hidden) { submitButton.disabled = false; submitButton.innerHTML = 'Submit for review <span aria-hidden="true">→</span>'; }
+      if (!byId('submissionConfirmation')?.hidden) { submitButton.disabled = false; submitButton.innerHTML = 'Submit for review <span aria-hidden="true"></span>'; }
     }
   });
 
   refreshPreview();
 })();
+

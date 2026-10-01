@@ -20,7 +20,7 @@ test('For Businesses landing page has indexable metadata and the founding offer'
   assert.match(html, /href="\/business-onboarding"/);
   assert.match(html, /See an Example Profile/);
   assert.match(html, /business-profile\.html\?business=keystone-pizza/);
-  for (const phrase of ['Founding Business — Free', '$0 during our Central PA launch.', 'No contract. No credit card required.', 'Business Profiles', 'Deals', 'Happy Hours', 'Job Listings', 'Local discovery and search']) assert.ok(html.includes(phrase), phrase);
+  for (const phrase of ['Founding Business - Free', '$0 during our Central PA launch.', 'No contract. No credit card required.', 'Business Profiles', 'Deals', 'Happy Hours', 'Job Listings', 'Local discovery and search']) assert.ok(html.includes(phrase), phrase);
   assert.match(html, /rel="canonical" href="https:\/\/pricemarketpa\.com\/for-businesses"/);
   assert.match(html, /name="robots" content="index,follow/);
   assert.ok(schemaFrom(html)['@graph'].some(entry => entry['@type'] === 'WebPage'));
@@ -73,7 +73,10 @@ test('Business onboarding provides image and PDF uploads with URL fallback and p
   assert.match(script, /profileDataJson: JSON\.stringify\(profileData\)/);
   assert.match(script, /reviewStatus: 'Pending review'/);
   assert.match(script, /uploadBytes\(signed\.uploadUrl/);
-  assert.match(script, /Uploading \$\{file\.name\} · \$\{percent\}%/);
+  assert.match(script, /Uploading \$\{file\.name\} � \$\{percent\}%/);
+  assert.match(script, /action: 'challenge'/);
+  assert.match(script, /solveUploadChallenge\(challenge\)/);
+  assert.match(script, /replacePath: previousAsset\?\.path/);
 });
 
 test('Mobile More menu groups discovery and business links without the obsolete waitlist action', () => {
@@ -133,3 +136,4 @@ test('New indexable routes are included in sitemap and linked through the site s
   assert.match(home, /initialParams.get\('form'\) === 'business'/);
   assert.ok(seoGenerator.includes("const routes = ['/', '/about', '/for-businesses'"));
 });
+
