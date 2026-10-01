@@ -33,6 +33,7 @@
   gtag('config', 'G-KC4258L331');
 </script>
   <script src="businesses.js"></script>
+  <script src="price-market-dropdown.js"></script>
 </head>
 <body>
 <div class="site">
@@ -114,9 +115,9 @@
         <div class="city-field">
           <span class="sr-only" id="cityFilterLabel">Choose a Central Pennsylvania city</span>
           <span aria-hidden="true">⌖</span>
-          <div class="pm-dropdown" id="cityDropdown" data-pm-dropdown data-open="false">
+          <div class="pm-dropdown" id="cityDropdown" data-pm-dropdown data-open="false" data-select-id="cityFilter">
             <button class="pm-dropdown-trigger" id="cityFilterTrigger" type="button" role="combobox" aria-label="Choose a Central Pennsylvania city" aria-haspopup="listbox" aria-expanded="false" aria-controls="cityFilterListbox" aria-autocomplete="none">
-              <span id="cityFilterValue">All Central PA</span>
+              <span class="pm-dropdown-value" id="cityFilterValue">All Central PA</span>
               <span class="pm-dropdown-chevron" aria-hidden="true"></span>
             </button>
             <div class="pm-dropdown-listbox" id="cityFilterListbox" role="listbox" aria-labelledby="cityFilterLabel" aria-hidden="true"></div>
@@ -352,13 +353,17 @@
     <img class="modal-logo" src="pm-logo.png" alt="Price Market PM logo">
     <h2 id="waitlistTitle">Join the Price Market Waitlist</h2>
     <p>Be first to know when local deals, businesses, and jobs go live.</p>
-    <form class="lead-form" data-lead-type="Waitlist">
+    <form class="lead-form" data-lead-type="Waitlist" novalidate>
       <label>First Name<input type="text" name="firstName" placeholder="First name" required></label>
       <label>Last Name<input type="text" name="lastName" placeholder="Last name"></label>
       <label>Email Address<input type="email" name="email" placeholder="you@example.com" required></label>
       <label>ZIP Code<input type="text" name="zipCode" placeholder="17055"></label>
       <label>I am a...
-        <select name="interest" class="pm-select" required>
+        <div class="pm-dropdown form-pm-dropdown" id="waitlistInterestDropdown" data-pm-dropdown data-open="false" data-select-id="waitlistInterestSelect" data-required="true">
+            <button class="pm-dropdown-trigger" id="waitlistInterestTrigger" type="button" aria-label="Waitlist interest" aria-haspopup="listbox" aria-expanded="false" aria-controls="waitlistInterestListbox" aria-autocomplete="none"><span class="pm-dropdown-value" id="waitlistInterestValue">Select one</span><span class="pm-dropdown-chevron" aria-hidden="true"></span></button>
+            <div class="pm-dropdown-listbox" id="waitlistInterestListbox" role="listbox" aria-label="Waitlist interest options" aria-hidden="true"></div>
+          </div>
+          <select name="interest" class="pm-dropdown-source sr-only" id="waitlistInterestSelect" aria-hidden="true" tabindex="-1">
           <option value="">Select one</option>
           <option>Shopper</option>
           <option>Local Business Owner</option>
@@ -379,13 +384,17 @@
     <img class="modal-logo" src="pm-logo.png" alt="Price Market PM logo">
     <h2 id="businessTitle">Become a Founding Business</h2>
     <p>Get early access to promote your business, feature deals, and share local hiring opportunities before launch.</p>
-    <form class="lead-form" data-lead-type="Business">
+    <form class="lead-form" data-lead-type="Business" novalidate>
       <label>Business Name<input type="text" name="businessName" placeholder="Business name" required></label>
       <label>Contact Name<input type="text" name="contactName" placeholder="Your name" required></label>
       <label>Email Address<input type="email" name="email" placeholder="you@example.com" required></label>
       <label>Phone Number<input type="tel" name="phone" placeholder="717-555-1234"></label>
       <label>Business Category
-        <select name="businessCategory" class="pm-select" required>
+        <div class="pm-dropdown form-pm-dropdown" id="businessCategoryDropdown" data-pm-dropdown data-open="false" data-select-id="businessCategorySelect" data-required="true">
+            <button class="pm-dropdown-trigger" id="businessCategoryTrigger" type="button" aria-label="Business category" aria-haspopup="listbox" aria-expanded="false" aria-controls="businessCategoryListbox" aria-autocomplete="none"><span class="pm-dropdown-value" id="businessCategoryValue">Select one</span><span class="pm-dropdown-chevron" aria-hidden="true"></span></button>
+            <div class="pm-dropdown-listbox" id="businessCategoryListbox" role="listbox" aria-label="Business category options" aria-hidden="true"></div>
+          </div>
+          <select name="businessCategory" class="pm-dropdown-source sr-only" id="businessCategorySelect" aria-hidden="true" tabindex="-1">
           <option value="">Select one</option>
           <option>Restaurant / Food</option>
           <option>Retail / Shopping</option>
@@ -398,7 +407,11 @@
         </select>
       </label>
       <label>I am interested in...
-        <select name="interest" class="pm-select" required>
+        <div class="pm-dropdown form-pm-dropdown" id="businessInterestDropdown" data-pm-dropdown data-open="false" data-select-id="businessInterestSelect" data-required="true">
+            <button class="pm-dropdown-trigger" id="businessInterestTrigger" type="button" aria-label="Business services interest" aria-haspopup="listbox" aria-expanded="false" aria-controls="businessInterestListbox" aria-autocomplete="none"><span class="pm-dropdown-value" id="businessInterestValue">Select one</span><span class="pm-dropdown-chevron" aria-hidden="true"></span></button>
+            <div class="pm-dropdown-listbox" id="businessInterestListbox" role="listbox" aria-label="Business services interest options" aria-hidden="true"></div>
+          </div>
+          <select name="interest" class="pm-dropdown-source sr-only" id="businessInterestSelect" aria-hidden="true" tabindex="-1">
           <option value="">Select one</option>
           <option>Business Listing</option>
           <option>Deals & Coupons</option>
@@ -488,6 +501,7 @@ function showToast(message) {
 document.querySelectorAll('.lead-form').forEach(form => {
   form.addEventListener('submit', async event => {
     event.preventDefault();
+    if (!form.reportValidity() || !window.validatePmDropdowns(form)) return;
     const submitButton = form.querySelector('button[type="submit"]');
     const originalText = submitButton.textContent;
     submitButton.disabled = true;
@@ -527,122 +541,8 @@ const categoryButtons = [...document.querySelectorAll('[data-category-filter]')]
 const noResults = document.getElementById('noResults');
 let activeCategory = '';
 
-/* Reusable interactive filter pattern: point createPmDropdown at a native select plus its trigger/listbox/value nodes. The source select preserves option values and change events for existing filters. */
-function createPmDropdown(select, { root, trigger, listbox, value }) {
-  let activeIndex = Math.max(0, select.selectedIndex);
-  let typeAhead = '';
-  let typeAheadTimer;
-
-  const options = [...select.options].map((option, index) => {
-    const node = document.createElement('div');
-    node.className = 'pm-dropdown-option';
-    node.id = `${listbox.id}-option-${index}`;
-    node.setAttribute('role', 'option');
-    node.setAttribute('aria-selected', 'false');
-    node.dataset.value = option.value;
-    node.textContent = option.textContent.trim();
-    listbox.append(node);
-    return node;
-  });
-
-  const isOpen = () => root.dataset.open === 'true';
-  const selectedIndex = () => Math.max(0, select.selectedIndex);
-
-  function sync() {
-    const selected = selectedIndex();
-    value.textContent = select.options[selected].textContent.trim();
-    options.forEach((option, index) => option.setAttribute('aria-selected', String(index === selected)));
-    if (!isOpen()) activeIndex = selected;
-    updateActiveDescendant();
-  }
-
-  function updateActiveDescendant() {
-    options.forEach((option, index) => option.classList.toggle('is-active', isOpen() && index === activeIndex));
-    if (isOpen()) trigger.setAttribute('aria-activedescendant', options[activeIndex].id);
-    else trigger.removeAttribute('aria-activedescendant');
-  }
-
-  function open(index = selectedIndex()) {
-    activeIndex = index;
-    root.dataset.open = 'true';
-    trigger.setAttribute('aria-expanded', 'true');
-    listbox.setAttribute('aria-hidden', 'false');
-    updateActiveDescendant();
-  }
-
-  function close(restoreFocus = false) {
-    if (!isOpen()) return;
-    root.dataset.open = 'false';
-    trigger.setAttribute('aria-expanded', 'false');
-    listbox.setAttribute('aria-hidden', 'true');
-    updateActiveDescendant();
-    if (restoreFocus) trigger.focus();
-  }
-
-  function moveActive(direction) {
-    activeIndex = (activeIndex + direction + options.length) % options.length;
-    updateActiveDescendant();
-    options[activeIndex].scrollIntoView({ block: 'nearest' });
-  }
-
-  function choose(index) {
-    select.value = select.options[index].value;
-    sync();
-    close(true);
-    select.dispatchEvent(new Event('change', { bubbles: true }));
-  }
-
-  trigger.addEventListener('click', () => isOpen() ? close() : open());
-  trigger.addEventListener('keydown', event => {
-    if (event.key === 'Tab') { close(); return; }
-    if (event.key === 'Escape' && isOpen()) { event.preventDefault(); close(true); return; }
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      if (isOpen()) moveActive(1); else open(selectedIndex());
-      return;
-    }
-    if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      if (isOpen()) moveActive(-1);
-      else open((selectedIndex() - 1 + options.length) % options.length);
-      return;
-    }
-    if (event.key === 'Home' && isOpen()) { event.preventDefault(); activeIndex = 0; updateActiveDescendant(); return; }
-    if (event.key === 'End' && isOpen()) { event.preventDefault(); activeIndex = options.length - 1; updateActiveDescendant(); return; }
-    if ((event.key === 'Enter' || event.key === ' ') && isOpen()) { event.preventDefault(); choose(activeIndex); return; }
-    if ((event.key === 'Enter' || event.key === ' ') && !isOpen()) { event.preventDefault(); open(); return; }
-    if (event.key.length === 1 && event.key !== ' ') {
-      typeAhead += event.key.toLocaleLowerCase();
-      clearTimeout(typeAheadTimer);
-      typeAheadTimer = setTimeout(() => { typeAhead = ''; }, 700);
-      const match = [...select.options].findIndex(option => option.textContent.trim().toLocaleLowerCase().startsWith(typeAhead));
-      if (match >= 0) {
-        if (!isOpen()) open(match);
-        activeIndex = match;
-        updateActiveDescendant();
-      }
-    }
-  });
-
-  options.forEach((option, index) => {
-    option.addEventListener('pointerenter', () => { activeIndex = index; updateActiveDescendant(); });
-    option.addEventListener('click', () => choose(index));
-  });
-  document.addEventListener('pointerdown', event => {
-    if (!root.contains(event.target)) close();
-  });
-  select.addEventListener('change', sync);
-  sync();
-
-  return { sync, open: () => open(), close: () => close() };
-}
-
-const cityDropdown = createPmDropdown(cityFilter, {
-  root: document.getElementById('cityDropdown'),
-  trigger: document.getElementById('cityFilterTrigger'),
-  listbox: document.getElementById('cityFilterListbox'),
-  value: document.getElementById('cityFilterValue')
-});
+window.initPmDropdowns(document);
+const cityDropdown = window.pmDropdownInstances.cityDropdown;
 
 const businessGrid = document.getElementById('businessGrid');
 const jobGrid = document.getElementById('jobGrid');
