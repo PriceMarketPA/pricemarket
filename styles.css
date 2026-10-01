@@ -338,3 +338,27 @@ footer{max-width:1240px;margin:auto;padding:28px 24px;display:flex;justify-conte
   .hours-row .hours-separator{align-self:end;margin-bottom:16px}
   .hours-row input[type="time"]{-webkit-appearance:auto;appearance:auto;width:100%;max-width:100%;min-width:0;box-sizing:border-box;min-height:44px;margin:0;padding:6px 5px;font-size:16px;line-height:1.2}
 }
+
+
+/* Compact photo-led Save / Buy / Hire cards on phones; preserve the original desktop cards. */
+.value-card-photo,.value-card-cta{display:none}
+.value-card-copy{display:contents}
+@media(max-width:720px){
+  .cards.section{padding:26px 0 30px}
+  .cards .section-heading{margin-bottom:13px}
+  .cards .section-heading h2{font-size:1.72rem;line-height:1.07;letter-spacing:-.045em}
+  .cards .card-grid.value-card-grid{grid-template-columns:minmax(0,1fr);gap:10px}
+  .cards .feature-card.value-card{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;align-content:stretch;justify-content:stretch;gap:7px;height:164px;min-height:164px;overflow:hidden;padding:13px 15px;border:1px solid rgba(255,255,255,.42);border-radius:21px;background:var(--navy);box-shadow:0 12px 28px rgba(7,21,47,.14);color:#fff}
+  .cards .value-card::before{position:absolute;z-index:-1;inset:0;border-radius:inherit;background:linear-gradient(100deg,rgba(5,17,37,.88),rgba(5,17,37,.63) 66%,rgba(5,17,37,.38));content:""}
+  .cards .value-card-photo{position:absolute;z-index:-2;inset:0;display:block;width:100%;height:100%;object-fit:cover}
+  .cards .value-save .value-card-photo{object-position:center 55%}
+  .cards .value-buy .value-card-photo{object-position:center 54%}
+  .cards .value-hire .value-card-photo{object-position:center 48%}
+  .cards .value-card .feature-icon{align-self:start;margin:0;padding:6px 10px;border:1px solid rgba(255,255,255,.72);border-radius:999px;background:rgba(255,255,255,.95);color:var(--blue-dark);font-size:.65rem;line-height:1;font-weight:950;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+  .cards .value-card-copy{position:relative;z-index:1;display:block;align-self:end;min-width:0}
+  .cards .value-card h3{margin:0 0 3px;color:#fff;font-size:1.08rem;line-height:1.12;letter-spacing:-.025em;text-shadow:0 1px 12px rgba(0,0,0,.2)}
+  .cards .value-card p{max-width:38em;margin:0;color:rgba(255,255,255,.91);font-size:.73rem;line-height:1.3;text-shadow:0 1px 10px rgba(0,0,0,.2)}
+  .cards .value-card-cta{position:relative;z-index:1;display:inline-flex;align-items:center;justify-content:center;justify-self:start;gap:8px;min-height:34px;margin:0;padding:7px 11px;border:1px solid rgba(255,255,255,.88);border-radius:999px;background:#fff;color:var(--blue-dark);font:inherit;font-size:.7rem;font-weight:950;line-height:1.1;text-decoration:none;white-space:nowrap;box-shadow:0 5px 14px rgba(0,0,0,.12);cursor:pointer;touch-action:manipulation}
+  .cards .value-card-cta:hover,.cards .value-card-cta:focus-visible{background:#effaf4;color:#126744}
+  .cards .value-card-cta:focus-visible{outline:3px solid #9fc1ff;outline-offset:3px}
+}
