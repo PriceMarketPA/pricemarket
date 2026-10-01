@@ -46,13 +46,21 @@
             <div class="onboarding-fields">
               <label class="field-wide">Business name <span class="required-mark">*</span><input name="businessName" id="businessNameInput" type="text" placeholder="e.g. Keystone Pizza Co." maxlength="90" required></label>
               <label>Category <span class="required-mark">*</span>
-                <select name="businessCategory" id="businessCategory" class="pm-select" required>
+                <div class="pm-dropdown form-pm-dropdown" id="onboardingCategoryDropdown" data-pm-dropdown data-open="false" data-select-id="businessCategory" data-required="true">
+                  <button class="pm-dropdown-trigger" id="onboardingCategoryTrigger" type="button" aria-label="Business category" aria-haspopup="listbox" aria-expanded="false" aria-controls="onboardingCategoryListbox" aria-autocomplete="none"><span id="onboardingCategoryValue">Choose a category</span><span class="pm-dropdown-chevron" aria-hidden="true"></span></button>
+                  <div class="pm-dropdown-listbox" id="onboardingCategoryListbox" role="listbox" aria-label="Business category options" aria-hidden="true"></div>
+                </div>
+                <select name="businessCategory" id="businessCategory" class="pm-dropdown-source sr-only" aria-hidden="true" tabindex="-1">
                   <option value="">Choose a category</option>
                   <option>Restaurant / Food</option><option>Retail / Shopping</option><option>Health / Fitness</option><option>Beauty / Salon</option><option>Home Services / Trades</option><option>Professional Services</option><option>Nonprofit / Community</option><option>Other</option>
                 </select>
               </label>
               <label>City <span class="required-mark">*</span>
-                <select name="city" id="businessCity" class="pm-select" required>
+                <div class="pm-dropdown form-pm-dropdown" id="onboardingCityDropdown" data-pm-dropdown data-open="false" data-select-id="businessCity" data-required="true">
+                  <button class="pm-dropdown-trigger" id="onboardingCityTrigger" type="button" aria-label="Business city" aria-haspopup="listbox" aria-expanded="false" aria-controls="onboardingCityListbox" aria-autocomplete="none"><span id="onboardingCityValue">Choose a Central PA city</span><span class="pm-dropdown-chevron" aria-hidden="true"></span></button>
+                  <div class="pm-dropdown-listbox" id="onboardingCityListbox" role="listbox" aria-label="Business city options" aria-hidden="true"></div>
+                </div>
+                <select name="city" id="businessCity" class="pm-dropdown-source sr-only" aria-hidden="true" tabindex="-1">
                   <option value="">Choose a Central PA city</option>
                   <option>Mechanicsburg</option><option>Camp Hill</option><option>Carlisle</option><option>Harrisburg</option><option>Hershey</option><option>Other Central PA</option>
                 </select>
@@ -153,6 +161,7 @@
   </div>
 
   <footer><span>© 2026 Price Market</span><span>Built for Central Pennsylvania</span></footer>
+  <script src="price-market-dropdown.js"></script>
   <script src="business-onboarding.js"></script>
 </body>
 </html>
