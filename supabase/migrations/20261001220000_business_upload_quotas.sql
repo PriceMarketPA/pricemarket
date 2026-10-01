@@ -13,6 +13,7 @@ create table if not exists public.pm_business_upload_slots (
   issue_count smallint not null default 0 check (issue_count between 0 and 5),
   active_path text,
   previous_path text,
+  pending_path text,
   status text not null default 'empty' check (status in ('empty', 'issued', 'uploaded', 'removed')),
   updated_at timestamptz not null default now(),
   primary key (submission_id, role)
@@ -107,6 +108,8 @@ begin
   end if;
 
   if v_slot.issue_count >= 5 then raise exception 'Upload replacement limit reached for this slot'; end if;
+  if v_slot.previous_path is not null then raise exception 'Previous replacement cleanup must finish before another replacement'; end if;
+  if v_slot.pending_path is not null then raise exception 'A previous upload reservation is still pending'; end if;
   if p_role like 'gallery-%' and v_session.gallery_issue_count >= 10 then
     raise exception 'Gallery upload limit reached for this submission';
   end if;
@@ -120,8 +123,7 @@ begin
   end if;
 
   update public.pm_business_upload_slots set
-    previous_path = case when v_slot.status = 'uploaded' then v_slot.active_path else null end,
-    active_path = p_object_path,
+    pending_path = p_object_path,
     issue_count = issue_count + 1,
     status = 'issued',
     updated_at = now()
@@ -131,6 +133,71 @@ begin
       where submission_id = p_submission_id;
   end if;
   return true;
+end;
+$$;
+
+-- Removal is deliberately split into a read-only validation and a post-Storage commit.
+-- This keeps a failed Storage DELETE retryable and prevents losing the only ledger reference.
+create or replace function public.pm_validate_business_upload_slot_file(
+  p_submission_id uuid,
+  p_role text,
+  p_object_path text
+) returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.pm_business_upload_slots
+    where submission_id = p_submission_id
+      and role = p_role
+      and (active_path = p_object_path or previous_path = p_object_path or pending_path = p_object_path)
+      and exists (select 1 from public.pm_business_upload_sessions where submission_id = p_submission_id and expires_at > now())
+  );
+$$;
+
+create or replace function public.pm_commit_business_upload_slot_file_removal(
+  p_submission_id uuid,
+  p_role text,
+  p_object_path text
+) returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_slot public.pm_business_upload_slots%rowtype;
+begin
+  if not exists (select 1 from public.pm_business_upload_sessions where submission_id = p_submission_id and expires_at > now()) then
+    raise exception 'Upload session expired';
+  end if;
+  select * into v_slot from public.pm_business_upload_slots
+    where submission_id = p_submission_id and role = p_role for update;
+  if not found then return jsonb_build_object('removed', false); end if;
+
+  if v_slot.pending_path = p_object_path then
+    update public.pm_business_upload_slots set pending_path = null,
+      status = case when active_path is null then 'removed' else 'uploaded' end,
+      updated_at = now()
+      where submission_id = p_submission_id and role = p_role;
+    return jsonb_build_object('removed', true, 'restoredPath', null);
+  end if;
+  if v_slot.active_path = p_object_path then
+    if v_slot.previous_path is not null then
+      update public.pm_business_upload_slots set active_path = previous_path, previous_path = null, status = 'uploaded', updated_at = now()
+        where submission_id = p_submission_id and role = p_role;
+      return jsonb_build_object('removed', true, 'restoredPath', v_slot.previous_path);
+    end if;
+    update public.pm_business_upload_slots set active_path = null, previous_path = null, status = 'removed', updated_at = now()
+      where submission_id = p_submission_id and role = p_role;
+    return jsonb_build_object('removed', true, 'restoredPath', null);
+  end if;
+  if v_slot.previous_path = p_object_path then
+    update public.pm_business_upload_slots set previous_path = null, updated_at = now()
+      where submission_id = p_submission_id and role = p_role;
+    return jsonb_build_object('removed', true, 'restoredPath', null);
+  end if;
+  return jsonb_build_object('removed', false);
 end;
 $$;
 
@@ -151,12 +218,16 @@ begin
   end if;
   select * into v_slot from public.pm_business_upload_slots
     where submission_id = p_submission_id and role = p_role for update;
-  if not found or v_slot.status <> 'issued' or v_slot.active_path <> p_object_path then
+  if not found or v_slot.status <> 'issued' or v_slot.pending_path <> p_object_path then
     raise exception 'Upload reservation does not match';
   end if;
-  update public.pm_business_upload_slots set status = 'uploaded', updated_at = now()
+  update public.pm_business_upload_slots set
+    previous_path = active_path,
+    active_path = pending_path,
+    pending_path = null,
+    status = 'uploaded', updated_at = now()
     where submission_id = p_submission_id and role = p_role;
-  return v_slot.previous_path;
+  return v_slot.active_path;
 end;
 $$;
 
@@ -178,6 +249,13 @@ begin
   select * into v_slot from public.pm_business_upload_slots
     where submission_id = p_submission_id and role = p_role for update;
   if not found then return false; end if;
+  if v_slot.pending_path = p_object_path then
+    update public.pm_business_upload_slots set pending_path = null,
+      status = case when active_path is null then 'removed' else 'uploaded' end,
+      updated_at = now()
+      where submission_id = p_submission_id and role = p_role;
+    return true;
+  end if;
   if v_slot.active_path = p_object_path then
     if v_slot.status = 'issued' and v_slot.previous_path is not null then
       update public.pm_business_upload_slots set active_path = previous_path, previous_path = null, status = 'uploaded', updated_at = now()
@@ -201,8 +279,12 @@ revoke all on function public.pm_reserve_business_upload_slot(uuid, text, text, 
 revoke all on function public.pm_create_business_upload_session(uuid, uuid, timestamptz, text) from public, anon, authenticated;
 revoke all on function public.pm_finalize_business_upload_slot(uuid, text, text) from public, anon, authenticated;
 revoke all on function public.pm_remove_business_upload_slot_file(uuid, text, text) from public, anon, authenticated;
+revoke all on function public.pm_validate_business_upload_slot_file(uuid, text, text) from public, anon, authenticated;
+revoke all on function public.pm_commit_business_upload_slot_file_removal(uuid, text, text) from public, anon, authenticated;
 grant execute on function public.pm_reserve_business_upload_slot(uuid, text, text, text) to service_role;
 grant execute on function public.pm_create_business_upload_session(uuid, uuid, timestamptz, text) to service_role;
 grant execute on function public.pm_finalize_business_upload_slot(uuid, text, text) to service_role;
 grant execute on function public.pm_remove_business_upload_slot_file(uuid, text, text) to service_role;
+grant execute on function public.pm_validate_business_upload_slot_file(uuid, text, text) to service_role;
+grant execute on function public.pm_commit_business_upload_slot_file_removal(uuid, text, text) to service_role;
 

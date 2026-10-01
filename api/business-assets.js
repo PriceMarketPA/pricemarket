@@ -50,6 +50,18 @@ function createHandler({ env = process.env, fetchImpl = global.fetch, now = Date
       }
       return data;
     };
+    const storageObjectInfo = path => storageRequest(`/object/info/${encodeURIComponent(path.bucket)}/${path.path.split('/').map(encodeURIComponent).join('/')}`);
+    const isConfirmedMissingObject = async (bucket, objectPath) => {
+      // A DELETE error is only retry-safe when a separate Storage info request confirms absence.
+      try {
+        const response = await storageObjectInfo({ bucket, path: objectPath });
+        if (response.status !== 404 && response.status !== 400) return false;
+        const detail = await response.json().catch(() => null);
+        const message = String(detail?.message || detail?.error || '').toLowerCase();
+        const code = String(detail?.statusCode || detail?.code || '').toLowerCase();
+        return /object (was )?not found|object not found|no such key/.test(message) || code === 'objectnotfound' || code === 'nosuchkey';
+      } catch { return false; }
+    };
     const checkSession = async (submissionId, capability) => {
       if (!verifyCapability(capability, submissionId, secret, now())) return false;
       const query = new URLSearchParams({ submission_id: `eq.${submissionId}`, expires_at: `gt.${new Date(now()).toISOString()}`, select: 'submission_id' });
@@ -149,13 +161,20 @@ function createHandler({ env = process.env, fetchImpl = global.fetch, now = Date
 
       if (body.action === 'remove') {
         if (!validatePendingPath(body.path, body.submissionId, body.role, body.bucket)) return json(res, 400, { error: 'Invalid pending file path.' });
-        const removedFromLedger = await rpc('pm_remove_business_upload_slot_file', { p_submission_id: body.submissionId, p_role: body.role, p_object_path: body.path });
-        if (removedFromLedger !== true) return json(res, 404, { error: 'This file is not part of the pending upload session.' });
+        const ledgerArgs = { p_submission_id: body.submissionId, p_role: body.role, p_object_path: body.path };
+        const tracked = await rpc('pm_validate_business_upload_slot_file', ledgerArgs);
+        if (tracked !== true) {
+          // A completed request whose response was lost is idempotent once Storage confirms absence.
+          if (await isConfirmedMissingObject(body.bucket, body.path)) return json(res, 200, { removed: true, alreadyRemoved: true });
+          return json(res, 404, { error: 'This file is not part of the pending upload session.' });
+        }
         const removeResponse = await storageRequest(`/object/${encodeURIComponent(body.bucket)}`, {
           method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prefixes: [body.path] })
         });
-        if (!removeResponse.ok) return json(res, 502, { error: 'Could not remove the pending upload. Please try again.' });
-        return json(res, 200, { removed: true });
+        if (!removeResponse.ok && !(await isConfirmedMissingObject(body.bucket, body.path))) return json(res, 502, { error: 'Could not remove the pending upload. Please try again.' });
+        const result = await rpc('pm_commit_business_upload_slot_file_removal', ledgerArgs);
+        if (!result || result.removed !== true) return json(res, 502, { error: 'The file was deleted, but its upload state could not be updated. Please retry removal.' });
+        return json(res, 200, { removed: true, restoredPath: result.restoredPath || '' });
       }
       return json(res, 400, { error: 'Unknown upload action.' });
     } catch (error) {

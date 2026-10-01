@@ -159,6 +159,15 @@
     remove.setAttribute('aria-label', `Remove ${asset.fileName}`);
     remove.addEventListener('click', () => removeUploadedAsset(slot, asset));
     card.append(remove);
+    if (asset.pendingRemoval) {
+      const retry = document.createElement('button');
+      retry.type = 'button';
+      retry.className = 'upload-remove';
+      retry.textContent = 'Retry old file cleanup';
+      retry.setAttribute('aria-label', `Retry cleanup of replaced file ${asset.pendingRemoval.fileName}`);
+      retry.addEventListener('click', () => retryPendingRemoval(slot, asset));
+      card.append(retry);
+    }
     return card;
   }
 
@@ -174,13 +183,27 @@
 
   async function removeUploadedAsset(slot, asset) {
     try {
-      if (uploadSession) await callUploadApi({ action: 'remove', path: asset.path, bucket: asset.bucket, role: asset.role });
+      const result = uploadSession ? await callUploadApi({ action: 'remove', path: asset.path, bucket: asset.bucket, role: asset.role }) : {};
       if (slot === 'gallery') uploadedAssets.gallery = uploadedAssets.gallery.filter(item => item.path !== asset.path);
-      else uploadedAssets[slot] = null;
+      else if (result.restoredPath && asset.pendingRemoval) {
+        const restored = asset.pendingRemoval;
+        uploadedAssets[slot] = { ...restored, path: result.restoredPath, bucket: asset.bucket, role: asset.role };
+      } else uploadedAssets[slot] = null;
       setUploadStatus(slot, slot === 'gallery' ? 'Add up to five extra photos.' : 'Uploaded file removed.');
       renderUploadPreviews();
       refreshPreview();
     } catch (error) { setUploadStatus(slot, error.message || 'Could not remove this file. Please retry.', true); }
+  }
+
+  async function retryPendingRemoval(slot, asset) {
+    const oldAsset = asset.pendingRemoval;
+    if (!oldAsset || !uploadSession) return;
+    try {
+      await callUploadApi({ action: 'remove', path: oldAsset.path, bucket: oldAsset.bucket, role: oldAsset.role });
+      delete asset.pendingRemoval;
+      setUploadStatus(slot, 'The replaced file was removed.');
+      renderUploadPreviews();
+    } catch (error) { setUploadStatus(slot, error.message || 'Could not remove the replaced file. Please retry.', true); }
   }
 
   async function uploadOne(slot, role, file) {
@@ -225,7 +248,13 @@
         uploadedAssets[slot] = asset;
         let previousRemoved = true;
         const replacedPath = asset.replacedPath || previous?.path;
-        if (replacedPath) { try { await callUploadApi({ action: 'remove', path: replacedPath, bucket: previous?.bucket || asset.bucket, role: asset.role }); } catch { previousRemoved = false; } }
+        if (replacedPath) {
+          try { await callUploadApi({ action: 'remove', path: replacedPath, bucket: previous?.bucket || asset.bucket, role: asset.role }); }
+          catch {
+            previousRemoved = false;
+            asset.pendingRemoval = { ...(previous || {}), path: replacedPath, bucket: previous?.bucket || asset.bucket, role: asset.role, fileName: previous?.fileName || 'Previous upload' };
+          }
+        }
         setUploadStatus(slot, `${files[0].name} uploaded.${previous && !previousRemoved ? ' The replaced pending file could not be removed; it will not be submitted.' : ''}`, Boolean(previous && !previousRemoved));
       }
       renderUploadPreviews();
