@@ -12,10 +12,10 @@
   window.initPmDropdowns(document);
 
   // Native selects keep form dropdowns keyboard- and screen-reader-friendly on desktop and mobile.
-  days.forEach((day, index) => {
+  days.forEach(day => {
     const row = document.createElement('div');
     row.className = 'hours-row';
-    row.innerHTML = `<strong class="hours-day">${day}</strong><label class="hours-time-label hours-open"><span class="hours-visible-label" aria-hidden="true">Open time</span><span class="sr-only">${day} opens at</span><input type="time" name="hoursOpen-${day}" aria-label="${day} opens at" ${index === 6 ? 'disabled' : ''}></label><span class="hours-separator" aria-hidden="true">to</span><label class="hours-time-label hours-close"><span class="hours-visible-label" aria-hidden="true">Close time</span><span class="sr-only">${day} closes at</span><input type="time" name="hoursClose-${day}" aria-label="${day} closes at" ${index === 6 ? 'disabled' : ''}></label><label class="hours-closed"><input type="checkbox" name="hoursClosed-${day}" ${index === 6 ? 'checked' : ''}><span>Closed</span></label>`;
+    row.innerHTML = `<strong class="hours-day">${day}</strong><label class="hours-time-label hours-open"><span class="hours-visible-label" aria-hidden="true">Open time</span><span class="sr-only">${day} opens at</span><input type="time" name="hoursOpen-${day}" aria-label="${day} opens at"></label><span class="hours-separator" aria-hidden="true">to</span><label class="hours-time-label hours-close"><span class="hours-visible-label" aria-hidden="true">Close time</span><span class="sr-only">${day} closes at</span><input type="time" name="hoursClose-${day}" aria-label="${day} closes at"></label><label class="hours-closed"><input type="checkbox" name="hoursClosed-${day}"><span>Closed</span></label>`;
     hoursEditor.append(row);
   });
 

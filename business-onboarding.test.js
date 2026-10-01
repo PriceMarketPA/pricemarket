@@ -72,7 +72,7 @@ function setupSubmission({ enabled }) {
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   for (const day of days) {
-    form.elements['hoursClosed-' + day] = { checked: day === 'Sunday' };
+    form.elements['hoursClosed-' + day] = { checked: false };
     form.elements['hoursOpen-' + day] = { value: '' };
     form.elements['hoursClose-' + day] = { value: '' };
   }
@@ -93,6 +93,7 @@ function setupSubmission({ enabled }) {
       await form.listeners.submit({ preventDefault() {} });
       return submittedPayload;
     },
+    initialHoursRows: () => hoursEditor.children.map(row => row.innerHTML),
     confirmationState: () => ({ formHidden: form.hidden, confirmationHidden: get('submissionConfirmation').hidden, status: get('onboardingStatus').textContent })
   };
 }
@@ -152,4 +153,16 @@ test('successful onboarding submission shows the pending-review confirmation sta
     confirmationHidden: false,
     status: 'Thanks — your profile submission is pending review. It has not been published.'
   });
+});
+
+
+test('Sunday business hours start open and enabled like the other weekdays', () => {
+  const rows = setupSubmission({ enabled: false }).initialHoursRows();
+  const sunday = rows.find(row => row.includes('class="hours-day">Sunday</strong>'));
+  assert.ok(sunday, 'Sunday hours row is rendered');
+  assert.match(sunday, /name="hoursOpen-Sunday" aria-label="Sunday opens at"/);
+  assert.match(sunday, /name="hoursClose-Sunday" aria-label="Sunday closes at"/);
+  assert.doesNotMatch(sunday, /<input type="time"[^>]*disabled/);
+  assert.match(sunday, /name="hoursClosed-Sunday"/);
+  assert.doesNotMatch(sunday.match(/name="hoursClosed-Sunday"[^>]*>/)[0], /checked/);
 });

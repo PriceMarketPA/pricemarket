@@ -476,14 +476,24 @@
   <div class="mobile-more-wrap">
     <button type="button" class="mobile-more-button" id="mobileMoreButton" aria-expanded="false" aria-controls="mobileMoreMenu">More</button>
     <div class="mobile-more-menu" id="mobileMoreMenu" role="group" aria-label="More navigation" hidden>
-      <button type="button" data-mobile-type="business" aria-pressed="false">Businesses</button>
-      <button type="button" data-mobile-type="all" aria-pressed="false">All listings</button>
-      <a href="/for-businesses">For Businesses</a>
-      <button type="button" class="open-waitlist">Join the waitlist</button>
-      <button type="button" class="open-business">For businesses</button>
-      <a href="#how-it-works">How it works</a>
-      <a href="#cities">Central PA cities</a>
-      <a href="/about">About Price Market</a>
+      <section class="mobile-more-group" aria-labelledby="mobileMoreExplore">
+        <h2 class="mobile-more-heading" id="mobileMoreExplore">Explore</h2>
+        <button type="button" data-mobile-type="all" aria-pressed="false">All Listings</button>
+        <button type="button" data-mobile-type="business" aria-pressed="false">Businesses</button>
+      </section>
+      <section class="mobile-more-group" aria-labelledby="mobileMoreBusiness">
+        <h2 class="mobile-more-heading" id="mobileMoreBusiness">For Businesses</h2>
+        <a href="/business-onboarding">List Your Business</a>
+        <a href="/for-businesses">How It Works</a>
+      </section>
+      <section class="mobile-more-group" aria-labelledby="mobileMoreCities">
+        <h2 class="mobile-more-heading" id="mobileMoreCities">Explore Central PA</h2>
+        <a href="#cities">Central PA Cities</a>
+      </section>
+      <section class="mobile-more-group" aria-labelledby="mobileMorePriceMarket">
+        <h2 class="mobile-more-heading" id="mobileMorePriceMarket">Price Market</h2>
+        <a href="/about">About Price Market</a>
+      </section>
     </div>
   </div>
 </nav>
