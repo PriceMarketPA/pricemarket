@@ -255,3 +255,20 @@ footer{max-width:1240px;margin:auto;padding:28px 24px;display:flex;justify-conte
   .discovery-tile img{transition:none}
   .deal-grid,.business-grid,.job-grid,.happy-hour-grid{scroll-behavior:auto}
 }
+
+
+/* Custom select source stays in the form for its original name/value; this UI is the accessible listbox trigger. */
+.form-pm-dropdown{display:block;width:100%;min-width:0;margin-top:6px}
+.form-pm-dropdown .pm-dropdown-trigger{min-height:51px;padding:13px 14px;border:1px solid var(--line);border-radius:15px;background:#f7f9fc;color:var(--ink);font-size:.92rem;font-weight:750}
+.form-pm-dropdown .pm-dropdown-trigger:hover{border-color:#a9bee9;background:#fff;color:var(--ink)}
+.form-pm-dropdown .pm-dropdown-trigger:focus-visible{outline:3px solid rgba(20,84,230,.22);outline-offset:2px;border-color:#8eacf0}
+.form-pm-dropdown[data-open="true"] .pm-dropdown-trigger{border-color:#8eacf0;background:#fff;box-shadow:0 0 0 3px rgba(20,84,230,.08)}
+.form-pm-dropdown .pm-dropdown-listbox{top:calc(100% + 7px);left:0;width:100%;max-width:min(420px,calc(100vw - 40px));max-height:min(280px,52vh);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.form-pm-dropdown .pm-dropdown-option{min-height:46px;padding:12px 13px;font-size:.9rem}
+.form-pm-dropdown .pm-dropdown-option[aria-selected="true"]{background:#f0f5ff}
+.form-pm-dropdown .pm-dropdown-error{display:block;margin:6px 2px 0;color:#b42318;font-size:.76rem;font-weight:750;line-height:1.35}
+.form-pm-dropdown .pm-dropdown-error[hidden]{display:none}
+@media(max-width:600px){
+  .form-pm-dropdown .pm-dropdown-trigger{min-height:52px;font-size:16px}
+  .form-pm-dropdown .pm-dropdown-listbox{max-width:calc(100vw - 42px);max-height:48vh}
+}
