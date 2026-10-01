@@ -162,6 +162,7 @@ test('homepage and crawl controls use the production origin and Vercel clean URL
   const robots = fs.readFileSync(path.join(root, 'robots.txt'), 'utf8');
   const sitemap = fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8');
   const onboarding = fs.readFileSync(path.join(root, 'business-onboarding.html'), 'utf8');
+  const legacyProfile = fs.readFileSync(path.join(root, 'keystone-pizza.html'), 'utf8');
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'site.webmanifest'), 'utf8'));
   const vercel = JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8'));
   assert.match(home, /<link rel="canonical" href="https:\/\/pricemarketpa\.com\/">/);
@@ -173,6 +174,7 @@ test('homepage and crawl controls use the production origin and Vercel clean URL
   assert.deepEqual(manifest.icons.map(icon => icon.src), ['/apple-touch-icon.png']);
   assert.doesNotMatch(sitemap, /www\.pricemarketpa\.com|onboarding|keystone-pizza|business-profile/);
   assert.match(onboarding, /name="robots" content="noindex,follow"/);
+  assert.match(legacyProfile, /rel="canonical" href="https:\/\/pricemarketpa\.com\/business-profile\?business=keystone-pizza"/);
   assert.equal(vercel.cleanUrls, true);
   assert.equal(vercel.trailingSlash, false);
   assert.match(onboarding, /href="styles\.css"/);
