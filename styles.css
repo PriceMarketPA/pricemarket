@@ -272,3 +272,5 @@ footer{max-width:1240px;margin:auto;padding:28px 24px;display:flex;justify-conte
   .form-pm-dropdown .pm-dropdown-trigger{min-height:52px;font-size:16px}
   .form-pm-dropdown .pm-dropdown-listbox{max-width:calc(100vw - 42px);max-height:48vh}
 }
+
+@media(max-width:720px){.toast{bottom:calc(82px + env(safe-area-inset-bottom));max-width:calc(100vw - 26px);border-radius:18px}}
