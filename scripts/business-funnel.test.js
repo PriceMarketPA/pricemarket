@@ -73,11 +73,14 @@ test('Mobile More menu groups discovery and business links without the obsolete 
   assert.match(menu, /data-mobile-type="business"/);
 });
 
-test('Onboarding step actions stack on narrow screens with readable, full-width controls', () => {
+test('Onboarding navigation uses a refreshed stylesheet and stacks every step on narrow screens', () => {
   const css = read('styles.css');
-  assert.match(css, /@media\(max-width:430px\)\{\.onboarding-step-controls\{display:grid;grid-template-columns:minmax\(0,1fr\)/);
-  assert.match(css, /\.onboarding-step-controls \.btn\{width:100%;min-width:0;min-height:52px;padding:13px 18px;font-size:\.9rem;white-space:normal\}/);
-  assert.doesNotMatch(css, /@media\(max-width:390px\)\{[^}]*onboarding-step-controls \.btn\{font-size:\.76rem/);
+  const html = read('business-onboarding.html');
+  assert.match(html, /href="\/styles\.css\?v=onboarding-mobile-nav-2"/);
+  assert.match(css, /@media\(max-width:430px\)\{\.onboarding-site \.onboarding-step-panel \.onboarding-step-controls,\.onboarding-site \.onboarding-submit-panel \.onboarding-step-controls\{display:flex!important;flex-direction:column!important/);
+  assert.match(css, /\.onboarding-site \.onboarding-step-panel \.onboarding-step-controls>\.btn,\.onboarding-site \.onboarding-submit-panel \.onboarding-step-controls>\.btn\{[^}]*width:100%!important;[^}]*flex:0 0 auto!important/);
+  assert.match(css, /font-size:1rem;line-height:1\.25;white-space:normal!important/);
+  assert.match(html, /onboarding-final-controls/);
 });
 test('New indexable routes are included in sitemap and linked through the site shell', () => {
   const sitemap = read('sitemap.xml');
