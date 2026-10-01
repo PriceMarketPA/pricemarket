@@ -29,6 +29,7 @@ test('generates five distinct city hubs and twenty city/listing guides', () => {
       assert.match(html, /<h1\b/);
       assert.match(html, new RegExp(`<title>[^<]*${city.name}`));
       assert.match(html, new RegExp(`<link rel="canonical" href="https:\/\/pricemarketpa\.com\/${city.slug}\/">`));
+      assert.doesNotMatch(html, /Keystone Pizza|example\.com|717-555|\b\d+ reviews?\b|\b[1-5](?:\.\d)? stars?\b/i);
       titles.add(html.match(/<title>(.*?)<\/title>/)[1]);
       for (const category of data.categories) {
         const routePage = path.join(tempRoot, city.slug, category.slug, 'index.html');
