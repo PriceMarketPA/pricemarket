@@ -21,6 +21,29 @@
 
   const byId = id => document.getElementById(id);
   const read = id => byId(id).value.trim();
+  const stepPanels = [...form.querySelectorAll('[data-step-panel]')];
+  const stepper = form.querySelector?.('.onboarding-stepper');
+  const previewAside = byId('onboardingLivePreview');
+  let currentStep = 1;
+  const stepNames = ['Your Business', 'Contact & Hours', 'Photos', 'Promote Something', 'Preview & Submit'];
+  function showStep(step, focusHeading = true) {
+    currentStep = Math.max(1, Math.min(5, step));
+    stepPanels.forEach(panel => { panel.hidden = Number(panel.dataset.stepPanel) !== currentStep; });
+    form.querySelectorAll('[data-step-indicator]').forEach(item => { const active = Number(item.dataset.stepIndicator) === currentStep; if (active) item.setAttribute('aria-current', 'step'); else item.removeAttribute('aria-current'); });
+    const count = byId('onboardingStepCount'); if (count) count.textContent = 'Step ' + currentStep + ' of 5 · ' + stepNames[currentStep - 1];
+    if (previewAside) previewAside.hidden = currentStep !== 5;
+    if (focusHeading) { const heading = stepPanels[currentStep - 1]?.querySelector('h2'); heading?.setAttribute('tabindex', '-1'); heading?.focus(); }
+  }
+  function validateCurrentStep() {
+    const panel = stepPanels[currentStep - 1]; if (!panel) return true;
+    if (currentStep === 1 && !window.validatePmDropdowns(form)) return false;
+    for (const field of panel.querySelectorAll('input, select, textarea')) { if (!field.disabled && !field.checkValidity()) { field.reportValidity(); field.focus(); return false; } }
+    return true;
+  }
+  form.querySelectorAll('[data-step-next]').forEach(button => button.addEventListener('click', () => { if (validateCurrentStep()) showStep(currentStep + 1); }));
+  form.querySelectorAll('[data-step-back]').forEach(button => button.addEventListener('click', () => showStep(currentStep - 1)));
+  showStep(1, false);
+  byId('submitAnotherProfile')?.addEventListener('click', () => window.location.reload());
   const setText = (id, value, fallback) => { byId(id).textContent = value || fallback; };
 
   function validImageUrl(value) {
@@ -164,7 +187,7 @@
   form.addEventListener('submit', async event => {
     event.preventDefault();
     status.hidden = true;
-    if (!form.reportValidity() || !window.validatePmDropdowns(form)) return;
+    if (!window.validatePmDropdowns(form)) return;
 
     const profileData = makeProfileData();
     const happyHour = profileData.happyHours[0] || {};
@@ -203,32 +226,18 @@
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload)
       });
+      const confirmation = byId('submissionConfirmation');
+      if (confirmation) { form.hidden = true; if (stepper) stepper.hidden = true; if (previewAside) previewAside.hidden = true; confirmation.hidden = false; confirmation.focus(); }
       status.textContent = 'Thanks — your profile submission is pending review. It has not been published.';
       status.classList.add('is-success');
       status.hidden = false;
       if (typeof gtag === 'function') gtag('event', 'business_profile_submission', { business_category: profileData.category, city: profileData.city });
-      form.reset();
-      jobFields.hidden = true;
-      byId('jobTitle').required = false;
-      happyHourFields.hidden = true;
-      ['happyHourTitleInput', 'happyHourDays', 'happyHourStartTime', 'happyHourEndTime'].forEach(id => {
-        byId(id).required = false;
-      });
-      hoursEditor.querySelectorAll('.hours-row').forEach((row, index) => {
-        const closed = row.querySelector('.hours-closed input');
-        closed.checked = index === 6;
-        row.querySelectorAll('input[type="time"]').forEach(input => { input.value = ''; input.disabled = index === 6; });
-      });
-      byId('descriptionCount').textContent = '0';
-      refreshPreview();
-      status.focus?.();
     } catch (error) {
       status.textContent = 'We couldn’t send that just now. Please try again in a moment.';
       status.classList.remove('is-success');
       status.hidden = false;
     } finally {
-      submitButton.disabled = false;
-      submitButton.innerHTML = 'Submit for review <span aria-hidden="true">→</span>';
+      if (!byId('submissionConfirmation')?.hidden) { submitButton.disabled = false; submitButton.innerHTML = 'Submit for review <span aria-hidden="true">→</span>'; }
     }
   });
 

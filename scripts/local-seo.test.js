@@ -50,7 +50,9 @@ test('generates five distinct city hubs and twenty city/listing guides', () => {
     }
     assert.equal(titles.size, 5, 'city title tags are unique');
     const sitemap = fs.readFileSync(path.join(tempRoot, 'sitemap.xml'), 'utf8');
-    assert.equal((sitemap.match(/<loc>/g) || []).length, 6);
+    assert.equal((sitemap.match(/<loc>/g) || []).length, 8);
+    assert.match(sitemap, /https:\/\/pricemarketpa\.com\/about<\/loc>/);
+    assert.match(sitemap, /https:\/\/pricemarketpa\.com\/for-businesses<\/loc>/);
     assert.doesNotMatch(sitemap, /business-profile|onboarding|\/deals\//);
   } finally {
     fs.rmSync(tempRoot, { recursive: true, force: true });

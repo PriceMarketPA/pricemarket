@@ -25,11 +25,8 @@
         <img src="pm-logo.png" alt="Price Market PM logo">
         <div><span>Price Market</span><small>Central PA Marketplace</small></div>
       </a>
-      <nav class="nav-links" aria-label="Main navigation">
-        <a href="index.html#marketplace">Explore deals</a>
-        <a href="index.html#businesses">For businesses</a>
-      </nav>
-      <a class="btn dark small" href="index.html">Back to Price Market</a>
+      <nav class="nav-links" aria-label="Main navigation"><a href="/">Marketplace</a><a href="/for-businesses">For Businesses</a><a href="/about">About</a></nav>
+      <a class="btn dark small" href="/">Back to Price Market</a>
     </header>
 
     <main class="onboarding-page">
@@ -42,6 +39,14 @@
 
       <div class="onboarding-layout">
         <form class="onboarding-form" id="businessProfileForm" novalidate>
+          <nav class="onboarding-stepper" aria-label="Business profile setup progress"><ol>
+            <li data-step-indicator="1" aria-current="step"><span>1</span><small>Your Business</small></li>
+            <li data-step-indicator="2"><span>2</span><small>Contact &amp; Hours</small></li>
+            <li data-step-indicator="3"><span>3</span><small>Photos</small></li>
+            <li data-step-indicator="4"><span>4</span><small>Promote Something</small></li>
+            <li data-step-indicator="5"><span>5</span><small>Preview &amp; Submit</small></li>
+          </ol><p id="onboardingStepCount" aria-live="polite">Step 1 of 5 · Your Business</p></nav>
+          <div class="onboarding-step-panel" data-step-panel="1">
           <section class="onboarding-section" aria-labelledby="basicsTitle">
             <div class="onboarding-section-heading"><span>01</span><div><h2 id="basicsTitle">The business basics</h2><p>Start with the name and location customers will recognize.</p></div></div>
             <div class="onboarding-fields">
@@ -70,7 +75,10 @@
               <label class="field-wide">Short business description <span class="required-mark">*</span><textarea name="description" id="businessDescription" rows="3" maxlength="240" placeholder="What should local customers know about your business?" required></textarea><small class="field-hint"><span id="descriptionCount">0</span>/240 characters</small></label>
             </div>
           </section>
+            <div class="onboarding-step-controls"><span></span><button class="btn blue" type="button" data-step-next>Continue to Contact &amp; Hours <span aria-hidden="true">→</span></button></div>
+          </div>
 
+          <div class="onboarding-step-panel" data-step-panel="2" hidden>
           <section class="onboarding-section" aria-labelledby="contactTitle">
             <div class="onboarding-section-heading"><span>02</span><div><h2 id="contactTitle">How customers can reach you</h2><p>Add the contact details and link you want shown on your profile.</p></div></div>
             <div class="onboarding-fields">
@@ -83,8 +91,12 @@
           <section class="onboarding-section" aria-labelledby="hoursTitle">
             <div class="onboarding-section-heading"><span>03</span><div><h2 id="hoursTitle">Business hours</h2><p>Set your usual hours. You can leave days blank if they vary.</p></div></div>
             <div class="hours-editor" id="hoursEditor" aria-label="Weekly business hours"></div>
-          </section>
+          </section>            <div class="onboarding-step-controls"><button class="btn ghost" type="button" data-step-back>Back</button><button class="btn blue" type="button" data-step-next>Continue to Photos <span aria-hidden="true">→</span></button></div>
+          </div>
 
+
+
+          <div class="onboarding-step-panel" data-step-panel="3" hidden>
           <section class="onboarding-section" aria-labelledby="imagesTitle">
             <div class="onboarding-section-heading"><span>04</span><div><h2 id="imagesTitle">Make it yours</h2><p>Add image links so your profile can show your logo and a great first impression.</p></div></div>
             <div class="onboarding-fields">
@@ -93,8 +105,12 @@
               <label class="field-wide">Image description<input name="imageAlt" id="imageAlt" type="text" maxlength="140" placeholder="Describe the image for screen readers"></label>
               <p class="field-hint field-wide">Image links are collected for review. This form does not upload files.</p>
             </div>
-          </section>
+          </section>            <div class="onboarding-step-controls"><button class="btn ghost" type="button" data-step-back>Back</button><button class="btn blue" type="button" data-step-next>Continue to Promote Something <span aria-hidden="true">→</span></button></div>
+          </div>
 
+
+
+          <div class="onboarding-step-panel" data-step-panel="4" hidden>
           <section class="onboarding-section" aria-labelledby="dealTitleHeading">
             <div class="onboarding-section-heading"><span>05</span><div><h2 id="dealTitleHeading">Feature a local deal <span class="optional-tag">Optional</span></h2><p>Give neighbors a reason to visit with an offer or special.</p></div></div>
             <div class="onboarding-fields">
@@ -124,15 +140,21 @@
               <label class="field-wide">Job details<textarea name="jobDescription" id="jobDescription" rows="2" maxlength="220" placeholder="Hours, schedule, experience, or how to apply"></textarea></label>
             </div>
           </section>
+            <div class="onboarding-step-controls"><button class="btn ghost" type="button" data-step-back>Back</button><button class="btn blue" type="button" data-step-next>Continue to Preview <span aria-hidden="true">→</span></button></div>
+          </div>
 
+          <div class="onboarding-step-panel onboarding-review-step" data-step-panel="5" hidden>
+            <section class="onboarding-section onboarding-review-intro"><p class="small-title">Final step</p><h2>Preview &amp; submit</h2><p>Review the live preview beside this form, then send your profile for human review. Deals, Happy Hours, and jobs are optional.</p></section>
           <div class="onboarding-submit-panel">
             <p>By submitting, you’re asking Price Market to review this business profile. <strong>Nothing goes live until it’s approved.</strong></p>
-            <button class="btn blue" type="submit" id="submitBusinessProfile">Submit for review <span aria-hidden="true">→</span></button>
+            <div class="onboarding-step-controls onboarding-final-controls"><button class="btn ghost" type="button" data-step-back>Back</button><button class="btn blue" type="submit" id="submitBusinessProfile">Submit for review <span aria-hidden="true">→</span></button></div>
             <p class="onboarding-status" id="onboardingStatus" role="status" aria-live="polite" hidden></p>
-          </div>
-        </form>
+          </div>          </div>
 
-        <aside class="onboarding-preview-wrap" aria-label="Business profile preview">
+        </form>
+        <section class="submission-confirmation" id="submissionConfirmation" aria-labelledby="confirmationTitle" tabindex="-1" hidden><p class="small-title">Submission received · Pending review</p><h2 id="confirmationTitle">Thanks for introducing your business to Price Market.</h2><p>Your profile is not published yet. Submission does not guarantee publication.</p><ol><li><strong>We review your submission.</strong><span>A person checks the details before anything goes live.</span></li><li><strong>Approved profiles are published.</strong><span>Your listing moves into the Price Market marketplace after approval.</span></li><li><strong>We send you the profile link.</strong><span>You will receive the link for your approved profile.</span></li><li><strong>Customers can discover it.</strong><span>People can find your business, offers, Happy Hours, and jobs through Price Market.</span></li></ol><a class="btn blue" href="/">Return to Price Market</a><button class="btn ghost" type="button" id="submitAnotherProfile">Submit another business</button></section>
+
+        <aside class="onboarding-preview-wrap" id="onboardingLivePreview" aria-label="Business profile preview" hidden>
           <div class="preview-sticky">
             <div class="preview-label-row"><div><p class="small-title">Your profile concept</p><h2>Live preview</h2></div><span class="preview-demo-pill">Preview only</span></div>
             <p class="preview-explainer">This example updates as you fill out the form. Your business will stay pending review after submission.</p>
@@ -161,7 +183,7 @@
     </main>
   </div>
 
-  <footer><span data-copyright-year>© 2026 Price Market LLC. All rights reserved.</span><span>Built for Central Pennsylvania</span></footer>
+  <footer class="site-footer"><nav aria-label="Footer navigation"><a href="/for-businesses">For Businesses</a><a href="/about">About</a><a href="/">Marketplace</a></nav><span data-copyright-year>© 2026 Price Market LLC. All rights reserved.</span><span>Built for Central Pennsylvania</span></footer>
   <script src="price-market-dropdown.js"></script>
   <script src="business-onboarding.js"></script>
   <script src="/copyright.js"></script>
