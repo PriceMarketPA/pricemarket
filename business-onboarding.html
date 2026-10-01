@@ -45,26 +45,26 @@
             <div class="onboarding-section-heading"><span>01</span><div><h2 id="basicsTitle">The business basics</h2><p>Start with the name and location customers will recognize.</p></div></div>
             <div class="onboarding-fields">
               <label class="field-wide">Business name <span class="required-mark">*</span><input name="businessName" id="businessNameInput" type="text" placeholder="e.g. Keystone Pizza Co." maxlength="90" required></label>
-              <label>Category <span class="required-mark">*</span>
+              <div class="onboarding-dropdown-field"><span class="field-label" id="onboardingCategoryLabel">Category <span class="required-mark">*</span></span>
                 <div class="pm-dropdown form-pm-dropdown" id="onboardingCategoryDropdown" data-pm-dropdown data-open="false" data-select-id="businessCategory" data-required="true">
-                  <button class="pm-dropdown-trigger" id="onboardingCategoryTrigger" type="button" aria-label="Business category" aria-haspopup="listbox" aria-expanded="false" aria-controls="onboardingCategoryListbox" aria-autocomplete="none"><span class="pm-dropdown-value" id="onboardingCategoryValue">Choose a category</span><span class="pm-dropdown-chevron" aria-hidden="true"></span></button>
+                  <button class="pm-dropdown-trigger" id="onboardingCategoryTrigger" type="button" aria-labelledby="onboardingCategoryLabel" aria-haspopup="listbox" aria-expanded="false" aria-controls="onboardingCategoryListbox" aria-autocomplete="none"><span class="pm-dropdown-value" id="onboardingCategoryValue">Choose a category</span><span class="pm-dropdown-chevron" aria-hidden="true"></span></button>
                   <div class="pm-dropdown-listbox" id="onboardingCategoryListbox" role="listbox" aria-label="Business category options" aria-hidden="true"></div>
                 </div>
                 <select name="businessCategory" id="businessCategory" class="pm-dropdown-source sr-only" aria-hidden="true" tabindex="-1">
                   <option value="">Choose a category</option>
                   <option>Restaurant / Food</option><option>Retail / Shopping</option><option>Health / Fitness</option><option>Beauty / Salon</option><option>Home Services / Trades</option><option>Professional Services</option><option>Nonprofit / Community</option><option>Other</option>
                 </select>
-              </label>
-              <label>City <span class="required-mark">*</span>
+              </div>
+              <div class="onboarding-dropdown-field"><span class="field-label" id="onboardingCityLabel">City <span class="required-mark">*</span></span>
                 <div class="pm-dropdown form-pm-dropdown" id="onboardingCityDropdown" data-pm-dropdown data-open="false" data-select-id="businessCity" data-required="true">
-                  <button class="pm-dropdown-trigger" id="onboardingCityTrigger" type="button" aria-label="Business city" aria-haspopup="listbox" aria-expanded="false" aria-controls="onboardingCityListbox" aria-autocomplete="none"><span class="pm-dropdown-value" id="onboardingCityValue">Choose a Central PA city</span><span class="pm-dropdown-chevron" aria-hidden="true"></span></button>
+                  <button class="pm-dropdown-trigger" id="onboardingCityTrigger" type="button" aria-labelledby="onboardingCityLabel" aria-haspopup="listbox" aria-expanded="false" aria-controls="onboardingCityListbox" aria-autocomplete="none"><span class="pm-dropdown-value" id="onboardingCityValue">Choose a Central PA city</span><span class="pm-dropdown-chevron" aria-hidden="true"></span></button>
                   <div class="pm-dropdown-listbox" id="onboardingCityListbox" role="listbox" aria-label="Business city options" aria-hidden="true"></div>
                 </div>
                 <select name="city" id="businessCity" class="pm-dropdown-source sr-only" aria-hidden="true" tabindex="-1">
                   <option value="">Choose a Central PA city</option>
                   <option>Mechanicsburg</option><option>Camp Hill</option><option>Carlisle</option><option>Harrisburg</option><option>Hershey</option><option>Other Central PA</option>
                 </select>
-              </label>
+              </div>
               <label class="field-wide">Street address <span class="required-mark">*</span><input name="streetAddress" id="businessAddress" type="text" autocomplete="street-address" placeholder="Street address, city, and ZIP" maxlength="180" required></label>
               <label class="field-wide">Short business description <span class="required-mark">*</span><textarea name="description" id="businessDescription" rows="3" maxlength="240" placeholder="What should local customers know about your business?" required></textarea><small class="field-hint"><span id="descriptionCount">0</span>/240 characters</small></label>
             </div>
