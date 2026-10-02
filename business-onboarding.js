@@ -314,7 +314,7 @@
     setText('previewAddress', read('businessAddress'), 'Your address');
     setText('previewHours', hours.length ? `${hours.length} day${hours.length === 1 ? '' : 's'} of hours added` : '', 'Add your hours');
     setText('previewDealTitle', dealTitle, 'Your featured deal');
-    setText('previewDealDescription', dealDescription, 'A quick look at the offer you'd like to share.');
+    setText('previewDealDescription', dealDescription, "A quick look at the offer you'd like to share.");
     const logo = uploadedAssets.logo?.publicUrl || validImageUrl(read('logoImage'));
     byId('previewAvatar').textContent = '';
     if (logo) {
@@ -480,7 +480,7 @@
       status.hidden = false;
       if (typeof gtag === 'function') gtag('event', 'business_profile_submission', { business_category: profileData.category, city: profileData.city });
     } catch (error) {
-      status.textContent = 'We couldn't send that just now. Please try again in a moment.';
+      status.textContent = "We couldn't send that just now. Please try again in a moment.";
       status.classList.remove('is-success');
       status.hidden = false;
     } finally {

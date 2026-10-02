@@ -4,6 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const vm = require('node:vm');
 const root = path.join(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 
@@ -20,7 +21,8 @@ test('For Businesses landing page has indexable metadata and the founding offer'
   assert.match(html, /href="\/business-onboarding"/);
   assert.match(html, /See an Example Profile/);
   assert.match(html, /business-profile\.html\?business=keystone-pizza/);
-  for (const phrase of ['Founding Business - Free', '$0 during our Central PA launch.', 'No contract. No credit card required.', 'Business Profiles', 'Deals', 'Happy Hours', 'Job Listings', 'Local discovery and search']) assert.ok(html.includes(phrase), phrase);
+  for (const phrase of ['$0 during our Central PA launch.', 'No contract. No credit card required.', 'Business Profiles', 'Deals', 'Happy Hours', 'Job Listings', 'Local discovery and search']) assert.ok(html.includes(phrase), phrase);
+  assert.match(html, /Founding Business\\s*[—–-]\\s*Free/);
   assert.match(html, /rel="canonical" href="https:\/\/pricemarketpa\.com\/for-businesses"/);
   assert.match(html, /name="robots" content="index,follow/);
   assert.ok(schemaFrom(html)['@graph'].some(entry => entry['@type'] === 'WebPage'));
@@ -59,6 +61,22 @@ test('Onboarding is a five-step client flow that preserves pending-review submis
   assert.match(html, /business-onboarding\.js/);
 });
 
+
+
+test('Onboarding scripts parse and load from root-relative URLs in dropdown-first order', () => {
+  const html = read('business-onboarding.html');
+  const script = read('business-onboarding.js');
+  const dropdown = read('price-market-dropdown.js');
+  assert.doesNotThrow(() => new vm.Script(script), 'onboarding script must parse before its handlers can run');
+  assert.match(html, /<script src="\\/price-market-dropdown\\.js"><\\/script>\\s*<script src="\\/business-onboarding\\.js"><\\/script>/);
+  assert.match(html, /id="onboardingCategoryDropdown" data-pm-dropdown[^>]*data-select-id="businessCategory"/);
+  assert.match(html, /id="onboardingCityDropdown" data-pm-dropdown[^>]*data-select-id="businessCity"/);
+  assert.match(html, /id="onboardingCategoryTrigger"[^>]*aria-controls="onboardingCategoryListbox"/);
+  assert.match(html, /id="onboardingCityTrigger"[^>]*aria-controls="onboardingCityListbox"/);
+  assert.match(dropdown, /trigger\\.addEventListener\\('click'/);
+  assert.match(dropdown, /window\\.initPmDropdowns = initPmDropdowns/);
+  assert.match(script, /window\\.initPmDropdowns\\(document\\)/);
+});
 
 test('Business onboarding provides image and PDF uploads with URL fallback and profile preview support', () => {
   const html = read('business-onboarding.html');
