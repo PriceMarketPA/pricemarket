@@ -4,6 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const vm = require('node:vm');
 const root = path.join(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 
@@ -20,7 +21,8 @@ test('For Businesses landing page has indexable metadata and the founding offer'
   assert.match(html, /href="\/business-onboarding"/);
   assert.match(html, /See an Example Profile/);
   assert.match(html, /business-profile\.html\?business=keystone-pizza/);
-  for (const phrase of ['Founding Business — Free', '$0 during our Central PA launch.', 'No contract. No credit card required.', 'Business Profiles', 'Deals', 'Happy Hours', 'Job Listings', 'Local discovery and search']) assert.ok(html.includes(phrase), phrase);
+  for (const phrase of ['$0 during our Central PA launch.', 'No contract. No credit card required.', 'Business Profiles', 'Deals', 'Happy Hours', 'Job Listings', 'Local discovery and search']) assert.ok(html.includes(phrase), phrase);
+  assert.match(html, /Founding Business\\s*[—–-]\\s*Free/);
   assert.match(html, /rel="canonical" href="https:\/\/pricemarketpa\.com\/for-businesses"/);
   assert.match(html, /name="robots" content="index,follow/);
   assert.ok(schemaFrom(html)['@graph'].some(entry => entry['@type'] === 'WebPage'));
@@ -60,6 +62,41 @@ test('Onboarding is a five-step client flow that preserves pending-review submis
 });
 
 
+
+test('Onboarding scripts parse and load from root-relative URLs in dropdown-first order', () => {
+  const html = read('business-onboarding.html');
+  const script = read('business-onboarding.js');
+  const dropdown = read('price-market-dropdown.js');
+  assert.doesNotThrow(() => new vm.Script(script), 'onboarding script must parse before its handlers can run');
+  assert.match(html, /<script src="\\/price-market-dropdown\\.js"><\\/script>\\s*<script src="\\/business-onboarding\\.js"><\\/script>/);
+  assert.match(html, /id="onboardingCategoryDropdown" data-pm-dropdown[^>]*data-select-id="businessCategory"/);
+  assert.match(html, /id="onboardingCityDropdown" data-pm-dropdown[^>]*data-select-id="businessCity"/);
+  assert.match(html, /id="onboardingCategoryTrigger"[^>]*aria-controls="onboardingCategoryListbox"/);
+  assert.match(html, /id="onboardingCityTrigger"[^>]*aria-controls="onboardingCityListbox"/);
+  assert.match(dropdown, /trigger\\.addEventListener\\('click'/);
+  assert.match(dropdown, /window\\.initPmDropdowns = initPmDropdowns/);
+  assert.match(script, /window\\.initPmDropdowns\\(document\\)/);
+});
+
+test('Business onboarding provides image and PDF uploads with URL fallback and profile preview support', () => {
+  const html = read('business-onboarding.html');
+  const script = read('business-onboarding.js');
+  for (const item of [
+    'id="logoImageFile" type="file"', 'id="coverPhotoFile" type="file"',
+    'id="galleryPhotosFile" type="file" multiple', 'id="businessDocumentFile" type="file"',
+    'image/heic', 'image/heif', 'application/pdf', 'Use image URLs instead (optional fallback)',
+    'data-upload-status="logo"', 'data-upload-status="gallery"', 'id="previewGallery"', 'id="previewDocument"'
+  ]) assert.ok(html.includes(item), item);
+  assert.match(script, /media:\s*\{[\s\S]*?logoUrl,[\s\S]*?coverUrl:[\s\S]*?galleryUrls:[\s\S]*?documentUrl:/);
+  assert.match(script, /profileDataJson: JSON\.stringify\(profileData\)/);
+  assert.match(script, /reviewStatus: 'Pending review'/);
+  assert.match(script, /uploadBytes\(signed\.uploadUrl/);
+  assert.match(script, /Uploading \$\{file\.name\} � \$\{percent\}%/);
+  assert.match(script, /action: 'challenge'/);
+  assert.match(script, /solveUploadChallenge\(challenge\)/);
+  assert.match(script, /replacePath: previousAsset\?\.path/);
+});
+
 test('Mobile More menu groups discovery and business links without the obsolete waitlist action', () => {
   const html = read('index.html');
   const menu = html.match(/<div class="mobile-more-menu"[\s\S]*?<\/div>\s*<\/div>\s*<\/nav>/)?.[0];
@@ -76,7 +113,7 @@ test('Mobile More menu groups discovery and business links without the obsolete 
 test('Onboarding navigation uses a refreshed stylesheet and stacks every step on narrow screens', () => {
   const css = read('styles.css');
   const html = read('business-onboarding.html');
-  assert.match(html, /href="\/styles\.css\?v=onboarding-happy-hour-select-5"/);
+  assert.match(html, /href="\/styles\.css\?v=onboarding-business-uploads-6"/);
   assert.match(css, /@media\(max-width:480px\)\{\.onboarding-site \.onboarding-step-panel \.onboarding-step-controls,\.onboarding-site \.onboarding-submit-panel \.onboarding-step-controls\{display:flex!important;flex-direction:column!important/);
   assert.match(css, /\.onboarding-site \.onboarding-step-panel \.onboarding-step-controls>\.btn,\.onboarding-site \.onboarding-submit-panel \.onboarding-step-controls>\.btn\{[^}]*width:100%!important;[^}]*flex:0 0 auto!important/);
   assert.match(css, /font-size:1rem;line-height:1\.25;white-space:normal!important/);
@@ -117,3 +154,4 @@ test('New indexable routes are included in sitemap and linked through the site s
   assert.match(home, /initialParams.get\('form'\) === 'business'/);
   assert.ok(seoGenerator.includes("const routes = ['/', '/about', '/for-businesses'"));
 });
+
