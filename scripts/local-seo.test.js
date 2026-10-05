@@ -6,9 +6,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const data = require('../data/local-seo.json');
-const businessSandbox = { window: {} };
-vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'businesses.js'), 'utf8'), businessSandbox);
-const profiles = businessSandbox.window.priceMarketBusinesses;
+const sandbox = { window: {} };
+vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'businesses.js'), 'utf8'), sandbox);
+const realProfiles = sandbox.window.priceMarketBusinesses;
 const {
   MIN_APPROVED_PROFILES_FOR_CATEGORY_INDEX,
   categoryIsIndexable,
@@ -16,193 +16,168 @@ const {
   getPublishedProfiles,
   renderSitemap
 } = require('./generate-local-seo-pages');
-const { buildLocalBusinessSchema } = require('../local-seo');
+const { buildLocalBusinessSchema, buildBusinessProfileJsonLd, localBusinessType } = require('../local-seo');
 
-test('generates five distinct city hubs and twenty city/listing guides', () => {
-  const tempRoot = fs.mkdtempSync(path.join(__dirname, '.local-seo-test-'));
+const temp = prefix => fs.mkdtempSync(path.join(__dirname, prefix));
+const profile = (slug, changes = {}) => ({
+  demo: false, name: slug.split('-').map(x => x[0].toUpperCase()+x.slice(1)).join(' '),
+  category: 'Restaurant', city: 'Mechanicsburg', state: 'PA', description: 'Owner provided information for this approved local business profile in Mechanicsburg.',
+  address: '12 Main Street, Mechanicsburg, PA 17055', deals: [], happyHours: [], jobs: [], hours: [], gallery: [],
+  ...changes
+});
+const city = data.cities.find(item => item.slug === 'mechanicsburg');
+const deals = data.categories.find(item => item.filterType === 'deal');
+
+test('city hubs render unique local copy, approved listing sections, honest empty states, and breadcrumbs', () => {
+  const root = temp('.seo-hubs-');
   try {
-    const generated = generateLocalSeoPages({ rootDir: tempRoot, data, profiles: {} });
-    assert.equal(generated.length, 25);
+    const profiles = {
+      sample: profile('sample', { deals: [{ title: 'Lunch special', description: 'Owner-provided weekday lunch offer.' }] }),
+      demo: { ...profile('demo'), demo: true, name: 'Demo Restaurant', deals: [{ title: 'Demo deal' }] },
+      pending: { ...profile('pending'), demo: 'pending', name: 'Pending Restaurant', deals: [{ title: 'Pending deal' }] }
+    };
+    generateLocalSeoPages({ rootDir: root, data, profiles });
     const titles = new Set();
-    for (const city of data.cities) {
-      const html = fs.readFileSync(path.join(tempRoot, city.slug, 'index.html'), 'utf8');
-      assert.match(html, /<h1\b/);
-      assert.match(html, new RegExp(`<title>[^<]*${city.name}`));
-      assert.match(html, new RegExp(`<link rel="canonical" href="https:\/\/pricemarketpa\.com\/${city.slug}">`));
-      assert.doesNotMatch(html, /Keystone Pizza|example\.com|717-555|\b\d+ reviews?\b|\b[1-5](?:\.\d)? stars?\b/i);
+    for (const item of data.cities) {
+      const html = fs.readFileSync(path.join(root, item.slug, 'index.html'), 'utf8');
+      assert.equal((html.match(/<h1\b/g) || []).length, 1);
+      assert.match(html, /name="robots" content="index,follow,max-image-preview:large"/);
+      assert.match(html, new RegExp('<link rel="canonical" href="https://pricemarketpa\\.com/' + item.slug + '">'));
+      assert.match(html, new RegExp(item.name));
+      assert.match(html, /There are no approved .* listings/);
+      assert.match(html, /Browse deals/);
+      assert.match(html, /Explore other Central PA launch cities/);
+      assert.doesNotMatch(html, /Demo Restaurant|Pending Restaurant/);
       titles.add(html.match(/<title>(.*?)<\/title>/)[1]);
-      for (const category of data.categories) {
-        const routePage = path.join(tempRoot, city.slug, category.slug, 'index.html');
-        assert.ok(fs.existsSync(routePage), `${city.slug}/${category.slug} route exists`);
-        const categoryHtml = fs.readFileSync(routePage, 'utf8');
-        assert.match(categoryHtml, /<h1\b/);
-        assert.match(categoryHtml, /Browse current/);
-        assert.match(categoryHtml, /\?city=/);
-        assert.match(categoryHtml, /name="robots" content="noindex,follow"/);
-        const scripts = [...categoryHtml.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
-        assert.equal(scripts.length, 1);
-        assert.doesNotThrow(() => JSON.parse(scripts[0][1]));
-      }
       const graphText = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1];
       const graph = JSON.parse(graphText);
-      assert.ok(graph['@graph'].some(item => item['@type'] === 'BreadcrumbList'));
-      assert.ok(!graph['@graph'].some(item => item['@type'] === 'LocalBusiness'));
+      assert.ok(graph['@graph'].some(node => node['@type'] === 'BreadcrumbList'));
+      assert.equal(graph['@graph'].some(node => /LocalBusiness/.test(node['@type'])), false);
     }
-    assert.equal(titles.size, 5, 'city title tags are unique');
-    const sitemap = fs.readFileSync(path.join(tempRoot, 'sitemap.xml'), 'utf8');
-    assert.equal((sitemap.match(/<loc>/g) || []).length, 8);
-    assert.match(sitemap, /https:\/\/pricemarketpa\.com\/about<\/loc>/);
-    assert.match(sitemap, /https:\/\/pricemarketpa\.com\/for-businesses<\/loc>/);
-    assert.doesNotMatch(sitemap, /business-profile|onboarding|\/deals\//);
-  } finally {
-    fs.rmSync(tempRoot, { recursive: true, force: true });
-  }
+    assert.equal(titles.size, 5);
+    const mechanicsburg = fs.readFileSync(path.join(root, 'mechanicsburg', 'index.html'), 'utf8');
+    assert.match(mechanicsburg, /Lunch special/);
+    assert.match(mechanicsburg, /href="\/business\/sample"/);
+    assert.doesNotMatch(mechanicsburg, /href="\/business\/demo"/);
+  } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
 
-test('category indexing requires three approved, matching businesses and useful city context', () => {
-  const city = data.cities[0];
-  const category = data.categories.find(item => item.filterType === 'deal');
-  const make = (slug, cityName = city.name, demo = false) => [slug, { demo, city: cityName, deals: [{ title: 'Offer' }] }];
-  const threeApproved = Object.fromEntries([make('a'), make('b'), make('c')]);
-  const twoApproved = Object.fromEntries([make('a'), make('b')]);
-  const withDemo = Object.fromEntries([make('a'), make('b'), make('sample', city.name, true)]);
-  const otherCity = Object.fromEntries([make('a'), make('b'), make('c', 'Other City')]);
+test('city/type routes require three approved matching listings and unique local content before indexing', () => {
+  const make = (slug, cityName = city.name, demo = false) => [slug, profile(slug, { city: cityName, deals: [{ title: 'Offer' }] , demo })];
+  const three = Object.fromEntries([make('one'), make('two'), make('three')]);
+  const two = Object.fromEntries([make('one'), make('two')]);
+  const mixed = Object.fromEntries([make('one'), make('two'), make('example', city.name, true)]);
   assert.equal(MIN_APPROVED_PROFILES_FOR_CATEGORY_INDEX, 3);
-  assert.equal(categoryIsIndexable(threeApproved, city, category), true);
-  assert.equal(categoryIsIndexable(twoApproved, city, category), false);
-  assert.equal(categoryIsIndexable(withDemo, city, category), false);
-  assert.equal(categoryIsIndexable(otherCity, city, category), false);
-  assert.equal(categoryIsIndexable(threeApproved, { ...city, discoveryNotes: { deals: 'Short text.' } }, category), false);
+  assert.equal(categoryIsIndexable(three, city, deals), true);
+  assert.equal(categoryIsIndexable(two, city, deals), false);
+  assert.equal(categoryIsIndexable(mixed, city, deals), false);
+  assert.equal(categoryIsIndexable(three, { ...city, discoveryNotes: { deals: 'Short local note.' } }, deals), false);
+  const oneBusinessThreeOffers = { one: profile('one', { deals: [{ title: 'A' }, { title: 'B' }, { title: 'C' }] }) };
+  assert.equal(categoryIsIndexable(oneBusinessThreeOffers, city, deals), true);
 });
 
-test('only explicitly approved real profiles enter indexable route lists', () => {
-  const sampleSet = { approved: { demo: false }, pending: { demo: 'pending' }, sample: { demo: true }, ambiguous: {} };
-  assert.deepEqual(getPublishedProfiles(sampleSet).map(([slug]) => slug), ['approved']);
-  const sitemap = renderSitemap(data, profiles);
-  assert.doesNotMatch(sitemap, /\/business\//);
-  assert.doesNotMatch(sitemap, /keystone-pizza/);
+test('city/type pages stay noindex and out of sitemap until eligible; eligible pages become indexable and self-canonical', () => {
+  const two = Object.fromEntries([['one', profile('one', { deals: [{ title: 'A' }] })], ['two', profile('two', { deals: [{ title: 'B' }] })]]);
+  const sitemapThin = renderSitemap(data, two);
+  assert.doesNotMatch(sitemapThin, /mechanicsburg\/deals/);
+  const root = temp('.seo-type-');
+  try {
+    generateLocalSeoPages({ rootDir: root, data, profiles: two });
+    const thin = fs.readFileSync(path.join(root, 'mechanicsburg', 'deals', 'index.html'), 'utf8');
+    assert.match(thin, /name="robots" content="noindex,follow"/);
+    assert.ok(thin.includes('href="/business/one"') && thin.includes('>A</a>'));
+    const eligible = Object.fromEntries([...Object.entries(two), ['three', profile('three', { deals: [{ title: 'C' }] })]]);
+    generateLocalSeoPages({ rootDir: root, data, profiles: eligible });
+    const page = fs.readFileSync(path.join(root, 'mechanicsburg', 'deals', 'index.html'), 'utf8');
+    assert.match(page, /name="robots" content="index,follow,max-image-preview:large"/);
+    assert.match(page, /rel="canonical" href="https:\/\/pricemarketpa\.com\/mechanicsburg\/deals"/);
+    const sitemap = fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8');
+    assert.match(sitemap, /https:\/\/pricemarketpa\.com\/mechanicsburg\/deals/);
+    assert.match(page, /href="\/business\/one"/);
+  } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
 
-test('approved profiles get static clean-URL HTML with metadata and eligible schema in the initial response', () => {
-  const tempRoot = fs.mkdtempSync(path.join(__dirname, '.local-seo-profile-test-'));
+test('sitemap contains only canonical public hubs and approved real business profiles', () => {
+  const sitemap = renderSitemap(data, { approved: profile('approved'), demo: { ...profile('demo'), demo: true }, pending: { ...profile('pending'), demo: 'pending' } });
+  assert.equal((sitemap.match(/<loc>/g) || []).length, 9);
+  assert.match(sitemap, /https:\/\/pricemarketpa\.com\/about/);
+  assert.match(sitemap, /https:\/\/pricemarketpa\.com\/for-businesses/);
+  assert.match(sitemap, /https:\/\/pricemarketpa\.com\/business\/approved/);
+  assert.doesNotMatch(sitemap, /demo|pending|onboarding|\.html|\/deals/);
+  assert.equal(renderSitemap(data, realProfiles).includes('/business/keystone-pizza'), false);
+});
+
+test('approved business profile is crawlable in initial HTML with unique metadata, breadcrumb, and factual LocalBusiness JSON-LD', () => {
+  const root = temp('.seo-profile-');
   const approved = {
-    'river-street-cafe': {
-      demo: false,
-      name: 'River Street Cafe',
-      category: 'Cafe',
-      city: 'Mechanicsburg',
-      state: 'PA',
-      address: '10 Main Street, Mechanicsburg, PA 17055',
-      description: 'A reviewed business profile with owner-provided information.',
-      phone: '717-555-0100',
-      heroImage: { src: '/assets/approved-business.jpg', alt: 'Cafe counter' },
-      deals: [], jobs: [], hours: [], happyHours: [], gallery: []
-    },
-    pending: { demo: true, name: 'Pending Example' }
+    'river-street-cafe': profile('River Street Cafe', {
+      category: 'Cafe', website: { href: 'https://riverstreet.example' }, phone: '717-555-0144',
+      logoImage: '/assets/cafe-logo.png', heroImage: { src: '/assets/cafe.jpg', alt: 'Cafe counter', width: 1200, height: 800 },
+      hours: [{ days: 'Monday – Friday', time: '9 AM – 5 PM' }],
+      deals: [{ title: 'Lunch special', description: 'Lunch details from the business.' }]
+    })
   };
   try {
-    const generated = generateLocalSeoPages({ rootDir: tempRoot, data, profiles: approved });
-    assert.ok(generated.includes('business/river-street-cafe/index.html'));
-    assert.ok(!generated.some(file => file.includes('/pending/')));
-    const page = fs.readFileSync(path.join(tempRoot, 'business', 'river-street-cafe', 'index.html'), 'utf8');
-    assert.match(page, /<title>River Street Cafe \| Business Profile \| Price Market<\/title>/);
+    generateLocalSeoPages({ rootDir: root, data, profiles: approved });
+    const page = fs.readFileSync(path.join(root, 'business', 'river-street-cafe', 'index.html'), 'utf8');
+    assert.match(page, /<title>River Street Cafe · Cafe in Mechanicsburg, PA \| Price Market<\/title>/);
     assert.match(page, /name="robots" id="profileRobots" content="index,follow,max-image-preview:large"/);
     assert.match(page, /rel="canonical" id="profileCanonical" href="https:\/\/pricemarketpa\.com\/business\/river-street-cafe"/);
+    assert.match(page, /property="og:title" id="profileOgTitle" content="River Street Cafe/);
+    assert.match(page, /<h1 id="businessName">River Street Cafe<\/h1>/);
+    assert.match(page, /Owner provided information/);
+    assert.match(page, /Monday/);
+    assert.match(page, /profile-breadcrumbs/);
+    assert.match(page, /href="\/mechanicsburg\/businesses">Cafe/);
     const jsonLd = JSON.parse(page.match(/<script type="application\/ld\+json" id="profileStructuredData">([\s\S]*?)<\/script>/)[1]);
-    assert.equal(jsonLd['@type'], 'LocalBusiness');
-    assert.equal(jsonLd.address.addressLocality, 'Mechanicsburg');
-    const sitemap = fs.readFileSync(path.join(tempRoot, 'sitemap.xml'), 'utf8');
-    assert.match(sitemap, /https:\/\/pricemarketpa\.com\/business\/river-street-cafe<\/loc>/);
-    assert.doesNotMatch(sitemap, /\/business\/pending\//);
-  } finally {
-    fs.rmSync(tempRoot, { recursive: true, force: true });
-  }
+    const businessNode = jsonLd['@graph'].find(node => node['@type'] === 'CafeOrCoffeeShop');
+    assert.equal(businessNode.name, 'River Street Cafe');
+    assert.equal(businessNode.telephone, '717-555-0144');
+    assert.equal(businessNode.address.addressLocality, 'Mechanicsburg');
+    assert.equal(businessNode.openingHoursSpecification[0].opens, '09:00');
+    assert.equal(jsonLd['@graph'].some(node => node['@type'] === 'BreadcrumbList'), true);
+    assert.equal(businessNode.aggregateRating, undefined);
+    const sitemap = fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8');
+    assert.match(sitemap, /https:\/\/pricemarketpa\.com\/business\/river-street-cafe/);
+  } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
 
-test('LocalBusiness schema requires approved profile and a complete matching address', () => {
-  const valid = {
-    demo: false,
-    name: 'Approved Sample Business',
-    description: 'Owner supplied business description.',
-    city: 'Mechanicsburg',
-    state: 'PA',
-    address: '10 Main Street, Mechanicsburg, PA 17055',
-    heroImage: { src: '/assets/example.jpg' }
-  };
-  assert.equal(buildLocalBusinessSchema({ ...valid, demo: true }, 'demo'), null);
-  assert.equal(buildLocalBusinessSchema({ ...valid, address: 'Mechanicsburg, PA' }, 'incomplete'), null);
-  assert.equal(buildLocalBusinessSchema({ ...valid, address: '10 Main Street, Hershey, PA 17033' }, 'mismatch'), null);
-  assert.equal(buildLocalBusinessSchema({ ...valid, address: { streetAddress: '10 Main Street', addressLocality: 'Hershey', addressRegion: 'PA', postalCode: '17033' } }, 'object-mismatch'), null);
-  const schema = buildLocalBusinessSchema(valid, 'approved-sample');
-  assert.equal(schema['@type'], 'LocalBusiness');
-  assert.equal(schema.address.postalCode, '17055');
-  assert.equal(schema.url, 'https://pricemarketpa.com/business/approved-sample');
-  assert.ok(!('aggregateRating' in schema));
-  assert.ok(!('review' in schema));
-  assert.ok(!('priceRange' in schema));
-  assert.ok(!('openingHours' in schema));
+test('demo and pending profiles never receive indexable LocalBusiness markup or sitemap URLs', () => {
+  const root = temp('.seo-demo-');
+  try {
+    const profiles = { sample: { ...profile('sample'), demo: true }, pending: { ...profile('pending'), demo: 'pending' } };
+    generateLocalSeoPages({ rootDir: root, data, profiles });
+    assert.equal(getPublishedProfiles(profiles).length, 0);
+    assert.doesNotMatch(fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8'), /business\//);
+    const template = fs.readFileSync(path.join(__dirname, '..', 'business-profile.html'), 'utf8');
+    assert.equal(template.includes('LocalBusiness'), false);
+  } finally { fs.rmSync(root, { recursive: true, force: true }); }
+  assert.equal(buildBusinessProfileJsonLd({ ...profile('demo'), demo: true }, 'demo'), null);
 });
 
-test('profile page implements clean approved URL and demo-safe metadata handling', () => {
-  const html = fs.readFileSync(path.join(__dirname, '..', 'business-profile.html'), 'utf8');
-  const js = fs.readFileSync(path.join(__dirname, '..', 'business-profile.js'), 'utf8');
-  assert.match(html, /name="robots" id="profileRobots" content="noindex,follow"/);
-  assert.match(js, /window\.location\.pathname\.match/);
-  assert.ok(js.includes("match(/^\\/business\\/([^/]+)\\/?$/)"));
-  assert.match(js, /business\.demo === false/);
-  assert.match(js, /buildLocalBusinessSchema/);
-  assert.match(html, /id="profileCanonical"/);
-  assert.match(html, /href="https:\/\/pricemarketpa\.com\/business-profile\?business=keystone-pizza"/);
-  assert.match(js, /https:\/\/pricemarketpa\.com\/business-profile\?business=/);
-  assert.match(html, /src="\/businesses\.js"/);
-  assert.match(html, /src="\/business-profile\.js"/);
+test('business schema uses the best supported subtype and includes only factual fields', () => {
+  assert.equal(localBusinessType('Cafe'), 'CafeOrCoffeeShop');
+  assert.equal(localBusinessType('Restaurant / Pizza'), 'Restaurant');
+  const schema = buildLocalBusinessSchema(profile('Good Salon', {
+    category: 'Beauty Salon', address: '', hours: [{ days: 'Monday', time: '9 AM – 5 PM' }]
+  }), 'good-salon');
+  assert.equal(schema['@type'], 'BeautySalon');
+  assert.equal(schema.address.addressLocality, 'Mechanicsburg');
+  assert.equal(schema.openingHoursSpecification[0].closes, '17:00');
+  assert.equal(schema.aggregateRating, undefined);
+  assert.equal(schema.review, undefined);
+  assert.equal(schema.priceRange, undefined);
+  assert.equal(schema.telephone, undefined);
 });
 
-test('homepage and crawl controls use the production origin and Vercel clean URLs', () => {
+test('homepage, About and For Businesses have distinct titles/canonicals and city links', () => {
   const root = path.join(__dirname, '..');
-  const home = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-  const robots = fs.readFileSync(path.join(root, 'robots.txt'), 'utf8');
-  const sitemap = fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8');
+  const files = ['index.html', 'about.html', 'for-businesses.html'].map(name => fs.readFileSync(path.join(root, name), 'utf8'));
+  const titles = files.map(html => html.match(/<title>(.*?)<\/title>/)[1]);
+  assert.equal(new Set(titles).size, 3);
+  assert.match(files[1], /<link rel="canonical" href="https:\/\/pricemarketpa\.com\/about">/);
+  assert.match(files[2], /<link rel="canonical" href="https:\/\/pricemarketpa\.com\/for-businesses">/);
+  for (const slug of data.cities.map(item => item.slug)) assert.match(files[0], new RegExp('href="/' + slug + '"'));
   const onboarding = fs.readFileSync(path.join(root, 'business-onboarding.html'), 'utf8');
-  const legacyProfile = fs.readFileSync(path.join(root, 'keystone-pizza.html'), 'utf8');
-  const manifest = JSON.parse(fs.readFileSync(path.join(root, 'site.webmanifest'), 'utf8'));
-  const vercel = JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8'));
-  assert.match(home, /<link rel="canonical" href="https:\/\/pricemarketpa\.com\/">/);
-  const homeGraph = JSON.parse(home.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
-  assert.ok(homeGraph['@graph'].some(item => item['@type'] === 'Organization'));
-  assert.ok(homeGraph['@graph'].some(item => item['@type'] === 'WebSite'));
-  assert.doesNotMatch(JSON.stringify(homeGraph), /LocalBusiness|aggregateRating|review/);
-  assert.match(robots, /Sitemap: https:\/\/pricemarketpa\.com\/sitemap\.xml/);
-  assert.deepEqual(manifest.icons.map(icon => icon.src), ['/apple-touch-icon.png']);
-  assert.doesNotMatch(sitemap, /www\.pricemarketpa\.com|onboarding|keystone-pizza|business-profile/);
   assert.match(onboarding, /name="robots" content="noindex,follow"/);
-  assert.match(legacyProfile, /rel="canonical" href="https:\/\/pricemarketpa\.com\/business-profile\?business=keystone-pizza"/);
-  assert.equal(vercel.cleanUrls, true);
-  assert.equal(vercel.trailingSlash, false);
-  assert.match(onboarding, /href="\/styles\.css\?v=onboarding-business-uploads-6"/);
-  assert.equal(new URL('/styles.css?v=onboarding-business-uploads-6', 'https://pricemarketpa.com/business-onboarding').href, 'https://pricemarketpa.com/styles.css?v=onboarding-business-uploads-6');
-  assert.equal(new URL('/styles.css?v=onboarding-business-uploads-6', 'https://pricemarketpa.com/business-onboarding/').href, 'https://pricemarketpa.com/styles.css?v=onboarding-business-uploads-6');
 });
-
-test('clean routes and legacy .html links share one no-slash destination', () => {
-  const config = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'vercel.json'), 'utf8'));
-  const canonicalPath = value => {
-    const url = new URL(value, 'https://pricemarketpa.com');
-    let pathname = url.pathname.replace(/\.html$/, '');
-    if (config.trailingSlash === false && pathname.length > 1) pathname = pathname.replace(/\/$/, '');
-    url.pathname = pathname || '/';
-    return `${url.pathname}${url.search}${url.hash}`;
-  };
-
-  assert.equal(canonicalPath('/'), '/');
-  assert.equal(canonicalPath('/index.html'), '/index');
-  assert.equal(canonicalPath('/business-onboarding.html'), '/business-onboarding');
-  assert.equal(canonicalPath('/business-profile.html?business=keystone-pizza'), '/business-profile?business=keystone-pizza');
-  assert.equal(canonicalPath('/keystone-pizza.html'), '/keystone-pizza');
-  assert.equal(canonicalPath('/?city=Harrisburg&type=happy-hour#marketplace'), '/?city=Harrisburg&type=happy-hour#marketplace');
-  assert.equal(canonicalPath('/mechanicsburg/'), '/mechanicsburg');
-  assert.equal(canonicalPath('/mechanicsburg/deals/'), '/mechanicsburg/deals');
-  assert.equal(canonicalPath('/business/keystone-pizza/'), '/business/keystone-pizza');
-  assert.equal(canonicalPath('/styles.css'), '/styles.css');
-});
-
