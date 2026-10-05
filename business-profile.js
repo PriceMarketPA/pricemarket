@@ -14,6 +14,8 @@
   }
 
   root.hidden = false;
+  if (root.dataset.prerendered === 'true') return;
+
   const isCanonicalProfileRoute = business.demo === false && !!routeMatch && !querySlug;
   const canonicalUrl = business.demo === false
     ? `https://pricemarketpa.com/business/${encodeURIComponent(slug)}`
