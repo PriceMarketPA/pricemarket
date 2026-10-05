@@ -273,7 +273,7 @@ test('finalize accepts real Supabase contentLength string metadata and MIME para
   const backend = mockBackend('https://ofjykpqfdogdpmpneuaz.supabase.co', secret, { objectInfoResponse: infoResponse });
   const handler = createHandler({ env, fetchImpl: backend.fakeFetch });
   const headers = { ...productionHeaders, host: 'preview.example.vercel.app', origin: 'https://preview.example.vercel.app' };
-  const session = await createSession(handler, headers);
+  const { session } = await createSession(handler, headers);
   const signed = await call(handler, { action: 'sign', ...session, role: 'logo', contentType: 'image/png', size: 8 }, headers);
   const finalized = await call(handler, { action: 'finalize', ...session, role: 'logo', contentType: 'image/png', size: 8, ...signed.body }, headers);
   assert.equal(finalized.status, 200);
