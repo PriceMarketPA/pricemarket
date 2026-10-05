@@ -135,5 +135,64 @@ function verifyProofOfWork(nonce, counter, difficultyBits = 16) {
   return digest[0] === 0 && digest[1] === 0;
 }
 
-module.exports = { IMAGE_LIMIT, PDF_LIMIT, IMAGE_MIMES, expectedForRole, validateDescriptor, makeCapability, verifyCapability, safeObjectPath, validatePendingPath, inspectMagicBytes, normalizeOrigin, vercelHost, approvedOrigins, isApprovedOrigin, signPayload, readSignedPayload, verifyProofOfWork };
+
+function normalizeStorageMimeType(value) {
+  if (typeof value !== 'string') return null;
+  const mime = value.split(';', 1)[0].trim().toLowerCase();
+  if (!mime) return null;
+  const aliases = {
+    'image/jpg': 'image/jpeg',
+    'image/pjpeg': 'image/jpeg',
+    'image/x-png': 'image/png',
+    'application/x-pdf': 'application/pdf'
+  };
+  return aliases[mime] || mime;
+}
+
+function normalizeStorageByteSize(value) {
+  if (typeof value === 'number') return Number.isSafeInteger(value) && value >= 0 ? value : null;
+  if (typeof value !== 'string' || !/^\\d+$/.test(value.trim())) return null;
+  const size = Number(value.trim());
+  return Number.isSafeInteger(size) && size >= 0 ? size : null;
+}
+
+function extractStoredObjectMetadata(info) {
+  const metadata = info?.metadata && typeof info.metadata === 'object' ? info.metadata : {};
+  const sizeCandidates = [
+    ['metadata.size', metadata.size],
+    ['metadata.contentLength', metadata.contentLength],
+    ['metadata.content_length', metadata.content_length],
+    ['info.size', info?.size],
+    ['info.contentLength', info?.contentLength],
+    ['info.content_length', info?.content_length]
+  ].map(([field, value]) => ({ field, value: normalizeStorageByteSize(value) })).filter(item => item.value !== null);
+  const mimeCandidates = [
+    ['metadata.mimetype', metadata.mimetype],
+    ['metadata.mimeType', metadata.mimeType],
+    ['metadata.mime_type', metadata.mime_type],
+    ['metadata.contentType', metadata.contentType],
+    ['metadata.content_type', metadata.content_type],
+    ['metadata.httpMetadata.contentType', metadata.httpMetadata?.contentType],
+    ['info.mimetype', info?.mimetype],
+    ['info.mimeType', info?.mimeType],
+    ['info.contentType', info?.contentType],
+    ['info.content_type', info?.content_type]
+  ].map(([field, value]) => ({ field, value: normalizeStorageMimeType(value) })).filter(item => item.value !== null);
+  const distinctSizes = new Set(sizeCandidates.map(item => item.value));
+  const distinctMimes = new Set(mimeCandidates.map(item => item.value));
+  return {
+    size: sizeCandidates[0]?.value ?? null,
+    sizeField: sizeCandidates[0]?.field ?? null,
+    sizeFields: sizeCandidates.map(item => item.field),
+    sizeConsistent: sizeCandidates.length > 0 && distinctSizes.size === 1,
+    contentType: mimeCandidates[0]?.value ?? null,
+    contentTypeField: mimeCandidates[0]?.field ?? null,
+    contentTypeFields: mimeCandidates.map(item => item.field),
+    contentTypeConsistent: mimeCandidates.length > 0 && distinctMimes.size === 1,
+    infoFields: info && typeof info === 'object' ? Object.keys(info).sort() : [],
+    metadataFields: Object.keys(metadata).sort()
+  };
+}
+
+module.exports = { extractStoredObjectMetadata, normalizeStorageMimeType, normalizeStorageByteSize, IMAGE_LIMIT, PDF_LIMIT, IMAGE_MIMES, expectedForRole, validateDescriptor, makeCapability, verifyCapability, safeObjectPath, validatePendingPath, inspectMagicBytes, normalizeOrigin, vercelHost, approvedOrigins, isApprovedOrigin, signPayload, readSignedPayload, verifyProofOfWork };
 

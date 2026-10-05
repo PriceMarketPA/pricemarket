@@ -7,7 +7,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const {
   validateDescriptor, makeCapability, verifyCapability, safeObjectPath,
-  validatePendingPath, inspectMagicBytes, isApprovedOrigin, verifyProofOfWork
+  validatePendingPath, inspectMagicBytes, isApprovedOrigin, verifyProofOfWork, extractStoredObjectMetadata
 } = require('../api/business-assets-utils');
 const { createHandler } = require('../api/business-assets');
 
@@ -73,6 +73,34 @@ test('server-verifiable proof-of-work accepts only a valid nonce/counter pair', 
   assert.equal(verifyProofOfWork(nonce, counter, 16), true);
   assert.equal(verifyProofOfWork(nonce, counter + 1, 16), false);
   assert.equal(verifyProofOfWork(nonce, counter, 8), false);
+});
+
+
+test('Storage object metadata accepts current contentLength and normalized MIME response shapes', () => {
+  const currentResponse = {
+    id: objectId,
+    name: 'pending/test/logo.png',
+    metadata: { contentLength: '8', mimetype: 'IMAGE/PNG; charset=binary', cacheControl: 'max-age=3600' }
+  };
+  assert.deepEqual(extractStoredObjectMetadata(currentResponse), {
+    size: 8,
+    sizeField: 'metadata.contentLength',
+    sizeFields: ['metadata.contentLength'],
+    sizeConsistent: true,
+    contentType: 'image/png',
+    contentTypeField: 'metadata.mimetype',
+    contentTypeFields: ['metadata.mimetype'],
+    contentTypeConsistent: true,
+    infoFields: ['id', 'metadata', 'name'],
+    metadataFields: ['cacheControl', 'contentLength', 'mimetype']
+  });
+  assert.deepEqual(extractStoredObjectMetadata({ size: 8, contentType: 'image/jpg' }).contentType, 'image/jpeg');
+});
+
+test('inconsistent or missing Storage metadata never passes verification', () => {
+  assert.equal(extractStoredObjectMetadata({ metadata: { size: 8, contentLength: 9, mimetype: 'image/png' } }).sizeConsistent, false);
+  assert.equal(extractStoredObjectMetadata({ metadata: { mimetype: 'image/png' } }).sizeConsistent, false);
+  assert.equal(extractStoredObjectMetadata({ metadata: { size: 8 } }).contentTypeConsistent, false);
 });
 
 function call(handler, body, headers = productionHeaders) {
@@ -190,7 +218,8 @@ function mockBackend(base, serviceKey, controls = {}) {
       const [, ...segments] = url.slice(pathStart).split('/');
       const objectPath = segments.map(decodeURIComponent).join('/');
       if (!storageObjects.has(objectPath)) return new Response(JSON.stringify({ statusCode: '404', error: 'ObjectNotFound', message: 'Object not found' }), { status: 404 });
-      return new Response(JSON.stringify({ metadata: { size: imageBytes.length, mimetype: 'image/png' } }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      const info = controls.objectInfoResponse || { metadata: { size: imageBytes.length, mimetype: 'image/png' } };
+      return new Response(JSON.stringify(info), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
     if (url.includes('/object/public/')) return new Response(imageBytes, { status: 200 });
     if (options.method === 'DELETE') {
@@ -231,6 +260,25 @@ test('unauthorized hosts are rejected even when they send a Price Market Origin 
   const handler = createHandler({ env: productionEnv, fetchImpl: fakeFetch });
   assert.equal((await call(handler, { action: 'challenge' }, { host: 'evil.example', origin: 'https://pricemarketpa.com' })).status, 403);
   assert.equal((await call(handler, { action: 'challenge' }, { host: 'pricemarketpa.com', origin: 'https://evil.example' })).status, 403);
+});
+
+
+test('finalize accepts real Supabase contentLength string metadata and MIME parameters, then checks magic bytes', async () => {
+  const env = { ...productionEnv, VERCEL_ENV: 'preview', VERCEL_URL: 'preview.example.vercel.app' };
+  const infoResponse = {
+    id: objectId,
+    name: 'pending/test/logo.png',
+    metadata: { contentLength: '8', mimetype: 'IMAGE/PNG; charset=binary', cacheControl: 'max-age=3600' }
+  };
+  const backend = mockBackend('https://ofjykpqfdogdpmpneuaz.supabase.co', secret, { objectInfoResponse: infoResponse });
+  const handler = createHandler({ env, fetchImpl: backend.fakeFetch });
+  const headers = { ...productionHeaders, host: 'preview.example.vercel.app', origin: 'https://preview.example.vercel.app' };
+  const session = await createSession(handler, headers);
+  const signed = await call(handler, { action: 'sign', ...session, role: 'logo', contentType: 'image/png', size: 8 }, headers);
+  const finalized = await call(handler, { action: 'finalize', ...session, role: 'logo', contentType: 'image/png', size: 8, ...signed.body }, headers);
+  assert.equal(finalized.status, 200);
+  assert.equal(finalized.body.size, 8);
+  assert.equal(finalized.body.contentType, 'image/png');
 });
 
 test('valid Price Market production flow challenges, initializes, signs, verifies, returns a public URL, and removes a pending file', async () => {

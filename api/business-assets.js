@@ -3,7 +3,7 @@
 const crypto = require('node:crypto');
 const {
   validateDescriptor, makeCapability, verifyCapability, safeObjectPath,
-  validatePendingPath, inspectMagicBytes, isApprovedOrigin,
+  validatePendingPath, inspectMagicBytes, isApprovedOrigin, extractStoredObjectMetadata, normalizeStorageMimeType,
   signPayload, readSignedPayload, verifyProofOfWork
 } = require('./business-assets-utils');
 
@@ -148,10 +148,35 @@ function createHandler({ env = process.env, fetchImpl = global.fetch, now = Date
         const infoResponse = await storageRequest(`/object/info/${encodeURIComponent(body.bucket)}/${body.path.split('/').map(encodeURIComponent).join('/')}`);
         if (!infoResponse.ok) return json(res, 400, { error: 'The uploaded file could not be verified.' });
         const info = await infoResponse.json();
-        const metadata = info.metadata || info;
-        const storedSize = Number(metadata.size ?? metadata.contentLength ?? info.size);
-        const storedType = metadata.mimetype || metadata.contentType || info.mimetype || info.contentType;
-        if (storedSize !== spec.size || storedType !== spec.contentType) return json(res, 400, { error: 'The stored file did not match the selected file. Please upload it again.' });
+        const stored = extractStoredObjectMetadata(info);
+        const expectedType = normalizeStorageMimeType(spec.contentType);
+        const sizeMatches = stored.sizeConsistent && stored.size === spec.size;
+        const mimeMatches = stored.contentTypeConsistent && stored.contentType === expectedType;
+        if (!sizeMatches || !mimeMatches) {
+          const mismatches = [];
+          if (!sizeMatches) mismatches.push('size');
+          if (!mimeMatches) mismatches.push('MIME type');
+          // Log only safe verification facts; never include credentials, capabilities, signed URLs, or object paths.
+          console.error('[business-assets] Storage object metadata verification failed', {
+            role: body.role,
+            expectedSize: spec.size,
+            reportedSize: stored.size,
+            sizeFields: stored.sizeFields,
+            sizeConsistent: stored.sizeConsistent,
+            expectedMime: expectedType,
+            reportedMime: stored.contentType,
+            mimeFields: stored.contentTypeFields,
+            mimeConsistent: stored.contentTypeConsistent,
+            infoFields: stored.infoFields,
+            metadataFields: stored.metadataFields
+          });
+          return json(res, 400, {
+            error: `The stored file metadata did not match (${mismatches.join(' and ')} mismatch). Please upload it again.`,
+            verification: { mismatches }
+          });
+        }
+        const storedSize = stored.size;
+        const storedType = stored.contentType;
         const publicUrl = `${storageBase}/object/public/${encodeURIComponent(body.bucket)}/${body.path.split('/').map(encodeURIComponent).join('/')}`;
         const fileResponse = await fetchImpl(publicUrl, { headers: { Range: 'bytes=0-63' } });
         if (!fileResponse.ok) return json(res, 400, { error: 'Could not inspect the uploaded file.' });
