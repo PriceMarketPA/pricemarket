@@ -77,6 +77,7 @@ test('invalid prices and sale-above-normal are rejected before database submissi
   const handler = createHandler({ env, fetchImpl: async () => { rpcCalls += 1; return ok({}); } });
   const proof = await challenge(handler);
   for (const fields of [
+    { normalPrice: '', salePrice: '1.00' },
     { normalPrice: '-1', salePrice: '1.00' },
     { normalPrice: '4.999', salePrice: '1.00' },
     { normalPrice: '4.00', salePrice: '5.00' },

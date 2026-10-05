@@ -101,7 +101,7 @@ function createHandler({ env = process.env, fetchImpl = global.fetch, now = Date
         const description = sanitizePlainText(body.description, 'description');
         const city = String(body.city || '');
         if (!CITIES.includes(city)) return json(res, 400, { error: 'Choose a Central PA launch city.' });
-        const normalPrice = parsePrice(body.normalPrice, { field: 'Normal price', allowZero: false });
+        const normalPrice = parsePrice(body.normalPrice, { field: 'Normal price', required: true, allowZero: false });
         const salePrice = parsePrice(body.salePrice, { field: 'Sale price', required: true });
         if (normalPrice != null && Number(salePrice) > Number(normalPrice)) return json(res, 400, { error: 'Sale price cannot be higher than normal price.' });
         let photoPath = null;
@@ -140,7 +140,7 @@ function createHandler({ env = process.env, fetchImpl = global.fetch, now = Date
       return json(res, 400, { error: 'Unknown community deal action.' });
     } catch (error) {
       const message = error instanceof Error ? error.message : '';
-      const status = error.status || (/valid|enter|choose|html|plain text|sale price|invalid json/i.test(message) ? 400 : 500);
+      const status = error.status || (/valid|enter|choose|html|plain text|price is required|sale price|invalid json/i.test(message) ? 400 : 500);
       return json(res, status, { error: status === 429 ? 'You have reached the community deal request limit. Please try again later.' : status === 409 ? (message || 'This deal is no longer active.') : status === 400 ? message : 'Community deal request could not be completed. Please try again.' });
     }
   };

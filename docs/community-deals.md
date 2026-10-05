@@ -4,7 +4,7 @@ The customer page is `/community-deals` (the repository keeps `community-deals.h
 
 ## Data and request flow
 
-- `pm_community_deal_reports` stores the city, store and deal text, optional normal price, required sale price, secure upload object path, server timestamp, status, expiration, confirmation count, and a normalized fingerprint.
+- `pm_community_deal_reports` stores the city, store and deal text, normal and sale prices, secure upload object path, server timestamp, status, expiration, confirmation count, and a normalized fingerprint.
 - `pm_community_deal_votes` stores one changeable vote per report and HMAC-hashed client IP. The UI exposes Still available, Expired, and Wrong info.
 - Private rate-limit and challenge tables enforce three submissions and forty votes per IP hash per hour and make proof-of-work challenges one-use.
 - The server routes `api/community-deals.js` use only `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. Do not add either value to frontend files or use a `NEXT_PUBLIC_`-style variable.
@@ -58,4 +58,4 @@ The existing Storage upload flow uploads to a public bucket using unpredictable 
 - Database-atomic per-IP-hash limits: 3 submissions/hour, 40 vote actions/hour.
 - Store/title/city duplicate detection is performed atomically by a unique fingerprint index.
 - Plain text is trimmed, bounded, HTML-like tags are rejected, prices are parsed server-side, and user content is rendered with DOM `textContent`, never interpolated into HTML.
-- Price bounds are numeric with up to two decimal places; sale price is required, normal price is optional, and a sale price cannot exceed the normal price.
+- Price bounds are numeric with up to two decimal places; normal and sale prices are required, and a sale price cannot exceed the normal price.

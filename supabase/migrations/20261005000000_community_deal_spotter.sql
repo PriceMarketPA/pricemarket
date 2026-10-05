@@ -6,7 +6,7 @@ create table if not exists public.pm_community_deal_reports (
   item_title text not null check (char_length(item_title) between 1 and 120),
   description text not null check (char_length(description) between 1 and 500),
   city text not null check (city in ('Mechanicsburg', 'Camp Hill', 'Carlisle', 'Harrisburg', 'Hershey')),
-  normal_price numeric(9,2) check (normal_price is null or normal_price > 0),
+  normal_price numeric(9,2) not null check (normal_price > 0),
   sale_price numeric(9,2) not null check (sale_price >= 0),
   photo_path text,
   spotted_at timestamptz not null default now(),
@@ -16,7 +16,7 @@ create table if not exists public.pm_community_deal_reports (
   fingerprint text not null check (fingerprint ~ '^[0-9a-f]{64}$'),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  check (normal_price is null or sale_price <= normal_price),
+  check (sale_price <= normal_price),
   check (photo_path is null or photo_path like 'pending/%')
 );
 create unique index if not exists pm_community_deal_fingerprint_open_idx
@@ -79,7 +79,7 @@ begin
   if p_city not in ('Mechanicsburg', 'Camp Hill', 'Carlisle', 'Harrisburg', 'Hershey') then raise exception 'Invalid city'; end if;
   if char_length(btrim(p_store_name)) not between 1 and 100 or char_length(btrim(p_item_title)) not between 1 and 120
     or char_length(btrim(p_description)) not between 1 and 500 or p_sale_price < 0
-    or (p_normal_price is not null and (p_normal_price <= 0 or p_sale_price > p_normal_price)) then
+    or p_normal_price is null or p_normal_price <= 0 or p_sale_price > p_normal_price then
     raise exception 'Invalid community deal fields';
   end if;
   insert into public.pm_community_deal_rate_limits (ip_hash) values (p_ip_hash) on conflict do nothing;
