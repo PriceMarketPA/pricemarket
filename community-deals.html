@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Live Community Deals in Central PA | Price Market</title>
+  <meta name="description" content="See fresh community-reported deals around Central Pennsylvania. Check recent sightings, confirm availability, or share a deal for review.">
+  <meta name="robots" content="noindex,follow">
+  <link rel="canonical" href="https://pricemarketpa.com/community-deals">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Price Market">
+  <meta property="og:title" content="Live Community Deals | Price Market">
+  <meta property="og:description" content="Fresh community-reported deal sightings across Central Pennsylvania.">
+  <meta property="og:url" content="https://pricemarketpa.com/community-deals">
+  <meta property="og:image" content="https://pricemarketpa.com/pm-logo.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Live Community Deals | Price Market">
+  <meta name="twitter:description" content="Fresh community-reported deal sightings across Central Pennsylvania.">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="site seo-site community-deals-site">
+    <header class="nav seo-nav">
+      <a class="brand" href="/" aria-label="Price Market home"><img src="/pm-logo.png" alt="Price Market PM logo"><div><span>Price Market</span><small>Central PA Marketplace</small></div></a>
+      <nav class="nav-links" aria-label="Main navigation"><a href="/#marketplace">Marketplace</a><a href="/for-businesses">For Businesses</a><a href="/about">About</a></nav>
+      <div class="nav-actions"><a class="btn blue small" href="#report-deal">Spot a Deal</a></div>
+    </header>
+    <main class="seo-local-page community-deals-page" id="main">
+      <nav class="seo-breadcrumbs" aria-label="Breadcrumb"><a href="/">Price Market</a><span aria-hidden="true">/</span><span aria-current="page">Live Community Deals</span></nav>
+      <section class="community-deals-hero" aria-labelledby="communityDealsTitle">
+        <p class="small-title">Fresh sightings from around Central PA</p>
+        <h1 id="communityDealsTitle">Live Community Deals</h1>
+        <p>See what shoppers have recently spotted nearby. Community reports are labeled clearly, reviewed before they go live, and may change—confirm the details with the store.</p>
+        <div class="community-deals-hero-actions"><a class="btn blue" href="#community-feed">Browse Live Deals</a><a class="btn white" href="#report-deal">Spot a Deal</a></div>
+      </section>
+
+      <section class="community-feed-section" id="community-feed" aria-labelledby="feedTitle">
+        <div class="community-feed-heading">
+          <div><p class="small-title">Community reported · newest first</p><h2 id="feedTitle">Recently spotted deals</h2></div>
+          <div class="community-city-filter">
+            <label class="sr-only" id="communityCityLabel">Filter deals by city</label>
+            <div class="pm-dropdown" id="communityCityDropdown" data-pm-dropdown data-open="false" data-select-id="communityCityFilter">
+              <button class="pm-dropdown-trigger" id="communityCityTrigger" type="button" role="combobox" aria-label="Filter deals by city" aria-haspopup="listbox" aria-expanded="false" aria-controls="communityCityListbox" aria-autocomplete="none">
+                <span class="pm-dropdown-value" id="communityCityValue">All Central PA</span><span class="pm-dropdown-chevron" aria-hidden="true"></span>
+              </button>
+              <div class="pm-dropdown-listbox" id="communityCityListbox" role="listbox" aria-labelledby="communityCityLabel" aria-hidden="true"></div>
+            </div>
+            <select id="communityCityFilter" class="sr-only" aria-hidden="true" tabindex="-1">
+              <option value="">All Central PA</option><option>Mechanicsburg</option><option>Camp Hill</option><option>Carlisle</option><option>Harrisburg</option><option>Hershey</option>
+            </select>
+          </div>
+        </div>
+        <p class="community-feed-note">Reports automatically leave the active feed after 7 days unless someone confirms they are still available.</p>
+        <p id="communityFeedStatus" class="community-feed-status" role="status" aria-live="polite">Loading current deals…</p>
+        <div id="communityDealsList" class="community-deals-list" aria-live="polite"></div>
+        <div id="communityDealsEmpty" class="community-empty-state" hidden><strong>No active community reports for this city yet.</strong><span>Try another launch city, or be the first to spot a deal.</span><a class="btn white" href="#report-deal">Report a Deal</a></div>
+      </section>
+
+      <section class="community-report-section" id="report-deal" aria-labelledby="reportTitle">
+        <div class="community-report-intro"><p class="small-title">Help neighbors find a good deal</p><h2 id="reportTitle">Spot a Deal</h2><p>Share a current store deal you personally saw. Every report starts Under review; it will not appear in the live feed until Price Market approves it.</p></div>
+        <form id="communityDealForm" class="community-deal-form" novalidate>
+          <div class="community-form-grid">
+            <label class="community-field"><span>Store or business name <span class="required-mark" aria-hidden="true">*</span></span><input name="storeName" required maxlength="100" autocomplete="organization" placeholder="e.g. local grocery or shop"></label>
+            <label class="community-field"><span>Item or deal title <span class="required-mark" aria-hidden="true">*</span></span><input name="itemTitle" required maxlength="120" placeholder="What is on sale?"></label>
+            <label class="community-field community-field-wide"><span>Short description <span class="required-mark" aria-hidden="true">*</span></span><textarea name="description" required maxlength="500" rows="3" placeholder="Share the details shoppers need to know"></textarea></label>
+            <div class="community-field">
+              <label for="communityReportCityTrigger">City <span class="required-mark" aria-hidden="true">*</span></label>
+              <div class="pm-dropdown" id="communityReportCityDropdown" data-pm-dropdown data-open="false" data-select-id="communityReportCity">
+                <button class="pm-dropdown-trigger" id="communityReportCityTrigger" type="button" role="combobox" aria-label="Choose deal city" aria-haspopup="listbox" aria-expanded="false" aria-controls="communityReportCityListbox" aria-autocomplete="none">
+                  <span class="pm-dropdown-value" id="communityReportCityValue">Choose a city</span><span class="pm-dropdown-chevron" aria-hidden="true"></span>
+                </button>
+                <div class="pm-dropdown-listbox" id="communityReportCityListbox" role="listbox" aria-label="Choose deal city" aria-hidden="true"></div>
+                <select id="communityReportCity" name="city" class="sr-only" required aria-hidden="true" tabindex="-1">
+                  <option value="">Choose a city</option><option>Mechanicsburg</option><option>Camp Hill</option><option>Carlisle</option><option>Harrisburg</option><option>Hershey</option>
+                </select>
+              </div>
+            </div>
+            <div class="community-price-fields community-field-wide">
+              <label class="community-field"><span>Normal price <span class="required-mark" aria-hidden="true">*</span></span><span class="community-price-input"><span aria-hidden="true">$</span><input name="normalPrice" required inputmode="decimal" autocomplete="off" placeholder="e.g. 5.99"></span></label>
+              <label class="community-field"><span>Sale price <span class="required-mark" aria-hidden="true">*</span></span><span class="community-price-input"><span aria-hidden="true">$</span><input name="salePrice" required inputmode="decimal" autocomplete="off" placeholder="e.g. 3.99"></span></label>
+            </div>
+            <div class="community-field community-field-wide">
+              <span id="communityPhotoLabel">Optional photo</span>
+              <p class="community-help" id="communityPhotoHelp">Photos use Price Market’s secure upload flow.</p>
+              <input id="communityDealPhoto" class="community-file-input" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" aria-describedby="communityPhotoHelp communityPhotoFilename communityPhotoStatus">
+              <label class="community-upload-control" for="communityDealPhoto"><span class="community-upload-button">Add photo</span><span id="communityPhotoFilename" class="community-upload-filename" aria-live="polite">JPG, PNG, WebP, HEIC or HEIF · up to 10 MB</span></label>
+              <progress id="communityPhotoProgress" max="100" value="0" hidden></progress>
+              <p id="communityPhotoStatus" class="community-help" role="status" aria-live="polite"></p>
+              <div id="communityPhotoPreview" class="community-photo-preview" hidden><img id="communityPhotoPreviewImage" alt="Preview of uploaded deal photo"><button type="button" class="btn ghost small" id="removeCommunityPhoto">Remove photo</button></div>
+            </div>
+          </div>
+          <p class="community-form-disclosure">Your report is community submitted and stays Under review until approved. Do not include people’s faces, payment information, or private details in photos.</p>
+          <button class="btn blue community-submit" type="submit">Send for Review <span aria-hidden="true">→</span></button>
+          <p id="communityReportStatus" class="community-report-status" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+    </main>
+    <footer class="seo-footer"><a href="/">Price Market home</a><a href="/#marketplace">Browse the marketplace</a><a href="/about">About</a></footer>
+  </div>
+  <script src="/price-market-dropdown.js" defer></script>
+  <script src="/community-deals.js" defer></script>
+</body>
+</html>
