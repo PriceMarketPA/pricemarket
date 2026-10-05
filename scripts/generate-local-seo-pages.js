@@ -5,10 +5,12 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const { absoluteAsset, buildBusinessProfileJsonLd, businessProfileUrl, cityRoute } = require('../local-seo');
+const { generateLocalGuidePages, renderBusinessGuideLinks, renderGuideLinks, renderHomeGuideLinks } = require('./local-guides');
 
 const SITE_ORIGIN = 'https://pricemarketpa.com';
 const ROOT = path.resolve(__dirname, '..');
 const DATA_FILE = path.join(ROOT, 'data', 'local-seo.json');
+const GUIDE_DATA_FILE = path.join(ROOT, 'data', 'local-guides.json');
 const MIN_APPROVED_PROFILES_FOR_CATEGORY_INDEX = 3;
 
 function escapeHtml(value) {
@@ -220,7 +222,7 @@ function businessProfilePath(slug) {
   return `/business/${encodeURIComponent(slug)}`;
 }
 
-function replaceProfileMeta(html, profile, slug, profiles = {}, data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'))) {
+function replaceProfileMeta(html, profile, slug, profiles = {}, data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')), guidePages = []) {
   if (!profile || profile.demo !== false) return html;
   const canonical = businessProfilePath(slug);
   const canonicalUrl = absoluteUrl(canonical);
@@ -301,6 +303,9 @@ function replaceProfileMeta(html, profile, slug, profiles = {}, data = JSON.pars
 
   const related = renderRelatedBusinesses(profile, slug, profiles, data);
   if (related) html = html.replace('<section class="profile-bottom-cta">', `${related}\n      <section class="profile-bottom-cta">`);
+  const guideLinks = renderBusinessGuideLinks(guidePages, slug);
+  if (guideLinks) html = html.replace('<section class="profile-bottom-cta">', `${guideLinks}
+      <section class="profile-bottom-cta">`);
   return html;
 }
 
@@ -398,7 +403,7 @@ function renderCategoryLinks(city, categories) {
   </div>`;
 }
 
-function renderCityPage(city, data, profiles = {}) {
+function renderCityPage(city, data, profiles = {}, guidePages = []) {
   const route=routeForCity(city), title=city.title, description=city.description;
   const breadcrumbs=[{name:'Price Market',route:'/'},{name:`${city.name}, PA`,route}];
   const graph=jsonLdGraph({route,title,description,breadcrumbs});
@@ -413,6 +418,7 @@ ${renderMeta({title,description,route,indexable:true,graph})}<meta name="theme-c
 <body>${renderHeader()}<main class="seo-local-page" id="main">${renderBreadcrumbs(breadcrumbs)}
 <section class="seo-local-hero" aria-labelledby="pageTitle"><p class="small-title">Central Pennsylvania · ${escapeHtml(city.name)}</p><h1 id="pageTitle">${escapeHtml(city.h1)}</h1>${city.intro.map(p=>`<p>${escapeHtml(p)}</p>`).join('')}<a class="btn blue" href="${homeFilterUrl(city,data.categories.find(x=>x.filterType==='all'))}">Browse the ${escapeHtml(city.name)} marketplace</a></section>
 ${sections}
+${renderGuideLinks(guidePages, city.slug)}
 <section class="seo-local-section" aria-labelledby="discoveryTitle"><p class="small-title">Browse by what you need</p><h2 id="discoveryTitle">${escapeHtml(city.sectionHeading)}</h2>${renderCategoryLinks(city,data.categories)}</section>
 <section class="seo-local-note" aria-labelledby="localGuideTitle"><h2 id="localGuideTitle">${escapeHtml(city.guideHeading)}</h2>${city.guide.map(p=>`<p>${escapeHtml(p)}</p>`).join('')}</section>
 <section class="seo-market-disclosure" aria-labelledby="reviewTitle"><h2 id="reviewTitle">Listings are reviewed before they go live</h2><p>Only approved, non-demo business information appears in these listing sections. New business submissions stay pending until a person reviews them. When a section is empty, there are no approved listings of that type in ${escapeHtml(city.name)} yet.</p><a href="/#marketplace">Open the Central PA marketplace <span aria-hidden="true">&rarr;</span></a></section>
@@ -451,7 +457,7 @@ function loadBusinesses(filePath = path.join(ROOT, 'businesses.js')) {
   return sandbox.window.priceMarketBusinesses || {};
 }
 
-function renderSitemap(data, profiles) {
+function renderSitemap(data, profiles, guidePages = []) {
   const routes = ['/', '/about', '/for-businesses', ...data.cities.map(routeForCity)];
   for (const city of data.cities) {
     for (const category of data.categories) {
@@ -459,16 +465,18 @@ function renderSitemap(data, profiles) {
     }
   }
   for (const [slug] of getPublishedProfiles(profiles)) routes.push(`/business/${encodeURIComponent(slug)}`);
+  for (const guide of guidePages) if (guide.indexable) routes.push(guide.route);
   const urls = [...new Set(routes)].map(route => `  <url><loc>${absoluteUrl(route)}</loc></url>`).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
 
-function generateLocalSeoPages({ rootDir = ROOT, data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')), profiles = loadBusinesses(), profileTemplate = fs.readFileSync(path.join(ROOT, 'business-profile.html'), 'utf8') } = {}) {
+function generateLocalSeoPages({ rootDir = ROOT, data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')), profiles = loadBusinesses(), profileTemplate = fs.readFileSync(path.join(ROOT, 'business-profile.html'), 'utf8'), guides = JSON.parse(fs.readFileSync(GUIDE_DATA_FILE, 'utf8')) } = {}) {
   const generated = [];
+  const guidePages = generateLocalGuidePages({ rootDir, guides, profiles, cities: data.cities });
   for (const city of data.cities) {
     const cityDir = path.join(rootDir, city.slug);
     fs.mkdirSync(cityDir, { recursive: true });
-    fs.writeFileSync(path.join(cityDir, 'index.html'), renderCityPage(city, data, profiles));
+    fs.writeFileSync(path.join(cityDir, 'index.html'), renderCityPage(city, data, profiles, guidePages));
     generated.push(`${city.slug}/index.html`);
     for (const category of data.categories) {
       const categoryDir = path.join(cityDir, category.slug);
@@ -481,11 +489,18 @@ function generateLocalSeoPages({ rootDir = ROOT, data = JSON.parse(fs.readFileSy
     if (!safeBusinessSlug(slug)) throw new Error(`Approved business has an unsafe slug: ${slug}`);
     const profileDir = path.join(rootDir, 'business', slug);
     fs.mkdirSync(profileDir, { recursive: true });
-    fs.writeFileSync(path.join(profileDir, 'index.html'), replaceProfileMeta(profileTemplate, profile, slug));
+    fs.writeFileSync(path.join(profileDir, 'index.html'), replaceProfileMeta(profileTemplate, profile, slug, profiles, data, guidePages));
     generated.push(`business/${slug}/index.html`);
   }
-  fs.writeFileSync(path.join(rootDir, 'sitemap.xml'), renderSitemap(data, profiles));
-  return generated;
+  const homePath = path.join(rootDir, 'index.html');
+  if (fs.existsSync(homePath)) {
+    let home = fs.readFileSync(homePath, 'utf8');
+    const marker = /<!-- PRICE_MARKET_GUIDE_LINKS:START -->[\s\S]*?<!-- PRICE_MARKET_GUIDE_LINKS:END -->/;
+    if (marker.test(home)) home = home.replace(marker, `<!-- PRICE_MARKET_GUIDE_LINKS:START -->\n${renderHomeGuideLinks(guidePages)}\n<!-- PRICE_MARKET_GUIDE_LINKS:END -->`);
+    fs.writeFileSync(homePath, home);
+  }
+  fs.writeFileSync(path.join(rootDir, 'sitemap.xml'), renderSitemap(data, profiles, guidePages));
+  return generated.concat(guidePages.filter(guide => guide.generated).map(guide => `guides/${guide.slug}/index.html`));
 }
 
 if (require.main === module) {
@@ -499,6 +514,8 @@ module.exports = {
   categoryIsIndexable,
   generateLocalSeoPages,
   getPublishedProfiles,
+  renderGuideLinks,
+  renderHomeGuideLinks,
   homeFilterUrl,
   renderCategoryPage,
   renderCityPage,
