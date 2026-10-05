@@ -200,6 +200,8 @@ test('community deal prices pair on desktop and the photo picker is custom but k
   const css = fs.readFileSync(path.join(__dirname, '..', 'styles.css'), 'utf8');
   const client = fs.readFileSync(path.join(__dirname, '..', 'community-deals.js'), 'utf8');
   assert.equal(home.includes(String.fromCharCode(92) + 'n'), false);
+  assert.equal(css.includes(String.fromCharCode(92) + 'n'), false);
+  assert.match(home, /<span class="preview-note">[\s\S]*?<\/span>\r?\n\s*<nav class="marketplace-community-links"/);
   assert.ok(html.includes('community-price-fields community-field-wide'));
   assert.ok(html.includes('name="normalPrice" required'));
   assert.ok(html.includes('name="salePrice" required'));
