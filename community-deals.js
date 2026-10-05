@@ -13,6 +13,7 @@
   const emptyState = document.getElementById('communityDealsEmpty');
   const reportStatus = document.getElementById('communityReportStatus');
   const photoInput = document.getElementById('communityDealPhoto');
+  const photoFilename = document.getElementById('communityPhotoFilename');
   const photoStatus = document.getElementById('communityPhotoStatus');
   const photoProgress = document.getElementById('communityPhotoProgress');
   const photoPreview = document.getElementById('communityPhotoPreview');
@@ -98,6 +99,7 @@
     photoProgress.hidden = true;
     photoStatus.textContent = 'Photo removed.';
     photoInput.value = '';
+    photoFilename.textContent = 'JPG, PNG, WebP, HEIC or HEIF · up to 10 MB';
   }
 
   async function uploadPhoto(file) {
@@ -270,6 +272,7 @@
   photoInput.addEventListener('change', async () => {
     const file = photoInput.files?.[0];
     if (!file) return;
+    photoFilename.textContent = file.name || 'Photo selected';
     photoStatus.textContent = '';
     try { await uploadPhoto(file); }
     catch (error) { photoStatus.textContent = error.message || 'Photo upload failed.'; photoProgress.hidden = true; }

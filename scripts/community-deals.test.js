@@ -193,3 +193,23 @@ test('feed page is noindex, has no user-generated HTML templates, and offers bot
   assert.match(client, /textContent = deal\.itemTitle/);
   assert.doesNotMatch(client, /innerHTML\s*=\s*.*deal\./);
 });
+
+test('community deal prices pair on desktop and the photo picker is custom but keyboard accessible', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'community-deals.html'), 'utf8');
+  const home = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  const css = fs.readFileSync(path.join(__dirname, '..', 'styles.css'), 'utf8');
+  const client = fs.readFileSync(path.join(__dirname, '..', 'community-deals.js'), 'utf8');
+  assert.equal(home.includes(String.fromCharCode(92) + 'n'), false);
+  assert.ok(html.includes('community-price-fields community-field-wide'));
+  assert.ok(html.includes('name="normalPrice" required'));
+  assert.ok(html.includes('name="salePrice" required'));
+  assert.ok(html.includes('id="communityDealPhoto" class="community-file-input" type="file"'));
+  assert.ok(html.includes('class="community-upload-control" for="communityDealPhoto"'));
+  assert.ok(html.includes('<span class="community-upload-button">Add photo</span>'));
+  assert.ok(html.includes('JPG, PNG, WebP, HEIC or HEIF · up to 10 MB'));
+  assert.ok(css.includes('.community-price-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))'));
+  assert.ok(css.includes('.community-file-input:focus-visible+.community-upload-control'));
+  assert.ok(css.includes('.community-upload-control:hover'));
+  assert.ok(css.includes('@media(max-width:700px){.community-price-fields{grid-template-columns:minmax(0,1fr)}'));
+  assert.ok(client.includes("photoFilename.textContent = file.name || 'Photo selected'"));
+});

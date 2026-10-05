@@ -517,3 +517,15 @@ footer{max-width:1240px;margin:auto;padding:28px 24px;display:flex;justify-conte
  .community-deal-price{flex-wrap:wrap}
 }
 \n.marketplace-community-links{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:.5rem}.marketplace-community-links a{display:inline-flex;align-items:center;gap:.35rem;min-height:42px;padding:.65rem .9rem;border:1px solid #dbe4ef;border-radius:999px;color:#1747b3;background:#fff;font-size:.87rem;font-weight:800;text-decoration:none}.marketplace-community-links a.primary{color:#fff;background:#1454e6;border-color:#1454e6}@media(max-width:760px){.marketplace-community-links{justify-content:flex-start;margin-top:12px}.marketplace-heading{flex-wrap:wrap}.marketplace-community-links a{min-height:46px}}\n
+/* Community deal prices and photo picker use paired, keyboard-visible Price Market controls. */
+.community-price-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;min-width:0}
+.community-price-fields>.community-field{min-width:0}
+.community-price-input{width:100%;min-width:0;box-sizing:border-box}
+.community-price-input input{min-width:0}
+.community-file-input{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important;white-space:nowrap!important;border:0!important}
+.community-upload-control{display:flex!important;align-items:center;flex-wrap:wrap;gap:.75rem;min-height:62px;padding:.65rem .8rem;border:1px dashed #b8c7de;border-radius:14px;background:#fff;color:#172b4d;cursor:pointer;transition:border-color .15s ease,background .15s ease,box-shadow .15s ease}
+.community-upload-control:hover{border-color:#1454e6;background:#f5f8ff}
+.community-file-input:focus-visible+.community-upload-control{outline:3px solid rgba(20,84,230,.28);outline-offset:3px;border-color:#1454e6;background:#f5f8ff}
+.community-upload-button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:.6rem 1rem;border-radius:11px;background:#1454e6;color:#fff;font-size:.92rem;font-weight:850;line-height:1.2}
+.community-upload-filename{min-width:0;color:#596980;font-size:.86rem;font-weight:550;overflow-wrap:anywhere}
+@media(max-width:700px){.community-price-fields{grid-template-columns:minmax(0,1fr)}.community-upload-control{align-items:flex-start;flex-direction:column;gap:.55rem}}

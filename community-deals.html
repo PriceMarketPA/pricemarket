@@ -76,12 +76,15 @@
                 </select>
               </div>
             </div>
-            <label class="community-field"><span>Normal price <span class="required-mark" aria-hidden="true">*</span></span><span class="community-price-input"><span aria-hidden="true">$</span><input name="normalPrice" required inputmode="decimal" autocomplete="off" placeholder="e.g. 5.99"></span></label>
-            <label class="community-field"><span>Sale price <span class="required-mark" aria-hidden="true">*</span></span><span class="community-price-input"><span aria-hidden="true">$</span><input name="salePrice" required inputmode="decimal" autocomplete="off" placeholder="e.g. 3.99"></span></label>
+            <div class="community-price-fields community-field-wide">
+              <label class="community-field"><span>Normal price <span class="required-mark" aria-hidden="true">*</span></span><span class="community-price-input"><span aria-hidden="true">$</span><input name="normalPrice" required inputmode="decimal" autocomplete="off" placeholder="e.g. 5.99"></span></label>
+              <label class="community-field"><span>Sale price <span class="required-mark" aria-hidden="true">*</span></span><span class="community-price-input"><span aria-hidden="true">$</span><input name="salePrice" required inputmode="decimal" autocomplete="off" placeholder="e.g. 3.99"></span></label>
+            </div>
             <div class="community-field community-field-wide">
-              <label for="communityDealPhoto">Optional photo</label>
-              <p class="community-help">Upload one JPG, PNG, WebP, HEIC, or HEIF image (up to 10 MB). Photos use Price Market’s secure upload flow.</p>
-              <input id="communityDealPhoto" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif">
+              <span id="communityPhotoLabel">Optional photo</span>
+              <p class="community-help" id="communityPhotoHelp">Photos use Price Market’s secure upload flow.</p>
+              <input id="communityDealPhoto" class="community-file-input" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" aria-describedby="communityPhotoHelp communityPhotoFilename communityPhotoStatus">
+              <label class="community-upload-control" for="communityDealPhoto"><span class="community-upload-button">Add photo</span><span id="communityPhotoFilename" class="community-upload-filename" aria-live="polite">JPG, PNG, WebP, HEIC or HEIF · up to 10 MB</span></label>
               <progress id="communityPhotoProgress" max="100" value="0" hidden></progress>
               <p id="communityPhotoStatus" class="community-help" role="status" aria-live="polite"></p>
               <div id="communityPhotoPreview" class="community-photo-preview" hidden><img id="communityPhotoPreviewImage" alt="Preview of uploaded deal photo"><button type="button" class="btn ghost small" id="removeCommunityPhoto">Remove photo</button></div>
