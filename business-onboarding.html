@@ -8,7 +8,7 @@
   <meta name="robots" content="noindex,follow">
   <meta name="theme-color" content="#1454e6">
   <link rel="icon" href="/favicon.ico" sizes="any">
-  <link rel="stylesheet" href="/styles.css?v=onboarding-happy-hour-select-5">
+  <link rel="stylesheet" href="/styles.css?v=onboarding-business-uploads-6">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KC4258L331"></script>
   <script>
@@ -50,8 +50,8 @@
           <section class="onboarding-section" aria-labelledby="basicsTitle">
             <div class="onboarding-section-heading"><span>01</span><div><h2 id="basicsTitle">The business basics</h2><p>Start with the name and location customers will recognize.</p></div></div>
             <div class="onboarding-fields">
-              <label class="field-wide">Business name <span class="required-mark">*</span><input name="businessName" id="businessNameInput" type="text" placeholder="e.g. Keystone Pizza Co." maxlength="90" required></label>
-              <div class="onboarding-dropdown-field"><span class="field-label" id="onboardingCategoryLabel">Category <span class="required-mark">*</span></span>
+              <label class="field-wide"><span class="field-label-line">Business name <span class="required-mark">*</span></span><input name="businessName" id="businessNameInput" type="text" placeholder="e.g. Keystone Pizza Co." maxlength="90" required></label>
+              <div class="onboarding-dropdown-field"><span class="field-label" id="onboardingCategoryLabel"><span class="field-label-line">Category <span class="required-mark">*</span></span></span>
                 <div class="pm-dropdown form-pm-dropdown" id="onboardingCategoryDropdown" data-pm-dropdown data-open="false" data-select-id="businessCategory" data-required="true">
                   <button class="pm-dropdown-trigger" id="onboardingCategoryTrigger" type="button" aria-labelledby="onboardingCategoryLabel" aria-haspopup="listbox" aria-expanded="false" aria-controls="onboardingCategoryListbox" aria-autocomplete="none"><span class="pm-dropdown-value" id="onboardingCategoryValue">Choose a category</span><span class="pm-dropdown-chevron" aria-hidden="true"></span></button>
                   <div class="pm-dropdown-listbox" id="onboardingCategoryListbox" role="listbox" aria-label="Business category options" aria-hidden="true"></div>
@@ -61,7 +61,7 @@
                   <option>Restaurant / Food</option><option>Retail / Shopping</option><option>Health / Fitness</option><option>Beauty / Salon</option><option>Home Services / Trades</option><option>Professional Services</option><option>Nonprofit / Community</option><option>Other</option>
                 </select>
               </div>
-              <div class="onboarding-dropdown-field"><span class="field-label" id="onboardingCityLabel">City <span class="required-mark">*</span></span>
+              <div class="onboarding-dropdown-field"><span class="field-label" id="onboardingCityLabel"><span class="field-label-line">City <span class="required-mark">*</span></span></span>
                 <div class="pm-dropdown form-pm-dropdown" id="onboardingCityDropdown" data-pm-dropdown data-open="false" data-select-id="businessCity" data-required="true">
                   <button class="pm-dropdown-trigger" id="onboardingCityTrigger" type="button" aria-labelledby="onboardingCityLabel" aria-haspopup="listbox" aria-expanded="false" aria-controls="onboardingCityListbox" aria-autocomplete="none"><span class="pm-dropdown-value" id="onboardingCityValue">Choose a Central PA city</span><span class="pm-dropdown-chevron" aria-hidden="true"></span></button>
                   <div class="pm-dropdown-listbox" id="onboardingCityListbox" role="listbox" aria-label="Business city options" aria-hidden="true"></div>
@@ -71,8 +71,8 @@
                   <option>Mechanicsburg</option><option>Camp Hill</option><option>Carlisle</option><option>Harrisburg</option><option>Hershey</option><option>Other Central PA</option>
                 </select>
               </div>
-              <label class="field-wide">Street address <span class="required-mark">*</span><input name="streetAddress" id="businessAddress" type="text" autocomplete="street-address" placeholder="Street address, city, and ZIP" maxlength="180" required></label>
-              <label class="field-wide">Short business description <span class="required-mark">*</span><textarea name="description" id="businessDescription" rows="3" maxlength="240" placeholder="What should local customers know about your business?" required></textarea><small class="field-hint"><span id="descriptionCount">0</span>/240 characters</small></label>
+              <label class="field-wide"><span class="field-label-line">Street address <span class="required-mark">*</span></span><input name="streetAddress" id="businessAddress" type="text" autocomplete="street-address" placeholder="Street address, city, and ZIP" maxlength="180" required></label>
+              <label class="field-wide"><span class="field-label-line">Short business description <span class="required-mark">*</span></span><textarea name="description" id="businessDescription" rows="3" maxlength="240" placeholder="What should local customers know about your business?" required></textarea><small class="field-hint"><span id="descriptionCount">0</span>/240 characters</small></label>
             </div>
           </section>
             <div class="onboarding-step-controls"><span></span><button class="btn blue" type="button" data-step-next>Continue to Contact &amp; Hours <span aria-hidden="true">→</span></button></div>
@@ -82,8 +82,8 @@
           <section class="onboarding-section" aria-labelledby="contactTitle">
             <div class="onboarding-section-heading"><span>02</span><div><h2 id="contactTitle">How customers can reach you</h2><p>Add the contact details and link you want shown on your profile.</p></div></div>
             <div class="onboarding-fields">
-              <label class="contact-phone">Phone<input name="phone" id="businessPhone" type="tel" autocomplete="tel" placeholder="717-555-0123"></label>
-              <label class="contact-email">Email <span class="required-mark">*</span><input name="email" id="businessEmail" type="email" autocomplete="email" placeholder="hello@yourbusiness.com" required></label>
+              <label class="contact-phone"><span class="field-label-line">Phone</span><input name="phone" id="businessPhone" type="tel" autocomplete="tel" placeholder="717-555-0123"></label>
+              <label class="contact-email"><span class="field-label-line">Email <span class="required-mark">*</span></span><input name="email" id="businessEmail" type="email" autocomplete="email" placeholder="hello@yourbusiness.com" required></label>
               <label class="field-wide">Website<input name="website" id="businessWebsite" type="url" inputmode="url" placeholder="https://yourbusiness.com"></label>
             </div>
           </section>
@@ -98,12 +98,37 @@
 
           <div class="onboarding-step-panel" data-step-panel="3" hidden>
           <section class="onboarding-section" aria-labelledby="imagesTitle">
-            <div class="onboarding-section-heading"><span>04</span><div><h2 id="imagesTitle">Make it yours</h2><p>Add image links so your profile can show your logo and a great first impression.</p></div></div>
-            <div class="onboarding-fields">
-              <label class="field-wide">Logo image URL<input name="logoImage" id="logoImage" type="url" inputmode="url" placeholder="https://... (optional)"></label>
-              <label class="field-wide">Business or cover image URL<input name="heroImage" id="heroImage" type="url" inputmode="url" placeholder="https://... (optional)"></label>
-              <label class="field-wide">Image description<input name="imageAlt" id="imageAlt" type="text" maxlength="140" placeholder="Describe the image for screen readers"></label>
-              <p class="field-hint field-wide">Image links are collected for review. This form does not upload files.</p>
+            <div class="onboarding-section-heading"><span>04</span><div><h2 id="imagesTitle">Make it yours</h2><p>Upload photos from your phone or computer. Your files stay attached to this pending submission until a person reviews it.</p></div></div>
+            <div class="onboarding-fields upload-fields">
+              <div class="upload-control field-wide" data-upload-control="logo">
+                <label for="logoImageFile">Logo <span class="optional-tag">Optional · 1 image, up to 10 MB</span></label>
+                <input id="logoImageFile" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" data-upload-role="logo">
+                <p class="upload-status" data-upload-status="logo" role="status" aria-live="polite">JPG, PNG, WebP, HEIC, or HEIF</p>
+                <div class="upload-preview" data-upload-preview="logo" aria-live="polite"></div>
+              </div>
+              <div class="upload-control field-wide" data-upload-control="cover">
+                <label for="coverPhotoFile">Cover photo <span class="optional-tag">Optional · 1 image, up to 10 MB</span></label>
+                <input id="coverPhotoFile" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" data-upload-role="cover">
+                <p class="upload-status" data-upload-status="cover" role="status" aria-live="polite">A wide photo works best.</p>
+                <div class="upload-preview" data-upload-preview="cover" aria-live="polite"></div>
+              </div>
+              <div class="upload-control field-wide" data-upload-control="gallery">
+                <label for="galleryPhotosFile">Gallery photos <span class="optional-tag">Optional · up to 5 images, 10 MB each</span></label>
+                <input id="galleryPhotosFile" type="file" multiple accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" data-upload-role="gallery">
+                <p class="upload-status" data-upload-status="gallery" role="status" aria-live="polite">Add up to five extra photos.</p>
+                <div class="upload-preview upload-gallery-preview" data-upload-preview="gallery" aria-live="polite"></div>
+              </div>
+              <div class="upload-control field-wide" data-upload-control="document">
+                <label for="businessDocumentFile">Menu, brochure, service list, or hiring flyer <span class="optional-tag">Optional · 1 PDF, up to 15 MB</span></label>
+                <input id="businessDocumentFile" type="file" accept="application/pdf,.pdf" data-upload-role="document">
+                <p class="upload-status" data-upload-status="document" role="status" aria-live="polite">PDF only.</p>
+                <div class="upload-preview" data-upload-preview="document" aria-live="polite"></div>
+              </div>
+              <label class="field-wide">Image description<input name="imageAlt" id="imageAlt" type="text" maxlength="140" placeholder="Describe the cover photo for screen readers"></label>
+              <details class="field-wide upload-url-fallback"><summary>Use image URLs instead (optional fallback)</summary>
+                <div class="onboarding-fields"><label class="field-wide">Logo image URL<input name="logoImage" id="logoImage" type="url" inputmode="url" placeholder="https://... (optional)"></label><label class="field-wide">Business or cover image URL<input name="heroImage" id="heroImage" type="url" inputmode="url" placeholder="https://... (optional)"></label></div>
+              </details>
+              <p class="field-hint field-wide">Uploads are stored in Price Market’s public media buckets, but are not added to a published profile unless approved. Please upload only business materials intended for public viewing.</p>
             </div>
           </section>            <div class="onboarding-step-controls"><button class="btn ghost" type="button" data-step-back>Back</button><button class="btn blue" type="button" data-step-next>Continue to Promote Something <span aria-hidden="true">→</span></button></div>
           </div>
@@ -166,6 +191,8 @@
               </div>
               <p class="onboarding-preview-description" id="previewDescription">Your short business introduction will appear here, helping neighbors get to know you.</p>
               <div class="onboarding-preview-details"><span id="previewAddress">Your address</span><span id="previewHours">Add your hours</span></div>
+              <div class="onboarding-preview-gallery" id="previewGallery" hidden aria-label="Uploaded gallery photo preview"></div>
+              <a class="onboarding-preview-document" id="previewDocument" hidden target="_blank" rel="noopener noreferrer"><span>Document attached</span><strong>View menu or document ↗</strong></a>
               <div class="onboarding-preview-deal" id="previewDeal"><span>FEATURED DEAL · EXAMPLE PREVIEW</span><strong id="previewDealTitle">Your featured deal</strong><p id="previewDealDescription">A quick look at the offer you’d like to share.</p></div>
               <div class="onboarding-preview-happy-hour" id="previewHappyHour" hidden>
                 <span>HAPPY HOUR · PREVIEW ONLY</span>
@@ -184,8 +211,8 @@
   </div>
 
   <footer class="site-footer"><nav aria-label="Footer navigation"><a href="/for-businesses">For Businesses</a><a href="/about">About</a><a href="/">Marketplace</a></nav><span data-copyright-year>© 2026 Price Market LLC. All rights reserved.</span><span>Built for Central Pennsylvania</span></footer>
-  <script src="price-market-dropdown.js"></script>
-  <script src="business-onboarding.js"></script>
+  <script src="/price-market-dropdown.js"></script>
+  <script src="/business-onboarding.js"></script>
   <script src="/copyright.js"></script>
 </body>
 </html>

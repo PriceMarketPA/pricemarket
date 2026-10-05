@@ -25,17 +25,25 @@
   const stepper = form.querySelector?.('.onboarding-stepper');
   const previewAside = byId('onboardingLivePreview');
   let currentStep = 1;
+  let uploadSession = null;
+  let uploadsInProgress = 0;
+  const uploadedAssets = { logo: null, cover: null, gallery: [], document: null };
+  const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']);
+  const IMAGE_LIMIT = 10 * 1024 * 1024;
+  const PDF_LIMIT = 15 * 1024 * 1024;
+  const uploadApi = '/api/business-assets';
   const stepNames = ['Your Business', 'Contact & Hours', 'Photos', 'Promote Something', 'Preview & Submit'];
   function showStep(step, focusHeading = true) {
     currentStep = Math.max(1, Math.min(5, step));
     stepPanels.forEach(panel => { panel.hidden = Number(panel.dataset.stepPanel) !== currentStep; });
     form.querySelectorAll('[data-step-indicator]').forEach(item => { const active = Number(item.dataset.stepIndicator) === currentStep; if (active) item.setAttribute('aria-current', 'step'); else item.removeAttribute('aria-current'); });
-    const count = byId('onboardingStepCount'); if (count) count.textContent = 'Step ' + currentStep + ' of 5 · ' + stepNames[currentStep - 1];
+    const count = byId('onboardingStepCount'); if (count) count.textContent = 'Step ' + currentStep + ' of 5 � ' + stepNames[currentStep - 1];
     if (previewAside) previewAside.hidden = currentStep !== 5;
     if (focusHeading) { const heading = stepPanels[currentStep - 1]?.querySelector('h2'); heading?.setAttribute('tabindex', '-1'); heading?.focus(); }
   }
   function validateCurrentStep() {
     const panel = stepPanels[currentStep - 1]; if (!panel) return true;
+    if (currentStep === 3 && uploadsInProgress) { setUploadStatus('gallery', 'Please wait for uploads to finish.', true); return false; }
     if (currentStep === 1 && !window.validatePmDropdowns(form)) return false;
     for (const field of panel.querySelectorAll('input, select, textarea')) { if (!field.disabled && !field.checkValidity()) { field.reportValidity(); field.focus(); return false; } }
     return true;
@@ -53,6 +61,209 @@
       return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
     } catch { return ''; }
   }
+
+  function setUploadStatus(slot, message, isError = false) {
+    const target = document.querySelector(`[data-upload-status="${slot}"]`);
+    if (!target) return;
+    target.textContent = message;
+    target.classList.toggle('is-error', isError);
+  }
+
+  async function callUploadApi(payload) {
+    const response = await fetch(uploadApi, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...payload, submissionId: uploadSession?.submissionId, capability: uploadSession?.capability })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || 'Upload service unavailable. Please try again.');
+    return result;
+  }
+
+  async function solveUploadChallenge(challenge) {
+    if (!window.crypto?.subtle || typeof TextEncoder === 'undefined') throw new Error('This browser cannot prepare the secure upload. Please update your browser or use the image URL fallback.');
+    let counter = 0;
+    while (counter < 10000000) {
+      const digest = new Uint8Array(await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${challenge.nonce}:${counter}`)));
+      if (digest[0] === 0 && digest[1] === 0) return counter;
+      counter++;
+      if (counter % 512 === 0) await new Promise(resolve => window.setTimeout(resolve, 0));
+    }
+    throw new Error('Upload verification took too long. Please try again.');
+  }
+
+  async function ensureUploadSession(slot) {
+    if (!uploadSession) {
+      setUploadStatus(slot, 'Preparing secure upload.');
+      const options = { method: 'POST', headers: { 'Content-Type': 'application/json' } };
+      const challengeResponse = await fetch(uploadApi, { ...options, body: JSON.stringify({ action: 'challenge' }) });
+      const challenge = await challengeResponse.json().catch(() => ({}));
+      if (!challengeResponse.ok || !challenge.challengeToken) throw new Error(challenge.error || 'Could not prepare upload verification. Please try again.');
+      const proof = await solveUploadChallenge(challenge);
+      const response = await fetch(uploadApi, { ...options, body: JSON.stringify({ action: 'initialize', challengeId: challenge.challengeId, challengeToken: challenge.challengeToken, proof }) });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.submissionId || !result.capability) throw new Error(result.error || 'Could not prepare a secure upload. Please try again.');
+      uploadSession = result;
+    }
+  }
+
+  function validateSelectedFile(file, isDocument) {
+    const maxSize = isDocument ? PDF_LIMIT : IMAGE_LIMIT;
+    const typeOkay = isDocument ? file.type === 'application/pdf' : IMAGE_TYPES.has(file.type);
+    if (!typeOkay) throw new Error(isDocument ? 'Choose a PDF document.' : 'Choose a JPG, PNG, WebP, HEIC, or HEIF image.');
+    if (!file.size || file.size > maxSize) throw new Error(`This file is too large. The limit is ${isDocument ? '15 MB' : '10 MB'}.`);
+  }
+
+  function uploadBytes(url, file, onProgress) {
+    return new Promise((resolve, reject) => {
+      const request = new window.XMLHttpRequest();
+      request.open('PUT', url);
+      request.setRequestHeader('Content-Type', file.type);
+      request.upload.onprogress = event => { if (event.lengthComputable) onProgress(Math.round((event.loaded / event.total) * 100)); };
+      request.onload = () => request.status >= 200 && request.status < 300 ? resolve() : reject(new Error('The file could not be stored. Please try again.'));
+      request.onerror = () => reject(new Error('Upload interrupted. Check your connection and try again.'));
+      request.onabort = () => reject(new Error('Upload cancelled.'));
+      request.send(file);
+    });
+  }
+
+  function assetPreviewNode(asset, slot) {
+    const card = document.createElement('div');
+    card.className = 'upload-preview-item';
+    if (asset.role !== 'document') {
+      const image = document.createElement('img');
+      image.src = asset.publicUrl;
+      image.alt = '';
+      image.loading = 'lazy';
+      image.addEventListener('error', () => {
+        const fallback = document.createElement('span');
+        fallback.className = 'upload-file-icon';
+        fallback.textContent = 'Photo';
+        image.replaceWith(fallback);
+      }, { once: true });
+      card.append(image);
+    } else {
+      const fileIcon = document.createElement('span');
+      fileIcon.className = 'upload-file-icon';
+      fileIcon.textContent = 'PDF';
+      card.append(fileIcon);
+    }
+    const details = document.createElement('span');
+    details.className = 'upload-preview-name';
+    details.textContent = asset.fileName;
+    card.append(details);
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'upload-remove';
+    remove.textContent = 'Remove';
+    remove.setAttribute('aria-label', `Remove ${asset.fileName}`);
+    remove.addEventListener('click', () => removeUploadedAsset(slot, asset));
+    card.append(remove);
+    if (asset.pendingRemoval) {
+      const retry = document.createElement('button');
+      retry.type = 'button';
+      retry.className = 'upload-remove';
+      retry.textContent = 'Retry old file cleanup';
+      retry.setAttribute('aria-label', `Retry cleanup of replaced file ${asset.pendingRemoval.fileName}`);
+      retry.addEventListener('click', () => retryPendingRemoval(slot, asset));
+      card.append(retry);
+    }
+    return card;
+  }
+
+  function renderUploadPreviews() {
+    for (const slot of ['logo', 'cover', 'gallery', 'document']) {
+      const container = document.querySelector(`[data-upload-preview="${slot}"]`);
+      if (!container) continue;
+      container.replaceChildren();
+      const assets = slot === 'gallery' ? uploadedAssets.gallery : uploadedAssets[slot] ? [uploadedAssets[slot]] : [];
+      assets.forEach(asset => container.append(assetPreviewNode(asset, slot)));
+    }
+  }
+
+  async function removeUploadedAsset(slot, asset) {
+    try {
+      const result = uploadSession ? await callUploadApi({ action: 'remove', path: asset.path, bucket: asset.bucket, role: asset.role }) : {};
+      if (slot === 'gallery') uploadedAssets.gallery = uploadedAssets.gallery.filter(item => item.path !== asset.path);
+      else if (result.restoredPath && asset.pendingRemoval) {
+        const restored = asset.pendingRemoval;
+        uploadedAssets[slot] = { ...restored, path: result.restoredPath, bucket: asset.bucket, role: asset.role };
+      } else uploadedAssets[slot] = null;
+      setUploadStatus(slot, slot === 'gallery' ? 'Add up to five extra photos.' : 'Uploaded file removed.');
+      renderUploadPreviews();
+      refreshPreview();
+    } catch (error) { setUploadStatus(slot, error.message || 'Could not remove this file. Please retry.', true); }
+  }
+
+  async function retryPendingRemoval(slot, asset) {
+    const oldAsset = asset.pendingRemoval;
+    if (!oldAsset || !uploadSession) return;
+    try {
+      await callUploadApi({ action: 'remove', path: oldAsset.path, bucket: oldAsset.bucket, role: oldAsset.role });
+      delete asset.pendingRemoval;
+      setUploadStatus(slot, 'The replaced file was removed.');
+      renderUploadPreviews();
+    } catch (error) { setUploadStatus(slot, error.message || 'Could not remove the replaced file. Please retry.', true); }
+  }
+
+  async function uploadOne(slot, role, file) {
+    const isDocument = role === 'document';
+    validateSelectedFile(file, isDocument);
+    await ensureUploadSession(slot);
+    const previousAsset = role.startsWith('gallery-') ? uploadedAssets.gallery.find(asset => asset.role === role) : uploadedAssets[slot];
+    let signed;
+    try {
+      signed = await callUploadApi({ action: 'sign', role, contentType: file.type, size: file.size, replacePath: previousAsset?.path || '' });
+      setUploadStatus(slot, `Uploading ${file.name} � 0%`);
+      await uploadBytes(signed.uploadUrl, file, percent => setUploadStatus(slot, `Uploading ${file.name} � ${percent}%`));
+      const complete = await callUploadApi({ action: 'finalize', role, bucket: signed.bucket, path: signed.path, contentType: file.type, size: file.size, fileName: file.name });
+      return { ...complete, role, fileName: file.name };
+    } catch (error) {
+      if (signed?.path) {
+        try { await callUploadApi({ action: 'remove', role, bucket: signed.bucket, path: signed.path }); } catch { error.cleanupFailed = true; }
+      }
+      throw error;
+    }
+  }
+
+  async function handleFileSelection(input) {
+    const slot = input.dataset.uploadRole;
+    const files = [...(input.files || [])];
+    if (!files.length) return;
+    uploadsInProgress++;
+    input.disabled = true;
+    try {
+      if (slot === 'gallery') {
+        if (uploadedAssets.gallery.length + files.length > 5) throw new Error('You can add up to five gallery photos. Remove a photo before adding another.');
+        for (const [index, file] of files.entries()) {
+          const usedRoles = new Set(uploadedAssets.gallery.map(asset => asset.role));
+          const role = ['gallery-1', 'gallery-2', 'gallery-3', 'gallery-4', 'gallery-5'].find(candidate => !usedRoles.has(candidate));
+          const asset = await uploadOne('gallery', role, file);
+          uploadedAssets.gallery.push(asset);
+          setUploadStatus('gallery', `${uploadedAssets.gallery.length} of 5 gallery photos uploaded.`);
+        }
+      } else {
+        const asset = await uploadOne(slot, slot, files[0]);
+        const previous = uploadedAssets[slot];
+        uploadedAssets[slot] = asset;
+        let previousRemoved = true;
+        const replacedPath = asset.replacedPath || previous?.path;
+        if (replacedPath) {
+          try { await callUploadApi({ action: 'remove', path: replacedPath, bucket: previous?.bucket || asset.bucket, role: asset.role }); }
+          catch {
+            previousRemoved = false;
+            asset.pendingRemoval = { ...(previous || {}), path: replacedPath, bucket: previous?.bucket || asset.bucket, role: asset.role, fileName: previous?.fileName || 'Previous upload' };
+          }
+        }
+        setUploadStatus(slot, `${files[0].name} uploaded.${previous && !previousRemoved ? ' The replaced pending file could not be removed; it will not be submitted.' : ''}`, Boolean(previous && !previousRemoved));
+      }
+      renderUploadPreviews();
+      refreshPreview();
+    } catch (error) { setUploadStatus(slot, `${error.message || 'Upload failed. Please try again.'}${error.cleanupFailed ? ' The incomplete pending file could not be removed.' : ''}`, true); }
+    finally { input.disabled = false; input.value = ''; uploadsInProgress--; }
+  }
+
+  form.querySelectorAll('[data-upload-role]').forEach(input => input.addEventListener('change', () => handleFileSelection(input)));
 
   function formatTime(value) {
     if (!value) return '';
@@ -83,7 +294,7 @@
       const closing = form.elements[`hoursClose-${day}`].value;
       if (closed) return [{ days: day, time: 'Closed' }];
       if (!opening && !closing) return [];
-      return [{ days: day, time: `${formatTime(opening)} – ${formatTime(closing)}`.trim() }];
+      return [{ days: day, time: `${formatTime(opening)} - ${formatTime(closing)}`.trim() }];
     });
   }
 
@@ -92,19 +303,19 @@
     const category = read('businessCategory');
     const city = read('businessCity');
     const description = read('businessDescription');
-    const image = validImageUrl(read('heroImage'));
+    const image = uploadedAssets.cover?.publicUrl || validImageUrl(read('heroImage'));
     const hours = collectHours();
     const dealTitle = read('dealTitle');
     const dealDescription = read('dealDescription');
 
     setText('previewBusinessName', name, 'Your Business Name');
-    setText('previewCategoryCity', `${category || 'Your category'} · ${city || 'Your city'}, PA`);
+    setText('previewCategoryCity', `${category || 'Your category'} � ${city || 'Your city'}, PA`);
     setText('previewDescription', description, 'Your short business introduction will appear here, helping neighbors get to know you.');
     setText('previewAddress', read('businessAddress'), 'Your address');
     setText('previewHours', hours.length ? `${hours.length} day${hours.length === 1 ? '' : 's'} of hours added` : '', 'Add your hours');
     setText('previewDealTitle', dealTitle, 'Your featured deal');
-    setText('previewDealDescription', dealDescription, 'A quick look at the offer you’d like to share.');
-    const logo = validImageUrl(read('logoImage'));
+    setText('previewDealDescription', dealDescription, "A quick look at the offer you'd like to share.");
+    const logo = uploadedAssets.logo?.publicUrl || validImageUrl(read('logoImage'));
     byId('previewAvatar').textContent = '';
     if (logo) {
       const avatarImage = document.createElement('img');
@@ -116,6 +327,19 @@
     }
     byId('previewImage').src = image || 'assets/showcase-restaurant.jpg';
     byId('previewImage').alt = read('imageAlt') || (name ? `${name} business preview` : 'Sample local business preview image');
+    const gallery = byId('previewGallery');
+    gallery.replaceChildren();
+    gallery.hidden = uploadedAssets.gallery.length === 0;
+    uploadedAssets.gallery.forEach(asset => {
+      const item = document.createElement('img');
+      item.src = asset.publicUrl;
+      item.alt = '';
+      item.loading = 'lazy';
+      gallery.append(item);
+    });
+    const documentLink = byId('previewDocument');
+    documentLink.hidden = !uploadedAssets.document;
+    if (uploadedAssets.document) documentLink.href = uploadedAssets.document.publicUrl;
     byId('previewDeal').hidden = !dealTitle && !dealDescription;
 
     const happyHourEnabled = happyHourToggle.checked;
@@ -125,9 +349,9 @@
     const happyHourEndTime = read('happyHourEndTime');
     const happyHourDescription = read('happyHourDescription');
     const happyHourRestrictions = read('happyHourRestrictions');
-    const happyHourRange = [formatTime(happyHourStartTime), formatTime(happyHourEndTime)].filter(Boolean).join('–');
+    const happyHourRange = [formatTime(happyHourStartTime), formatTime(happyHourEndTime)].filter(Boolean).join('-');
     setText('previewHappyHourTitle', happyHourTitle, 'Your Happy Hour offer');
-    setText('previewHappyHourSchedule', [happyHourDays, happyHourRange].filter(Boolean).join(' · '), 'Add the days and times');
+    setText('previewHappyHourSchedule', [happyHourDays, happyHourRange].filter(Boolean).join(' � '), 'Add the days and times');
     setText('previewHappyHourDescription', happyHourDescription, 'A recurring special for your neighbors.');
     const restrictions = byId('previewHappyHourRestrictions');
     restrictions.textContent = happyHourRestrictions;
@@ -168,8 +392,8 @@
     const happyHourStartTime = happyHourToggle.checked ? read('happyHourStartTime') : '';
     const happyHourEndTime = happyHourToggle.checked ? read('happyHourEndTime') : '';
     const happyHourRestrictions = happyHourToggle.checked ? read('happyHourRestrictions') : '';
-    const heroUrl = validImageUrl(read('heroImage'));
-    const logoUrl = validImageUrl(read('logoImage'));
+    const heroUrl = uploadedAssets.cover?.publicUrl || validImageUrl(read('heroImage'));
+    const logoUrl = uploadedAssets.logo?.publicUrl || validImageUrl(read('logoImage'));
     return {
       demo: false,
       reviewStatus: 'Pending review',
@@ -177,6 +401,13 @@
       avatarText: businessName.split(/\s+/).filter(Boolean).map(part => part[0]).join('').slice(0, 2).toUpperCase(),
       logoImage: logoUrl,
       heroImage: { src: heroUrl, alt: read('imageAlt') || `${businessName} business image` },
+      media: {
+        logoUrl,
+        coverUrl: heroUrl,
+        galleryUrls: uploadedAssets.gallery.map(asset => asset.publicUrl),
+        documentUrl: uploadedAssets.document?.publicUrl || ''
+      },
+      gallery: uploadedAssets.gallery.map(asset => asset.publicUrl),
       category: read('businessCategory'),
       city: read('businessCity'),
       state: 'PA',
@@ -203,6 +434,7 @@
     event.preventDefault();
     status.hidden = true;
     if (!window.validatePmDropdowns(form)) return;
+    if (uploadsInProgress) { status.textContent = 'Please wait for your uploads to finish before submitting.'; status.hidden = false; return; }
 
     const profileData = makeProfileData();
     const happyHour = profileData.happyHours[0] || {};
@@ -233,7 +465,7 @@
     };
 
     submitButton.disabled = true;
-    submitButton.textContent = 'Sending for review…';
+    submitButton.textContent = 'Sending for review.';
     try {
       await fetch(LEADS_API_URL, {
         method: 'POST',
@@ -243,18 +475,19 @@
       });
       const confirmation = byId('submissionConfirmation');
       if (confirmation) { form.hidden = true; if (stepper) stepper.hidden = true; if (previewAside) previewAside.hidden = true; confirmation.hidden = false; confirmation.focus(); }
-      status.textContent = 'Thanks — your profile submission is pending review. It has not been published.';
+      status.textContent = 'Thanks - your profile submission is pending review. It has not been published.';
       status.classList.add('is-success');
       status.hidden = false;
       if (typeof gtag === 'function') gtag('event', 'business_profile_submission', { business_category: profileData.category, city: profileData.city });
     } catch (error) {
-      status.textContent = 'We couldn’t send that just now. Please try again in a moment.';
+      status.textContent = "We couldn't send that just now. Please try again in a moment.";
       status.classList.remove('is-success');
       status.hidden = false;
     } finally {
-      if (!byId('submissionConfirmation')?.hidden) { submitButton.disabled = false; submitButton.innerHTML = 'Submit for review <span aria-hidden="true">→</span>'; }
+      if (!byId('submissionConfirmation')?.hidden) { submitButton.disabled = false; submitButton.innerHTML = 'Submit for review <span aria-hidden="true"></span>'; }
     }
   });
 
   refreshPreview();
 })();
+

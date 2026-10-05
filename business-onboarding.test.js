@@ -21,10 +21,15 @@ class FakeElement {
     this.listeners = {};
     this.classList = { add() {}, remove() {} };
     this.elements = {};
+    this.dataset = {};
   }
   append(...children) { this.children.push(...children); }
+  replaceChildren(...children) { this.children = children; }
   addEventListener(type, callback) { this.listeners[type] = callback; }
   querySelectorAll() { return []; }
+  querySelector() { return new FakeElement(); }
+  setAttribute() {}
+  removeAttribute() {}
   reportValidity() { return true; }
   reset() {}
   focus() {}
@@ -38,6 +43,20 @@ function setupSubmission({ enabled }) {
   };
   const form = get('businessProfileForm');
   const hoursEditor = get('hoursEditor');
+  const panels = Array.from({ length: 5 }, (_, index) => {
+    const panel = get('step-panel-' + (index + 1));
+    panel.dataset.stepPanel = String(index + 1);
+    panel.hidden = index !== 0;
+    return panel;
+  });
+  const nextButtons = [get('continue-button')];
+  const backButtons = [get('back-button')];
+  form.querySelectorAll = selector => {
+    if (selector === '[data-step-panel]') return panels;
+    if (selector === '[data-step-next]') return nextButtons;
+    if (selector === '[data-step-back]') return backButtons;
+    return [];
+  };
   const happyFields = [
     'happyHourTitleInput', 'happyHourDescription', 'happyHourDays',
     'happyHourStartTime', 'happyHourEndTime', 'happyHourRestrictions'
@@ -86,7 +105,20 @@ function setupSubmission({ enabled }) {
     submittedPayload = JSON.parse(options.body);
     return { ok: true };
   };
-  vm.runInNewContext(source, { document, fetch, URL, console, window: { initPmDropdowns() {}, validatePmDropdowns() { return true; } } });
+  const categoryTrigger = get('onboardingCategoryTrigger');
+  const cityTrigger = get('onboardingCityTrigger');
+  let dropdownInitCalls = 0;
+  vm.runInNewContext(source, {
+    document, fetch, URL, console,
+    window: {
+      initPmDropdowns() {
+        dropdownInitCalls++;
+        categoryTrigger.addEventListener('click', () => {});
+        cityTrigger.addEventListener('click', () => {});
+      },
+      validatePmDropdowns() { return true; }
+    }
+  });
 
   return {
     submit: async () => {
@@ -95,9 +127,31 @@ function setupSubmission({ enabled }) {
     },
     initialHoursRows: () => hoursEditor.children.map(row => row.innerHTML),
     timeOptions: id => get(id).children.map(option => ({ value: option.value, label: option.textContent })),
-    confirmationState: () => ({ formHidden: form.hidden, confirmationHidden: get('submissionConfirmation').hidden, status: get('onboardingStatus').textContent })
+    confirmationState: () => ({ formHidden: form.hidden, confirmationHidden: get('submissionConfirmation').hidden, status: get('onboardingStatus').textContent }),
+    dropdownState: () => ({ initCalls: dropdownInitCalls, categoryClick: typeof categoryTrigger.listeners.click, cityClick: typeof cityTrigger.listeners.click }),
+    continueToStepTwo: () => nextButtons[0].listeners.click(),
+    visibleStep: () => panels.findIndex(panel => !panel.hidden) + 1
   };
 }
+
+
+test('onboarding fails immediately when the dropdown initializer is unavailable', () => {
+  assert.throws(() => vm.runInNewContext(source, {
+    document: { getElementById: () => new FakeElement() },
+    window: {}
+  }), /initPmDropdowns/);
+});
+
+test('Category and City dropdown triggers are initialized before the wizard becomes interactive', () => {
+  const flow = setupSubmission({ enabled: false });
+  assert.deepEqual(flow.dropdownState(), { initCalls: 1, categoryClick: 'function', cityClick: 'function' });
+});
+
+test('Step 1 Continue listener advances to Contact & Hours', () => {
+  const flow = setupSubmission({ enabled: false });
+  flow.continueToStepTwo();
+  assert.equal(flow.visibleStep(), 2);
+});
 
 test('Happy Hour time selects offer readable quarter-hour labels with 24-hour values', () => {
   const flow = setupSubmission({ enabled: false });
@@ -132,6 +186,7 @@ test('Happy Hour submissions send six dedicated fields and retain reusable profi
     ]
   );
   const profileData = JSON.parse(payload.profileDataJson);
+  assert.deepEqual(profileData.media, { logoUrl: '', coverUrl: '', galleryUrls: [], documentUrl: '' });
   assert.deepEqual(profileData.happyHours, [{
     title: 'After-work special',
     description: 'Half-price appetizers.',
@@ -156,6 +211,7 @@ test('Happy Hour-disabled submissions send blank dedicated fields and an empty p
   ]) assert.equal(payload[field], '');
   assert.deepEqual(JSON.parse(payload.profileDataJson).happyHours, []);
   assert.equal(payload.reviewStatus, 'Pending review');
+  assert.deepEqual(JSON.parse(payload.profileDataJson).media, { logoUrl: '', coverUrl: '', galleryUrls: [], documentUrl: '' });
 });
 
 test('successful onboarding submission shows the pending-review confirmation state', async () => {
