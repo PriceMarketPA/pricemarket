@@ -54,7 +54,7 @@
         <p class="community-feed-note">Reports automatically leave the active feed after 7 days unless someone confirms they are still available.</p>
         <p id="communityFeedStatus" class="community-feed-status" role="status" aria-live="polite">Loading current deals…</p>
         <div id="communityDealsList" class="community-deals-list" aria-live="polite"></div>
-        <div id="communityDealsEmpty" class="community-empty-state" hidden><strong>No active community reports for this city yet.</strong><span>Try another launch city, or be the first to spot a deal.</span><a class="btn white" href="#report-deal">Report a Deal</a></div>
+        <div id="communityDealsEmpty" class="community-empty-state" hidden><strong>Nothing spotted here yet — be the first to report one.</strong><span>Choose another city or share a deal you just saw in a local store.</span><a class="btn white" href="#report-deal">Report a Deal</a></div>
       </section>
 
       <section class="community-report-section" id="report-deal" aria-labelledby="reportTitle">
@@ -91,6 +91,7 @@
             </div>
           </div>
           <p class="community-form-disclosure">Your report is community submitted and stays Under review until approved. Do not include people’s faces, payment information, or private details in photos.</p>
+          <p class="community-time-note">Takes about 30 seconds.</p>
           <button class="btn blue community-submit" type="submit">Send for Review <span aria-hidden="true">→</span></button>
           <p id="communityReportStatus" class="community-report-status" role="status" aria-live="polite"></p>
         </form>
@@ -99,6 +100,7 @@
     <footer class="seo-footer"><a href="/">Price Market home</a><a href="/#marketplace">Browse the marketplace</a><a href="/about">About</a></footer>
   </div>
   <script src="/price-market-dropdown.js" defer></script>
+  <script src="/community-deals-view.js" defer></script>
   <script src="/community-deals.js" defer></script>
 </body>
 </html>

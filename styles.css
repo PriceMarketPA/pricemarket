@@ -534,3 +534,20 @@ footer{max-width:1240px;margin:auto;padding:28px 24px;display:flex;justify-conte
 .community-upload-button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:.6rem 1rem;border-radius:11px;background:#1454e6;color:#fff;font-size:.92rem;font-weight:850;line-height:1.2}
 .community-upload-filename{min-width:0;color:#596980;font-size:.86rem;font-weight:550;overflow-wrap:anywhere}
 @media(max-width:700px){.community-price-fields{grid-template-columns:minmax(0,1fr)}.community-upload-control{align-items:flex-start;flex-direction:column;gap:.55rem}}
+
+/* Community viewer polish keeps freshness and trust details readable at every width. */
+.community-deal-badge.freshness{text-transform:none;letter-spacing:0;font-size:.77rem}
+.community-deal-badge.freshness.recent{background:#e8f5ef;color:#176b45}
+.community-deal-badge.freshness.confirmed{background:#eef3ff;color:#173f91}
+.community-deal-store{display:flex;flex-wrap:wrap;align-items:baseline;gap:.2rem .55rem}
+.community-deal-store strong{min-width:0;color:#172b4d;font-size:1rem;font-weight:850;overflow-wrap:anywhere}
+.community-deal-city{min-width:0;color:#63718a;font-size:.88rem;font-weight:650;overflow-wrap:anywhere}
+.community-sale-price{font-size:clamp(1.85rem,3vw,2.15rem);line-height:1.1;letter-spacing:-.035em}
+.community-deal-trust{margin:0;color:#5d6d82;font-size:.8rem;line-height:1.4;overflow-wrap:anywhere}
+.community-empty-state{width:100%;border:1px dashed #c9d7e8;background:linear-gradient(135deg,#f7faff,#f2faf6)}
+.community-empty-state[hidden]{display:none}
+.community-empty-state strong{color:#17345a;font-size:1.05rem;line-height:1.4}
+.community-empty-state span{line-height:1.5}
+.community-time-note{margin:.6rem 0 0;color:#536882;font-size:.9rem;font-weight:700}
+.community-deal-actions button:focus-visible{outline:3px solid #1454e6;outline-offset:2px}
+@media(max-width:700px){.community-deal-badges{gap:.35rem}.community-sale-price{font-size:1.85rem}}

@@ -167,9 +167,21 @@
     status.className = 'community-deal-badge status';
     status.textContent = 'Active';
     badges.append(community, status);
+    const freshnessLabels = window.pmCommunityDealView?.freshnessBadges(deal) || [];
+    freshnessLabels.forEach(label => {
+      const badge = document.createElement('span');
+      badge.className = 'community-deal-badge freshness ' + (label === 'Confirmed recently' ? 'confirmed' : 'recent');
+      badge.textContent = label;
+      badges.append(badge);
+    });
     const store = document.createElement('p');
     store.className = 'community-deal-store';
-    store.textContent = deal.storeName + ' · ' + deal.city;
+    const storeName = document.createElement('strong');
+    storeName.textContent = deal.storeName;
+    const location = document.createElement('span');
+    location.className = 'community-deal-city';
+    location.textContent = deal.city;
+    store.append(storeName, location);
     const title = document.createElement('h3');
     title.className = 'community-deal-title';
     title.textContent = deal.itemTitle;
@@ -188,6 +200,9 @@
     const description = document.createElement('p');
     description.className = 'community-deal-description';
     description.textContent = deal.description;
+    const trust = document.createElement('p');
+    trust.className = 'community-deal-trust';
+    trust.textContent = 'Community reported • confirm with store';
     const freshness = document.createElement('time');
     freshness.className = 'community-deal-freshness';
     freshness.dateTime = deal.spottedAt;
@@ -204,7 +219,7 @@
       makeButton('Expired', 'expired', deal.id),
       makeButton('Wrong info', 'wrong_info', deal.id)
     );
-    body.append(badges, store, title, price, description, freshness, confirmations, actions);
+    body.append(badges, store, title, price, description, trust, freshness, confirmations, actions);
     article.append(body);
     return article;
   }

@@ -8,6 +8,7 @@ const path = require('node:path');
 const { createHandler } = require('../api/community-deals');
 const { CITIES, formatAge, makeFingerprint, parsePrice, sanitizePlainText } = require('../api/community-deals-utils');
 const { makeCapability, safeObjectPath, verifyProofOfWork } = require('../api/business-assets-utils');
+const { freshnessBadges } = require('../community-deals-view');
 
 const secret = 'test-service-key';
 const env = { VERCEL_ENV: 'production', SUPABASE_URL: 'https://project.supabase.co', SUPABASE_SERVICE_ROLE_KEY: secret };
@@ -187,11 +188,40 @@ test('SQL keeps moderation private, stores only hashes for rate/vote identity, d
 test('feed page is noindex, has no user-generated HTML templates, and offers both actions', () => {
   const html = fs.readFileSync(path.join(__dirname, '..', 'community-deals.html'), 'utf8');
   const client = fs.readFileSync(path.join(__dirname, '..', 'community-deals.js'), 'utf8');
+  const css = fs.readFileSync(path.join(__dirname, '..', 'styles.css'), 'utf8');
   assert.match(html, /name="robots" content="noindex,follow"/);
   assert.match(html, /Spot a Deal/);
   assert.match(html, /Live Community Deals/);
+  assert.match(html, /Nothing spotted here yet — be the first to report one\./);
+  assert.match(html, /Takes about 30 seconds\./);
+  assert.match(html, /community-deals-view\.js["']/);
+  assert.match(client, /Community reported • confirm with store/);
+  assert.match(client, /freshnessBadges\(deal\)/);
+  assert.match(client, /makeButton\('Still available'/);
+  assert.match(client, /makeButton\('Expired'/);
+  assert.match(client, /makeButton\('Wrong info'/);
   assert.match(client, /textContent = deal\.itemTitle/);
   assert.doesNotMatch(client, /innerHTML\s*=\s*.*deal\./);
+  assert.match(css, /\.community-deals-list\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  assert.match(css, /@media\(max-width:700px\)\{[\s\S]*?\.community-deals-list\{grid-template-columns:1fr\}/);
+  assert.match(css, /\.community-deal-body\{min-width:0/);
+  assert.match(css, /\.community-empty-state\[hidden\]\{display:none\}/);
+  assert.match(css, /\.community-deal-actions button:focus-visible\{/);
+});
+
+test('community deal freshness badges distinguish new, today, and confirmed reports', () => {
+  const now = new Date(2026, 5, 18, 12, 0, 0);
+  const minutesAgo = minutes => new Date(now.getTime() - minutes * 60000).toISOString();
+  assert.deepEqual(freshnessBadges({ spottedAt: minutesAgo(12), confirmationCount: 0 }, now), ['New']);
+  assert.deepEqual(freshnessBadges({ spottedAt: minutesAgo(95), confirmationCount: 2 }, now), ['Today', 'Confirmed recently']);
+  assert.deepEqual(freshnessBadges({ spottedAt: minutesAgo(1500), confirmationCount: 0 }, now), []);
+  assert.deepEqual(freshnessBadges({ spotted_at: minutesAgo(12), confirmation_count: 1 }, now), ['New', 'Confirmed recently']);
+});
+
+test('homepage emphasizes Live Deals while retaining Spot a Deal', () => {
+  const home = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.match(home, /<a class="primary" href="\/community-deals#community-feed">Live Deals/);
+  assert.match(home, /<a href="\/community-deals#report-deal">Spot a Deal/);
 });
 
 test('community deal prices pair on desktop and the photo picker is custom but keyboard accessible', () => {
