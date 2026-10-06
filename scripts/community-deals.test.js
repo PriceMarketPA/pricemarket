@@ -213,9 +213,9 @@ test('community deal freshness badges distinguish new, today, and confirmed repo
   const now = new Date(2026, 5, 18, 12, 0, 0);
   const minutesAgo = minutes => new Date(now.getTime() - minutes * 60000).toISOString();
   assert.deepEqual(freshnessBadges({ spottedAt: minutesAgo(12), confirmationCount: 0 }, now), ['New']);
-  assert.deepEqual(freshnessBadges({ spottedAt: minutesAgo(95), confirmationCount: 2 }, now), ['Today', 'Confirmed recently']);
+  assert.deepEqual(freshnessBadges({ spottedAt: minutesAgo(95), confirmationCount: 2 }, now), ['Today', 'Community confirmed']);
   assert.deepEqual(freshnessBadges({ spottedAt: minutesAgo(1500), confirmationCount: 0 }, now), []);
-  assert.deepEqual(freshnessBadges({ spotted_at: minutesAgo(12), confirmation_count: 1 }, now), ['New', 'Confirmed recently']);
+  assert.deepEqual(freshnessBadges({ spotted_at: minutesAgo(12), confirmation_count: 1 }, now), ['New', 'Community confirmed']);
 });
 
 test('homepage emphasizes Live Deals while retaining Spot a Deal', () => {

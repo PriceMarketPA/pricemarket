@@ -170,7 +170,7 @@
     const freshnessLabels = window.pmCommunityDealView?.freshnessBadges(deal) || [];
     freshnessLabels.forEach(label => {
       const badge = document.createElement('span');
-      badge.className = 'community-deal-badge freshness ' + (label === 'Confirmed recently' ? 'confirmed' : 'recent');
+      badge.className = 'community-deal-badge freshness ' + (label === 'Community confirmed' ? 'confirmed' : 'recent');
       badge.textContent = label;
       badges.append(badge);
     });

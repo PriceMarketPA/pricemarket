@@ -17,7 +17,7 @@
     }
 
     if (Number(deal?.confirmationCount ?? deal?.confirmation_count ?? 0) > 0) {
-      labels.push('Confirmed recently');
+      labels.push('Community confirmed');
     }
     return labels;
   }
