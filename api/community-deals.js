@@ -5,6 +5,7 @@ const {
   verifyCapability, validatePendingPath, isApprovedOrigin, signPayload, readSignedPayload, verifyProofOfWork
 } = require('./business-assets-utils');
 const { CITIES, hashClientIp, makeFingerprint, parsePrice, publicObjectUrl, sanitizePlainText } = require('./community-deals-utils');
+const { sendCommunityDealNotification } = require('../lib/community-deal-notifications');
 
 const json = (res, status, data) => {
   res.statusCode = status;
@@ -24,7 +25,7 @@ function clientIp(req) {
 function validUuid(value) {
   return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
-function createHandler({ env = process.env, fetchImpl = global.fetch, now = Date.now, uuid = crypto.randomUUID } = {}) {
+function createHandler({ env = process.env, fetchImpl = global.fetch, now = Date.now, uuid = crypto.randomUUID, logger = console } = {}) {
   return async function communityDeals(req, res) {
     const supabaseUrl = String(env.SUPABASE_URL || '').replace(/\/$/, '');
     const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY;
@@ -128,6 +129,23 @@ function createHandler({ env = process.env, fetchImpl = global.fetch, now = Date
           p_ip_hash: ipHash, p_challenge_id: challenge.challengeId
         });
         if (created?.duplicate) return json(res, 409, { error: 'A similar deal was recently reported. Check the live feed before submitting another.' });
+        try {
+          await sendCommunityDealNotification({
+            apiKey: env.RESEND_API_KEY,
+            deal: { storeName, itemTitle, city, normalPrice, salePrice, description },
+            submissionId: created?.id || 'Unavailable',
+            submittedAt: new Date(now()).toISOString(),
+            photoIncluded: Boolean(photoPath),
+            fetchImpl
+          });
+        } catch (error) {
+          try {
+            logger.error?.('[community-deals] admin email notification failed', {
+              submissionId: created?.id || null,
+              error: error instanceof Error ? error.message : 'Unknown notification error'
+            });
+          } catch {}
+        }
         return json(res, 201, { id: created.id, status: 'under_review', message: 'Thanks. Your community report is under review before it can appear in the live feed.' });
       }
       if (body.action === 'vote') {
@@ -147,3 +165,4 @@ function createHandler({ env = process.env, fetchImpl = global.fetch, now = Date
 }
 module.exports = createHandler();
 module.exports.createHandler = createHandler;
+
