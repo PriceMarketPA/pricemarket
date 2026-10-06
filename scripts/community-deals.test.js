@@ -5,7 +5,7 @@ const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
-const { createHandler } = require('../api/community-deals');
+const { createHandler: createCommunityDealHandler } = require('../api/community-deals');
 const { CITIES, formatAge, makeFingerprint, parsePrice, sanitizePlainText } = require('../api/community-deals-utils');
 const { makeCapability, safeObjectPath, verifyProofOfWork } = require('../api/business-assets-utils');
 const { freshnessBadges } = require('../community-deals-view');
@@ -15,6 +15,9 @@ const env = { VERCEL_ENV: 'production', SUPABASE_URL: 'https://project.supabase.
 const hostHeaders = { origin: 'https://pricemarketpa.com', host: 'pricemarketpa.com', 'x-forwarded-for': '203.0.113.25' };
 const ok = data => ({ ok: true, status: 200, json: async () => data });
 const bad = (status, message) => ({ ok: false, status, json: async () => ({ message }) });
+function createHandler(options = {}) {
+  return createCommunityDealHandler({ logger: { error() {} }, ...options });
+}
 function makeResponse() {
   return {
     statusCode: 0, headers: {}, body: '',
@@ -61,6 +64,84 @@ test('valid report is sanitized, fingerprinted server-side, and always starts Un
   assert.equal(submitted.p_city, 'Harrisburg');
   assert.match(submitted.p_fingerprint, /^[0-9a-f]{64}$/);
   assert.match(submitted.p_ip_hash, /^[0-9a-f]{64}$/);
+});
+test('successful report sends the admin a complete pending-review email through Resend', async () => {
+  const notificationEnv = { ...env, RESEND_API_KEY: 're_test_server_only' };
+  const submittedAt = Date.UTC(2026, 9, 6, 15, 30, 0);
+  let emailRequest;
+  let reportCreated = false;
+  const handler = createHandler({ env: notificationEnv, now: () => submittedAt, fetchImpl: async (url, options) => {
+    if (String(url).includes('/rpc/pm_submit_community_deal')) {
+      reportCreated = true;
+      return ok({ id: 'a0ea5305-65be-405e-b978-ccacb2896772', status: 'under_review' });
+    }
+    if (String(url) === 'https://api.resend.com/emails') {
+      assert.equal(reportCreated, true);
+      emailRequest = { headers: options.headers, payload: JSON.parse(options.body) };
+      return ok({ id: 'resend-message-id' });
+    }
+    throw new Error('Unexpected request ' + url);
+  } });
+  const res = await send(handler, 'POST', validReport(await challenge(handler)));
+  assert.equal(res.statusCode, 201);
+  assert.equal(res.data.status, 'under_review');
+  assert.equal(emailRequest.headers.Authorization, 'Bearer re_test_server_only');
+  assert.deepEqual(emailRequest.payload.to, ['pat@pricemarketpa.com']);
+  assert.equal(emailRequest.payload.from, 'Price Market <notifications@pricemarketpa.com>');
+  for (const expected of [
+    'Store/business: Market Place', 'Item/deal title: Coffee beans, 12 oz', 'City: Harrisburg',
+    'Normal price: $8.99', 'Sale price: $5.99', 'Description: A current shelf deal spotted in store.',
+    'Photo included: No', 'Submission ID: a0ea5305-65be-405e-b978-ccacb2896772',
+    'Submission time: 2026-10-06T15:30:00.000Z', 'Status: Under review',
+    'not public and will not appear in the marketplace until Price Market approves it'
+  ]) assert.ok(emailRequest.payload.text.includes(expected), expected);
+});
+test('Resend failure is logged but does not fail an already-created deal submission', async () => {
+  const logs = [];
+  const handler = createHandler({
+    env: { ...env, RESEND_API_KEY: 're_test_server_only' },
+    logger: { error: (...values) => logs.push(values) },
+    fetchImpl: async url => {
+      if (String(url).includes('/rpc/pm_submit_community_deal')) return ok({ id: 'a0ea5305-65be-405e-b978-ccacb2896772' });
+      if (String(url) === 'https://api.resend.com/emails') return { ok: false, status: 503 };
+      throw new Error('Unexpected request ' + url);
+    }
+  });
+  const res = await send(handler, 'POST', validReport(await challenge(handler)));
+  assert.equal(res.statusCode, 201);
+  assert.equal(res.data.status, 'under_review');
+  assert.equal(logs.length, 1);
+  assert.equal(logs[0][0], '[community-deals] admin email notification failed');
+  assert.equal(logs[0][1].submissionId, 'a0ea5305-65be-405e-b978-ccacb2896772');
+  assert.match(logs[0][1].error, /HTTP 503/);
+  assert.doesNotMatch(JSON.stringify(logs), /re_test_server_only/);
+});
+test('duplicate report does not send an admin email', async () => {
+  let emailCalls = 0;
+  const handler = createHandler({ env: { ...env, RESEND_API_KEY: 're_test_server_only' }, fetchImpl: async url => {
+    if (String(url).includes('/rpc/pm_submit_community_deal')) return ok({ duplicate: true });
+    if (String(url) === 'https://api.resend.com/emails') emailCalls += 1;
+    throw new Error('Unexpected request ' + url);
+  } });
+  const res = await send(handler, 'POST', validReport(await challenge(handler)));
+  assert.equal(res.statusCode, 409);
+  assert.equal(emailCalls, 0);
+});
+test('failed and rate-limited reports do not send an admin email', async () => {
+  for (const scenario of [
+    { response: bad(500, 'Database unavailable'), status: 502 },
+    { response: bad(429, 'Community deal submission rate limit reached'), status: 429 }
+  ]) {
+    let emailCalls = 0;
+    const handler = createHandler({ env: { ...env, RESEND_API_KEY: 're_test_server_only' }, fetchImpl: async url => {
+      if (String(url).includes('/rpc/pm_submit_community_deal')) return scenario.response;
+      if (String(url) === 'https://api.resend.com/emails') emailCalls += 1;
+      throw new Error('Unexpected request ' + url);
+    } });
+    const res = await send(handler, 'POST', validReport(await challenge(handler)));
+    assert.equal(res.statusCode, scenario.status);
+    assert.equal(emailCalls, 0);
+  }
 });
 test('invalid or unapproved origins cannot request a challenge or submit', async () => {
   const handler = createHandler({ env });
@@ -113,16 +194,19 @@ test('a report photo is accepted only from the verified existing secure upload s
   const photoPath = safeObjectPath(uploadId, 'gallery-1', 'jpg', '74151238-5227-4c22-9710-05ac2a7949e9');
   const capability = makeCapability(uploadId, secret, Date.now() + 60000);
   let createdArgs;
-  const handler = createHandler({ env, fetchImpl: async (url, options = {}) => {
+  let emailText = '';
+  const handler = createHandler({ env: { ...env, RESEND_API_KEY: 're_test_server_only' }, fetchImpl: async (url, options = {}) => {
     if (String(url).includes('/pm_business_upload_sessions?')) return ok([{ submission_id: uploadId }]);
     if (String(url).includes('/pm_business_upload_slots?')) return ok([{ active_path: photoPath }]);
     if (String(url).includes('/rpc/pm_submit_community_deal')) { createdArgs = JSON.parse(options.body); return ok({ id: 'a0ea5305-65be-405e-b978-ccacb2896772' }); }
+    if (String(url) === 'https://api.resend.com/emails') { emailText = JSON.parse(options.body).text; return ok({ id: 'resend-message-id' }); }
     throw new Error('Unexpected request ' + url);
   } });
   const payload = validReport(await challenge(handler), { photoPath, photoSubmissionId: uploadId, photoCapability: capability });
   const res = await send(handler, 'POST', payload);
   assert.equal(res.statusCode, 201);
   assert.equal(createdArgs.p_photo_path, photoPath);
+  assert.match(emailText, /Photo included: Yes/);
 
   const forged = await send(handler, 'POST', validReport(await challenge(handler), { photoPath: 'https://attacker.example/fake.jpg' }));
   assert.equal(forged.statusCode, 400);
@@ -245,3 +329,4 @@ test('community deal prices pair on desktop and the photo picker is custom but k
   assert.ok(css.includes('@media(max-width:700px){.community-price-fields{grid-template-columns:minmax(0,1fr)}'));
   assert.ok(client.includes("photoFilename.textContent = file.name || 'Photo selected'"));
 });
+
