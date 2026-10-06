@@ -8,6 +8,7 @@ The customer page is `/community-deals` (the repository keeps `community-deals.h
 - `pm_community_deal_votes` stores one changeable vote per report and HMAC-hashed client IP. The UI exposes Still available, Expired, and Wrong info.
 - Private rate-limit and challenge tables enforce three submissions and forty votes per IP hash per hour and make proof-of-work challenges one-use.
 - The server routes `api/community-deals.js` use only `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. Do not add either value to frontend files or use a `NEXT_PUBLIC_`-style variable.
+- After `pm_submit_community_deal` creates a non-duplicate report, the server sends a best-effort admin notification through Resend. The message includes the submitted deal details and states that it is Under review and not public until approved. Notification failure is logged server-side and does not change the successful report response.
 - Photos reuse `/api/business-assets`: the browser gets a short-lived signed upload through the existing challenge/capability/session flow, uploads to the existing `business-images` bucket, and finalizes through server-side metadata and signature checks. Submission verifies that the capability/session still owns an uploaded `gallery-1` object. Only the verified object path is stored. The private report API does not accept arbitrary image URLs.
 
 ## Moderation
@@ -45,9 +46,10 @@ The server normalizes city/store/item text to build a SHA-256 fingerprint. A par
 ## Setup
 
 1. Add and apply `supabase/migrations/20261005000000_community_deal_spotter.sql` to the Price Market Supabase project. It creates the private tables and service-role-only RPC functions; it does not change storage buckets or public Storage policies.
-2. Ensure Vercel Production and Preview have the existing server-side `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` variables used by the secure business-upload endpoint. No new secret or public environment variable is required.
-3. Deploy the branch, open `/community-deals`, test the report flow, then approve a test report in the Supabase SQL editor before checking the active feed and status buttons.
-4. Remove the test report and its uploaded object after QA. Community records do not appear in sitemap.
+2. Ensure Vercel Production and Preview have the existing server-side `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` variables used by the secure business-upload endpoint.
+3. Add the server-only `RESEND_API_KEY` in Vercel Production and Preview. Verify the `pricemarketpa.com` sending domain in Resend so `Price Market <notifications@pricemarketpa.com>` is authorized to send. Notifications go to `pat@pricemarketpa.com`.
+4. Deploy the branch and test a new `/community-deals` report. Confirm the notification arrives and the report remains Under review; duplicates, failed writes, and rate-limited writes do not send email.
+5. Approve a test report in the Supabase SQL editor before checking the active feed and status buttons. Remove the test report and its uploaded object after QA. Community records do not appear in sitemap.
 
 The existing Storage upload flow uploads to a public bucket using unpredictable pending paths. Under-review reports are not returned by the feed and their photo URLs are not exposed by the community feed API until a moderator activates the report.
 
@@ -59,3 +61,4 @@ The existing Storage upload flow uploads to a public bucket using unpredictable 
 - Store/title/city duplicate detection is performed atomically by a unique fingerprint index.
 - Plain text is trimmed, bounded, HTML-like tags are rejected, prices are parsed server-side, and user content is rendered with DOM `textContent`, never interpolated into HTML.
 - Price bounds are numeric with up to two decimal places; normal and sale prices are required, and a sale price cannot exceed the normal price.
+
